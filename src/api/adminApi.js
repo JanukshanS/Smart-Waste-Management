@@ -89,6 +89,16 @@ export const updateUser = async (userId, userData) => {
   }
 };
 
+// Create new user
+export const createUser = async (userData) => {
+  try {
+    const response = await client.post('/admin/users', userData);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Delete user
 export const deleteUser = async (userId) => {
   try {
@@ -133,6 +143,7 @@ export default {
   getDashboardStats,
   getUsers,
   getUserById,
+  createUser,
   updateUser,
   deleteUser,
   getCollectionReports,

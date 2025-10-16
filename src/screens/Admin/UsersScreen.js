@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TextInput, Alert, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
-import { UserCard, FilterChip } from '../../components/Admin';
+import { UserCard, FilterChip, CreateUserBottomSheet } from '../../components/Admin';
 import { adminApi } from '../../api';
 
 // Enable LayoutAnimation for Android
@@ -25,6 +25,7 @@ const UsersScreen = () => {
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   // Filters
   const [selectedRole, setSelectedRole] = useState('all');
@@ -127,6 +128,26 @@ const UsersScreen = () => {
     if (selectedStatus !== 'all') count++;
     if (searchQuery) count++;
     return count;
+  };
+
+  const handleCreateUser = async (userData) => {
+    try {
+      const response = await adminApi.createUser(userData);
+      if (response.success) {
+        Alert.alert('Success', 'User created successfully!');
+        setShowCreateModal(false);
+        // Refresh the list
+        setCurrentPage(1);
+        onRefresh();
+      } else {
+        Alert.alert('Error', response.message || 'Failed to create user');
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error('Create user error:', error);
+      Alert.alert('Error', 'Failed to create user. Please try again.');
+      throw error;
+    }
   };
 
   const renderUserCard = ({ item }) => (
@@ -302,6 +323,22 @@ const UsersScreen = () => {
           ListEmptyComponent={renderEmpty}
         />
       )}
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setShowCreateModal(true)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabIcon}>+</Text>
+      </TouchableOpacity>
+
+      {/* Create User Bottom Sheet */}
+      <CreateUserBottomSheet
+        visible={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={handleCreateUser}
+      />
     </View>
   );
 };
@@ -490,6 +527,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textLight,
     textAlign: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    right: SPACING.large,
+    bottom: SPACING.large,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fabIcon: {
+    fontSize: 32,
+    color: COLORS.white,
+    fontWeight: '300',
+    lineHeight: 32,
   },
 });
 

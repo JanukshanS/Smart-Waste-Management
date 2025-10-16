@@ -7,4 +7,6 @@ export { default as FilterChip } from './FilterChip';
 export { default as DateRangeSelector } from './DateRangeSelector';
 export { default as ReportStatCard } from './ReportStatCard';
 export { default as TabBar } from './TabBar';
+export { default as CreateUserBottomSheet } from './CreateUserBottomSheet';
+export { default as MapPicker } from './MapPicker';
 
