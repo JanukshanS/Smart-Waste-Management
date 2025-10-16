@@ -99,6 +99,36 @@ export const deleteUser = async (userId) => {
   }
 };
 
+// Get collection reports
+export const getCollectionReports = async (startDate, endDate) => {
+  try {
+    const params = new URLSearchParams({
+      startDate,
+      endDate,
+    });
+    
+    const response = await client.get(`/admin/reports/collections?${params.toString()}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get efficiency reports
+export const getEfficiencyReports = async (startDate, endDate) => {
+  try {
+    const params = new URLSearchParams({
+      startDate,
+      endDate,
+    });
+    
+    const response = await client.get(`/admin/reports/efficiency?${params.toString()}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Get system health (placeholder for future)
 export const getSystemHealth = async () => {
   try {
@@ -115,5 +145,7 @@ export default {
   getUserById,
   updateUser,
   deleteUser,
+  getCollectionReports,
+  getEfficiencyReports,
   getSystemHealth,
 };
