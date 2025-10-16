@@ -4,4 +4,7 @@ export { default as MiniStat } from './MiniStat';
 export { default as RoleBadge } from './RoleBadge';
 export { default as UserCard } from './UserCard';
 export { default as FilterChip } from './FilterChip';
+export { default as DateRangeSelector } from './DateRangeSelector';
+export { default as ReportStatCard } from './ReportStatCard';
+export { default as TabBar } from './TabBar';
 

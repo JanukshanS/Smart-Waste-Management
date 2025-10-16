@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TextInput, Alert, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { UserCard, FilterChip } from '../../components/Admin';
 import { adminApi } from '../../api';
+
+// Enable LayoutAnimation for Android
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental &&
+  typeof UIManager.setLayoutAnimationEnabledExperimental === 'function'
+) {
+  try {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  } catch (error) {
+    // Silently fail on New Architecture
+  }
+}
 
 const UsersScreen = () => {
   const router = useRouter();
@@ -11,6 +24,7 @@ const UsersScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState(null);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // Filters
   const [selectedRole, setSelectedRole] = useState('all');
@@ -43,9 +57,9 @@ const UsersScreen = () => {
       setLoading(currentPage === 1 && !refreshing);
       
       const response = await adminApi.getUsers({
-        role: selectedRole,
-        status: selectedStatus,
-        search: searchQuery,
+        role: selectedRole !== 'all' ? selectedRole : undefined,
+        status: selectedStatus !== 'all' ? selectedStatus : undefined,
+        search: searchQuery || undefined,
         page: currentPage,
         limit: 20,
       });
@@ -95,6 +109,26 @@ const UsersScreen = () => {
     setCurrentPage(1);
   };
 
+  const toggleFilters = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setFiltersExpanded(!filtersExpanded);
+  };
+
+  const clearFilters = () => {
+    setSelectedRole('all');
+    setSelectedStatus('all');
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
+
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (selectedRole !== 'all') count++;
+    if (selectedStatus !== 'all') count++;
+    if (searchQuery) count++;
+    return count;
+  };
+
   const renderUserCard = ({ item }) => (
     <UserCard user={item} onPress={() => handleUserPress(item)} />
   );
@@ -121,6 +155,8 @@ const UsersScreen = () => {
     );
   };
 
+  const activeFiltersCount = getActiveFiltersCount();
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -131,7 +167,7 @@ const UsersScreen = () => {
         </Text>
       </View>
 
-      {/* Search Bar */}
+      {/* Search Bar & Filter Toggle */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -140,37 +176,100 @@ const UsersScreen = () => {
           onChangeText={setSearchQuery}
           placeholderTextColor={COLORS.textLight}
         />
-      </View>
+        
+        <View style={styles.filterToggleRow}>
+          <TouchableOpacity 
+            style={styles.filterToggleButton} 
+            onPress={toggleFilters}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.filterIcon}>🔍</Text>
+            <Text style={styles.filterToggleText}>
+              {filtersExpanded ? 'Hide Filters' : 'Show Filters'}
+            </Text>
+            {activeFiltersCount > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
+              </View>
+            )}
+            <Text style={[styles.filterArrow, filtersExpanded && styles.filterArrowExpanded]}>
+              ›
+            </Text>
+          </TouchableOpacity>
 
-      {/* Role Filters */}
-      <View style={styles.filterSection}>
-        <Text style={styles.filterLabel}>Role:</Text>
-        <View style={styles.filterChipsContainer}>
-          {roles.map((role) => (
-            <FilterChip
-              key={role}
-              label={role === 'all' ? 'All' : role.charAt(0).toUpperCase() + role.slice(1)}
-              selected={selectedRole === role}
-              onPress={() => handleRoleFilter(role)}
-            />
-          ))}
+          {activeFiltersCount > 0 && (
+            <TouchableOpacity 
+              style={styles.clearButton} 
+              onPress={clearFilters}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.clearButtonText}>Clear All</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
-      {/* Status Filters */}
-      <View style={styles.filterSection}>
-        <Text style={styles.filterLabel}>Status:</Text>
-        <View style={styles.filterChipsContainer}>
-          {statuses.map((status) => (
-            <FilterChip
-              key={status}
-              label={status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
-              selected={selectedStatus === status}
-              onPress={() => handleStatusFilter(status)}
-            />
-          ))}
+      {/* Collapsible Filters */}
+      {filtersExpanded && (
+        <View style={styles.filtersContainer}>
+          {/* Role Filters */}
+          <View style={styles.filterSection}>
+            <Text style={styles.filterLabel}>Role:</Text>
+            <View style={styles.filterChipsContainer}>
+              {roles.map((role) => (
+                <FilterChip
+                  key={role}
+                  label={role === 'all' ? 'All' : role.charAt(0).toUpperCase() + role.slice(1)}
+                  selected={selectedRole === role}
+                  onPress={() => handleRoleFilter(role)}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Status Filters */}
+          <View style={styles.filterSection}>
+            <Text style={styles.filterLabel}>Status:</Text>
+            <View style={styles.filterChipsContainer}>
+              {statuses.map((status) => (
+                <FilterChip
+                  key={status}
+                  label={status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  selected={selectedStatus === status}
+                  onPress={() => handleStatusFilter(status)}
+                />
+              ))}
+            </View>
+          </View>
         </View>
-      </View>
+      )}
+
+      {/* Active Filters Display (when collapsed) */}
+      {!filtersExpanded && activeFiltersCount > 0 && (
+        <View style={styles.activeFiltersBar}>
+          {selectedRole !== 'all' && (
+            <View style={styles.activeFilterTag}>
+              <Text style={styles.activeFilterTagText}>
+                Role: {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
+              </Text>
+            </View>
+          )}
+          {selectedStatus !== 'all' && (
+            <View style={styles.activeFilterTag}>
+              <Text style={styles.activeFilterTagText}>
+                Status: {selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1)}
+              </Text>
+            </View>
+          )}
+          {searchQuery && (
+            <View style={styles.activeFilterTag}>
+              <Text style={styles.activeFilterTagText}>
+                Search: "{searchQuery.substring(0, 15)}{searchQuery.length > 15 ? '...' : ''}"
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* Results Count */}
       {!loading && pagination && (
@@ -240,11 +339,75 @@ const styles = StyleSheet.create({
     padding: SPACING.medium,
     fontSize: 15,
     color: COLORS.text,
+    marginBottom: SPACING.small,
+  },
+  filterToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  filterToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    backgroundColor: COLORS.background,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: SPACING.small,
+  },
+  filterIcon: {
+    fontSize: 16,
+    marginRight: SPACING.small / 2,
+  },
+  filterToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    flex: 1,
+  },
+  filterBadge: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.small,
+    paddingHorizontal: 6,
+  },
+  filterBadgeText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  filterArrow: {
+    fontSize: 24,
+    color: COLORS.textLight,
+    transform: [{ rotate: '90deg' }],
+  },
+  filterArrowExpanded: {
+    transform: [{ rotate: '-90deg' }],
+  },
+  clearButton: {
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    backgroundColor: COLORS.danger,
+    borderRadius: 8,
+  },
+  clearButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+  filtersContainer: {
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   filterSection: {
     padding: SPACING.medium,
     paddingBottom: SPACING.small,
-    backgroundColor: COLORS.white,
   },
   filterLabel: {
     fontSize: 13,
@@ -255,6 +418,27 @@ const styles = StyleSheet.create({
   filterChipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  activeFiltersBar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    backgroundColor: COLORS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    gap: SPACING.small,
+  },
+  activeFilterTag: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.small,
+    borderRadius: 12,
+  },
+  activeFilterTagText: {
+    fontSize: 12,
+    color: COLORS.white,
+    fontWeight: '500',
   },
   resultsInfo: {
     padding: SPACING.medium,
@@ -275,7 +459,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.xl,
+    padding: SPACING.large * 2,
   },
   loadingText: {
     marginTop: SPACING.medium,
@@ -289,8 +473,8 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: SPACING.xl,
-    marginTop: SPACING.xl * 2,
+    padding: SPACING.large * 2,
+    marginTop: SPACING.large * 2,
   },
   emptyIcon: {
     fontSize: 64,
