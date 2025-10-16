@@ -37,6 +37,51 @@ const UserDetailsScreen = () => {
     }
   };
 
+  const handleDeleteUser = () => {
+    Alert.alert(
+      'Delete User',
+      `Are you sure you want to delete ${user?.name}? This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: confirmDeleteUser,
+        },
+      ]
+    );
+  };
+
+  const confirmDeleteUser = async () => {
+    try {
+      setLoading(true);
+      const response = await adminApi.deleteUser(id);
+      
+      if (response.success) {
+        Alert.alert(
+          'Success',
+          'User deleted successfully',
+          [
+            {
+              text: 'OK',
+              onPress: () => router.back(),
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Error', response.message || 'Failed to delete user');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Delete user error:', error);
+      Alert.alert('Error', 'Failed to delete user. Please try again.');
+      setLoading(false);
+    }
+  };
+
   const roleColors = {
     admin: COLORS.roleAdmin,
     citizen: COLORS.roleCitizen,
@@ -198,6 +243,12 @@ const UserDetailsScreen = () => {
           variant="outline"
           style={styles.actionButton}
         />
+
+        <Button
+          title="🗑️ Delete User"
+          onPress={handleDeleteUser}
+          style={[styles.actionButton, styles.deleteButton]}
+        />
       </View>
     </ScrollView>
   );
@@ -335,6 +386,9 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: SPACING.medium,
+  },
+  deleteButton: {
+    backgroundColor: COLORS.danger,
   },
 });
 
