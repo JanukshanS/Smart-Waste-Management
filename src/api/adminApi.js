@@ -129,16 +129,6 @@ export const getEfficiencyReports = async (startDate, endDate) => {
   }
 };
 
-// Get system health (placeholder for future)
-export const getSystemHealth = async () => {
-  try {
-    const response = await client.get('/admin/health');
-    return response;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export default {
   getDashboardStats,
   getUsers,
@@ -147,5 +137,4 @@ export default {
   deleteUser,
   getCollectionReports,
   getEfficiencyReports,
-  getSystemHealth,
 };

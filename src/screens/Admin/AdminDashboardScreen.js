@@ -274,11 +274,6 @@ const AdminDashboardScreen = () => {
           title="📊 View Reports" 
           onPress={() => router.push('/admin/reports')}
         />
-        
-        <Button 
-          title="💚 System Health" 
-          onPress={() => router.push('/admin/system-health')}
-        />
       </View>
 
       <View style={styles.footer}>
