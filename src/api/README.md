@@ -103,7 +103,7 @@ Update the base URL in `src/constants/config.js`:
 
 ```javascript
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:5000/api',  // Change this for production
+  BASE_URL: 'https://api.csse.icy-r.dev/api',  // Change this for production
   TIMEOUT: 10000,
 };
 ```

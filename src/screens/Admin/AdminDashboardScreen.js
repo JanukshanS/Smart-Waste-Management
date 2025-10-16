@@ -1,32 +1,288 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
+import { StatCard, ExpandableCard, MiniStat, RoleBadge } from '../../components/Admin';
+import { adminApi } from '../../api';
 
 const AdminDashboardScreen = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await adminApi.getDashboardStats();
+      if (response.success) {
+        setDashboardData(response.data);
+      } else {
+        Alert.alert('Error', response.message || 'Failed to fetch dashboard data');
+      }
+    } catch (error) {
+      console.error('Dashboard fetch error:', error);
+      Alert.alert('Error', 'Failed to load dashboard data. Please try again.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchDashboardData();
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading Dashboard...</Text>
+      </View>
+    );
+  }
+
+  const data = dashboardData || {};
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Admin Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome to the Admin Panel</Text>
+    <ScrollView 
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
+      }
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Admin Dashboard</Text>
+        <Text style={styles.subtitle}>System Overview & Management</Text>
+      </View>
 
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="User Management" 
-          onPress={() => router.push('/admin/users')}
-        />
+      {/* Quick Stats - Always Visible */}
+      <View style={styles.quickStatsContainer}>
+        <View style={styles.row}>
+          <StatCard
+            icon="👥"
+            title="Total Users"
+            value={data.users?.total || 0}
+            subtitle={`${data.users?.active || 0} active`}
+            color={COLORS.info}
+          />
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.halfCard}>
+            <StatCard
+              icon="📋"
+              title="Requests"
+              value={data.requests?.total || 0}
+              subtitle={`${data.requests?.thisMonth || 0} this month`}
+              color={COLORS.success}
+            />
+          </View>
+          <View style={styles.halfCard}>
+            <StatCard
+              icon="🗑️"
+              title="Smart Bins"
+              value={data.bins?.total || 0}
+              subtitle={`${data.bins?.full || 0} full`}
+              color={data.bins?.full > 0 ? COLORS.danger : COLORS.warning}
+            />
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.halfCard}>
+            <StatCard
+              icon="📱"
+              title="Devices"
+              value={data.devices?.total || 0}
+              subtitle={`${data.devices?.offline || 0} offline`}
+              color={data.devices?.offline > 0 ? COLORS.danger : COLORS.purple}
+            />
+          </View>
+          <View style={styles.halfCard}>
+            <StatCard
+              icon="🔧"
+              title="Work Orders"
+              value={data.workOrders?.total || 0}
+              subtitle={`${data.workOrders?.pending || 0} pending`}
+              color={COLORS.roleAdmin}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* Expandable Detailed Sections */}
+      <View style={styles.detailsContainer}>
+        {/* Users Section */}
+        <ExpandableCard title="User Management" icon="👥" defaultExpanded={true}>
+          <View style={styles.statsRow}>
+            <MiniStat label="Total" value={data.users?.total || 0} color={COLORS.info} />
+            <MiniStat label="Active" value={data.users?.active || 0} color={COLORS.success} />
+            <MiniStat label="Inactive" value={(data.users?.total || 0) - (data.users?.active || 0)} color={COLORS.textLight} />
+          </View>
+
+          {data.users?.byRole && data.users.byRole.length > 0 && (
+            <>
+              <Text style={styles.sectionLabel}>Users by Role</Text>
+              <View style={styles.rolesContainer}>
+                {data.users.byRole.map((role, index) => (
+                  <RoleBadge key={index} role={role._id} count={role.count} />
+                ))}
+              </View>
+            </>
+          )}
+
+          <Button 
+            title="Manage Users" 
+            onPress={() => router.push('/admin/users')}
+            style={styles.actionButton}
+          />
+        </ExpandableCard>
+
+        {/* Waste Requests Section */}
+        <ExpandableCard title="Waste Requests" icon="📋">
+          <View style={styles.statsRow}>
+            <MiniStat label="Total" value={data.requests?.total || 0} color={COLORS.info} />
+            <MiniStat label="Pending" value={data.requests?.pending || 0} color={COLORS.warning} />
+            <MiniStat label="Completed" value={data.requests?.completed || 0} color={COLORS.success} />
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>This Month:</Text>
+            <Text style={styles.infoValue}>{data.requests?.thisMonth || 0} requests</Text>
+          </View>
+
+          {data.requests?.pending > 0 && (
+            <View style={styles.alertBox}>
+              <Text style={styles.alertIcon}>⚠️</Text>
+              <Text style={styles.alertText}>
+                {data.requests.pending} request{data.requests.pending > 1 ? 's' : ''} need attention
+              </Text>
+            </View>
+          )}
+        </ExpandableCard>
+
+        {/* Smart Bins Section */}
+        <ExpandableCard title="Smart Bins Status" icon="🗑️">
+          <View style={styles.statsRow}>
+            <MiniStat label="Total" value={data.bins?.total || 0} color={COLORS.info} />
+            <MiniStat label="Active" value={data.bins?.active || 0} color={COLORS.success} />
+            <MiniStat label="Full" value={data.bins?.full || 0} color={COLORS.danger} />
+          </View>
+
+          {data.bins?.full > 0 && (
+            <View style={[styles.alertBox, styles.alertBoxDanger]}>
+              <Text style={styles.alertIcon}>🚨</Text>
+              <Text style={[styles.alertText, styles.alertTextDanger]}>
+                {data.bins.full} bin{data.bins.full > 1 ? 's' : ''} require immediate attention!
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.progressBar}>
+            <View style={styles.progressBarBg}>
+              <View 
+                style={[
+                  styles.progressBarFill, 
+                  { 
+                    width: `${data.bins?.total > 0 ? (data.bins.active / data.bins.total * 100) : 0}%`,
+                    backgroundColor: COLORS.primary 
+                  }
+                ]} 
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {data.bins?.total > 0 ? Math.round(data.bins.active / data.bins.total * 100) : 0}% Active
+            </Text>
+          </View>
+        </ExpandableCard>
+
+        {/* Collection Routes Section */}
+        <ExpandableCard title="Collection Routes" icon="🚛">
+          <View style={styles.statsRow}>
+            <MiniStat label="Total" value={data.routes?.total || 0} color={COLORS.info} />
+            <MiniStat label="Active" value={data.routes?.active || 0} color={COLORS.success} />
+            <MiniStat label="Completed" value={data.routes?.completed || 0} color={COLORS.gray} />
+          </View>
+        </ExpandableCard>
+
+        {/* IoT Devices Section */}
+        <ExpandableCard title="IoT Devices" icon="📱">
+          <View style={styles.statsRow}>
+            <MiniStat label="Total" value={data.devices?.total || 0} color={COLORS.info} />
+            <MiniStat label="Online" value={data.devices?.active || 0} color={COLORS.success} />
+            <MiniStat label="Offline" value={data.devices?.offline || 0} color={COLORS.danger} />
+          </View>
+
+          {data.devices?.offline > 0 && (
+            <View style={[styles.alertBox, styles.alertBoxWarning]}>
+              <Text style={styles.alertIcon}>🔴</Text>
+              <Text style={[styles.alertText, styles.alertTextWarning]}>
+                {data.devices.offline} device{data.devices.offline > 1 ? 's' : ''} offline
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.progressBar}>
+            <View style={styles.progressBarBg}>
+              <View 
+                style={[
+                  styles.progressBarFill, 
+                  { 
+                    width: `${data.devices?.total > 0 ? (data.devices.active / data.devices.total * 100) : 0}%`,
+                    backgroundColor: COLORS.success 
+                  }
+                ]} 
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {data.devices?.total > 0 ? Math.round(data.devices.active / data.devices.total * 100) : 0}% Uptime
+            </Text>
+          </View>
+        </ExpandableCard>
+
+        {/* Work Orders Section */}
+        <ExpandableCard title="Work Orders" icon="🔧">
+          <View style={styles.statsRow}>
+            <MiniStat label="Total" value={data.workOrders?.total || 0} color={COLORS.info} />
+            <MiniStat label="Pending" value={data.workOrders?.pending || 0} color={COLORS.warning} />
+            <MiniStat label="Resolved" value={data.workOrders?.resolved || 0} color={COLORS.success} />
+          </View>
+
+          {data.workOrders?.pending > 0 && (
+            <View style={styles.alertBox}>
+              <Text style={styles.alertIcon}>⚠️</Text>
+              <Text style={styles.alertText}>
+                {data.workOrders.pending} work order{data.workOrders.pending > 1 ? 's' : ''} pending
+              </Text>
+            </View>
+          )}
+        </ExpandableCard>
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.actionsContainer}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
         
         <Button 
-          title="System Reports" 
+          title="📊 View Reports" 
           onPress={() => router.push('/admin/reports')}
         />
         
         <Button 
-          title="System Health" 
+          title="💚 System Health" 
           onPress={() => router.push('/admin/system-health')}
         />
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Last updated: {new Date().toLocaleString()}</Text>
       </View>
     </ScrollView>
   );
@@ -36,23 +292,160 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  loadingText: {
+    marginTop: SPACING.medium,
+    fontSize: 16,
+    color: COLORS.textLight,
+  },
+  header: {
+    backgroundColor: COLORS.primary,
     padding: SPACING.large,
+    paddingTop: SPACING.large + 20,
+    paddingBottom: SPACING.large + 10,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.small,
+    color: COLORS.white,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
-    color: COLORS.textLight,
-    marginBottom: SPACING.large,
+    fontSize: 14,
+    color: COLORS.white,
+    opacity: 0.9,
   },
-  buttonContainer: {
+  quickStatsContainer: {
+    padding: SPACING.medium,
+    paddingTop: SPACING.small,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: SPACING.small,
+  },
+  halfCard: {
+    flex: 1,
+    marginHorizontal: SPACING.small / 2,
+  },
+  detailsContainer: {
+    padding: SPACING.medium,
+    paddingTop: 0,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: SPACING.medium,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.small,
+    marginTop: SPACING.small,
+  },
+  rolesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: SPACING.medium,
+  },
+  actionButton: {
+    marginTop: SPACING.small,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    padding: SPACING.medium,
+    borderRadius: 8,
+    marginBottom: SPACING.medium,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: COLORS.textLight,
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  alertBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.warningBg,
+    padding: SPACING.medium,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.warning,
+    marginTop: SPACING.small,
+  },
+  alertBoxDanger: {
+    backgroundColor: COLORS.dangerBg,
+    borderLeftColor: COLORS.danger,
+  },
+  alertBoxWarning: {
+    backgroundColor: COLORS.warningBg,
+    borderLeftColor: COLORS.warning,
+  },
+  alertIcon: {
+    fontSize: 20,
+    marginRight: SPACING.small,
+  },
+  alertText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.warningText,
+    fontWeight: '600',
+  },
+  alertTextDanger: {
+    color: COLORS.dangerText,
+  },
+  alertTextWarning: {
+    color: COLORS.warningText,
+  },
+  progressBar: {
     marginTop: SPACING.medium,
+  },
+  progressBarBg: {
+    height: 8,
+    backgroundColor: COLORS.border,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: SPACING.small / 2,
+    textAlign: 'right',
+  },
+  actionsContainer: {
+    padding: SPACING.medium,
+    paddingTop: 0,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: SPACING.medium,
+  },
+  footer: {
+    padding: SPACING.medium,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    color: COLORS.textLight,
   },
 });
 
 export default AdminDashboardScreen;
-
