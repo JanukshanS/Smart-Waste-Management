@@ -1,0 +1,342 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { COLORS, SPACING } from '../../constants/theme';
+import Button from '../../components/Button';
+import { adminApi } from '../../api';
+
+const UserDetailsScreen = () => {
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (id) {
+      fetchUserDetails();
+    }
+  }, [id]);
+
+  const fetchUserDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await adminApi.getUserById(id);
+      
+      if (response.success) {
+        setUser(response.data);
+      } else {
+        Alert.alert('Error', response.message || 'Failed to fetch user details');
+        router.back();
+      }
+    } catch (error) {
+      console.error('Fetch user details error:', error);
+      Alert.alert('Error', 'Failed to load user details. Please try again.');
+      router.back();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const roleColors = {
+    admin: COLORS.roleAdmin,
+    citizen: COLORS.roleCitizen,
+    coordinator: COLORS.roleCoordinator,
+    technician: COLORS.roleTechnician,
+  };
+
+  const roleIcons = {
+    admin: '👨‍💼',
+    citizen: '👤',
+    coordinator: '🗺️',
+    technician: '🔧',
+  };
+
+  const statusColors = {
+    active: COLORS.success,
+    inactive: COLORS.gray,
+    suspended: COLORS.danger,
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading user details...</Text>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>User not found</Text>
+        <Button title="Go Back" onPress={() => router.back()} />
+      </View>
+    );
+  }
+
+  const roleColor = roleColors[user.role] || COLORS.primary;
+  const statusColor = statusColors[user.status] || COLORS.gray;
+
+  return (
+    <ScrollView style={styles.container}>
+      {/* Header with Avatar */}
+      <View style={styles.header}>
+        <View style={styles.avatarLarge}>
+          <Text style={styles.avatarText}>
+            {user.name.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+        <Text style={styles.userName}>{user.name}</Text>
+        
+        <View style={styles.badgesContainer}>
+          <View style={[styles.roleBadge, { backgroundColor: `${roleColor}15`, borderColor: roleColor }]}>
+            <Text style={styles.roleIcon}>{roleIcons[user.role] || '👤'}</Text>
+            <Text style={[styles.roleBadgeText, { color: roleColor }]}>
+              {user.role}
+            </Text>
+          </View>
+          
+          <View style={[styles.statusBadge, { backgroundColor: `${statusColor}15`, borderColor: statusColor }]}>
+            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+            <Text style={[styles.statusBadgeText, { color: statusColor }]}>
+              {user.status}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Contact Information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Contact Information</Text>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>📧 Email</Text>
+          <Text style={styles.infoValue}>{user.email}</Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>📱 Phone</Text>
+          <Text style={styles.infoValue}>{user.phone}</Text>
+        </View>
+      </View>
+
+      {/* Address Information */}
+      {user.address && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Address</Text>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>🏠 Street</Text>
+            <Text style={styles.infoValue}>{user.address.street}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>🏙️ City</Text>
+            <Text style={styles.infoValue}>{user.address.city}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>📮 Postal Code</Text>
+            <Text style={styles.infoValue}>{user.address.postalCode}</Text>
+          </View>
+          
+          {user.address.coordinates && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>📍 Coordinates</Text>
+              <Text style={styles.infoValue}>
+                {user.address.coordinates.lat}, {user.address.coordinates.lng}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* Account Information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Account Information</Text>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>📅 Created</Text>
+          <Text style={styles.infoValue}>
+            {new Date(user.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>🔄 Last Updated</Text>
+          <Text style={styles.infoValue}>
+            {new Date(user.updatedAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </Text>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>🆔 User ID</Text>
+          <Text style={[styles.infoValue, styles.userId]}>{user._id}</Text>
+        </View>
+      </View>
+
+      {/* Action Buttons */}
+      <View style={styles.actionsSection}>
+        <Button
+          title="Edit User"
+          onPress={() => Alert.alert('Coming Soon', 'Edit user functionality will be added')}
+          style={styles.actionButton}
+        />
+        
+        <Button
+          title="View Activity"
+          onPress={() => Alert.alert('Coming Soon', 'User activity tracking will be added')}
+          variant="outline"
+          style={styles.actionButton}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  loadingText: {
+    marginTop: SPACING.medium,
+    fontSize: 14,
+    color: COLORS.textLight,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    padding: SPACING.large,
+  },
+  errorText: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    marginBottom: SPACING.large,
+  },
+  header: {
+    backgroundColor: COLORS.white,
+    padding: SPACING.large,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  avatarLarge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.medium,
+  },
+  avatarText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.white,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: SPACING.medium,
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+    gap: SPACING.small,
+  },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  roleIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  roleBadgeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusBadgeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  section: {
+    backgroundColor: COLORS.white,
+    marginTop: SPACING.medium,
+    padding: SPACING.large,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: SPACING.medium,
+  },
+  infoRow: {
+    marginBottom: SPACING.medium,
+  },
+  infoLabel: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 15,
+    color: COLORS.text,
+    fontWeight: '500',
+  },
+  userId: {
+    fontSize: 12,
+    fontFamily: 'monospace',
+    color: COLORS.textLight,
+  },
+  actionsSection: {
+    padding: SPACING.large,
+  },
+  actionButton: {
+    marginBottom: SPACING.medium,
+  },
+});
+
+export default UserDetailsScreen;
+
