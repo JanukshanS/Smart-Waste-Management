@@ -3,16 +3,20 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
+import DashboardHeader from '../../components/DashboardHeader';
 
 const CoordinatorDashboardScreen = () => {
   const router = useRouter();
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Coordinator Dashboard</Text>
-      <Text style={styles.subtitle}>Route & Collection Management</Text>
-
-      <View style={styles.buttonContainer}>
+    <View style={styles.container}>
+      <DashboardHeader 
+        title="Coordinator Dashboard"
+        subtitle="Route & Collection Management"
+      />
+      
+      <ScrollView style={styles.content}>
+        <View style={styles.buttonContainer}>
         <Button 
           title="Smart Bins" 
           onPress={() => router.push('/coordinator/bins')}
@@ -32,8 +36,9 @@ const CoordinatorDashboardScreen = () => {
           title="Create Route" 
           onPress={() => router.push('/coordinator/create-route')}
         />
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -41,21 +46,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  content: {
+    flex: 1,
     padding: SPACING.large,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.small,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textLight,
-    marginBottom: SPACING.large,
-  },
   buttonContainer: {
-    marginTop: SPACING.medium,
+    gap: SPACING.medium,
   },
 });
 

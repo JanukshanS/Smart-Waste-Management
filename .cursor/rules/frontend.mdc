@@ -1,0 +1,207 @@
+---
+alwaysApply: true
+---
+# Smart Waste Management - Frontend Development Rules
+
+## Project Architecture
+- React Native with Expo Router for navigation
+- Role-based structure: Admin, Citizen, Coordinator, Technician
+- Screens in `src/screens/{Role}/`
+- Routes in `app/{role}/`
+- Shared components in `src/components/`
+- Constants in `src/constants/`
+
+## Code Style & Standards
+
+### File Naming
+- Screens: PascalCase with "Screen" suffix (e.g., `CreateRequestScreen.js`)
+- Components: PascalCase (e.g., `Button.js`, `RequestCard.js`)
+- Utilities: camelCase (e.g., `validators.js`, `formatters.js`)
+- Constants: camelCase (e.g., `theme.js`, `statusConfig.js`)
+
+### Component Structure
+```javascript
+// 1. Imports (React, libraries, local)
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { COLORS, SPACING } from '../../constants/theme';
+import Button from '../../components/Button';
+
+// 2. Component definition
+const ComponentName = ({ prop1, prop2 }) => {
+  // 3. State and hooks
+  const [state, setState] = useState();
+  const router = useRouter();
+
+  // 4. Functions
+  const handleAction = () => {
+    // Implementation
+  };
+
+  // 5. Render
+  return (
+    <View style={styles.container}>
+      {/* JSX */}
+    </View>
+  );
+};
+
+// 6. Styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: SPACING.large,
+    backgroundColor: COLORS.background,
+  },
+});
+
+// 7. Export
+export default ComponentName;
+```
+
+### Styling Rules
+- **Always use** constants from `src/constants/theme.js` for colors and spacing
+- Use StyleSheet.create() - never inline styles for static values
+- Use consistent naming: container, title, subtitle, button, text, etc.
+- Group related styles together
+
+### Color Usage
+- Primary actions: `COLORS.primary`
+- Secondary actions: `COLORS.secondary`
+- Text: `COLORS.text` (primary), `COLORS.textLight` (secondary)
+- Background: `COLORS.background` or `COLORS.white`
+- Errors: `COLORS.error`
+- Never hardcode colors like '#fff' or '#000'
+
+### Spacing Usage
+- Use `SPACING.small`, `SPACING.medium`, `SPACING.large`
+- Consistent padding: `padding: SPACING.large`
+- Consistent margins: `marginBottom: SPACING.medium`
+
+## Navigation Rules
+- Use `useRouter()` from 'expo-router'
+- Navigate with: `router.push('/role/screen-name')`
+- Go back with: `router.back()`
+- Routes must match folder structure in `app/`
+
+## Component Development
+
+### Creating New Screens
+1. Create screen file in `src/screens/{Role}/ScreenName.js`
+2. Add to `src/screens/{Role}/index.js` exports
+3. Create route in `app/{role}/screen-name.js`
+4. Import and export the screen component
+
+### Creating New Components
+1. Place role-specific components in `src/components/{Role}/`
+2. Place shared components in `src/components/`
+3. Export from index.js for easy imports
+4. Make components reusable with props
+
+### State Management
+- Use `useState` for local component state
+- Use `useEffect` for side effects
+- Keep state close to where it's used
+- Pass data via props or context
+
+## API Integration (Future)
+- API calls go in `src/api/{role}Api.js`
+- Use the client from `src/api/client.js`
+- Handle errors gracefully with try-catch
+- Show loading states during API calls
+
+## Props and TypeScript (Future)
+- Document expected props in comments
+- Use descriptive prop names
+- Provide default values where appropriate
+- Consider adding PropTypes or TypeScript later
+
+## DO's
+✅ Use existing Button component for actions
+✅ Use COLORS and SPACING constants
+✅ Keep screens simple and focused
+✅ Extract reusable logic into components
+✅ Handle loading and error states
+✅ Use meaningful variable names
+✅ Add comments for complex logic
+✅ Follow existing patterns in the codebase
+✅ Test navigation between screens
+
+## DON'Ts
+❌ Don't hardcode colors or spacing values
+❌ Don't create duplicate components
+❌ Don't modify existing component APIs without discussion
+❌ Don't use external libraries without approval
+❌ Don't ignore errors or warnings
+❌ Don't create deeply nested component trees
+❌ Don't use inline styles for static values
+❌ Don't mix tabs and spaces (use 2 spaces)
+
+## Testing Your Work
+1. Run `npm start` to start Expo
+2. Test on both Android and Web if possible
+3. Test all navigation paths
+4. Verify colors and spacing match design
+5. Check for console errors/warnings
+
+## Git Workflow
+- Create feature branch: `feature/{role}/{feature-name}`
+- Commit frequently with clear messages
+- Pull latest changes before starting work
+- Test before committing
+
+## Common Patterns
+
+### Button with Navigation
+```javascript
+<Button 
+  title="Screen Name" 
+  onPress={() => router.push('/role/screen-name')}
+/>
+```
+
+### Screen Container
+```javascript
+<View style={styles.container}>
+  <Text style={styles.title}>Title</Text>
+  <Text style={styles.subtitle}>Subtitle</Text>
+  {/* Content */}
+</View>
+```
+
+### ScrollView for Long Content
+```javascript
+<ScrollView style={styles.container}>
+  {/* Content */}
+</ScrollView>
+```
+
+## Role-Specific Guidelines
+
+### Admin Screens
+- Focus on system management and monitoring
+- Show statistics and reports
+- Provide user management tools
+
+### Citizen Screens
+- Focus on user-friendly request creation
+- Show request tracking and history
+- Provide bin location services
+
+### Coordinator Screens
+- Focus on route management
+- Show bin status monitoring
+- Manage waste collection requests
+
+### Technician Screens
+- Focus on device management
+- Show work orders and repairs
+- Provide device registration tools
+
+## Questions?
+- Check existing code for examples
+- Refer to DEVELOPER_GUIDE.md
+- Ask team before making architectural changes
+- Keep the architecture clean and consistent
+
