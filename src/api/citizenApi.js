@@ -17,8 +17,22 @@ export const createRequest = async (requestData) => {
 // Get user's requests
 export const getMyRequests = async (params = {}) => {
   try {
-    const queryString = new URLSearchParams(params).toString();
-    const response = await client.get(`/citizen/requests?${queryString}`);
+    const { userId, status, page = 1, limit = 20 } = params;
+    
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (userId) {
+      queryParams.append('userId', userId);
+    }
+    
+    if (status && status !== 'all') {
+      queryParams.append('status', status);
+    }
+    
+    const response = await client.get(`/citizen/requests?${queryParams.toString()}`);
     return response;
   } catch (error) {
     throw error;
