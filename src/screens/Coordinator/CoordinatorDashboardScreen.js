@@ -13,7 +13,6 @@ import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
 import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
-import { useAuth } from "../../contexts/AuthContext";
 import { BinMapView } from "../../components/Coordinator";
 
 const CoordinatorDashboardScreen = () => {
