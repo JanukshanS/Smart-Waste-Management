@@ -27,7 +27,8 @@ export const AuthProvider = ({ children }) => {
       const token = await AsyncStorage.getItem('authToken');
       
       if (userData && token) {
-        setUser(JSON.parse(userData));
+        const parsedUserData = JSON.parse(userData);
+        setUser(parsedUserData);
         setIsAuthenticated(true);
       }
     } catch (error) {
@@ -81,6 +82,10 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     signup,
+    clearUserData: () => {
+      setUser(null);
+      setIsAuthenticated(false);
+    },
   };
 
   return (
