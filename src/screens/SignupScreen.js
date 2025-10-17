@@ -147,7 +147,6 @@ export default function SignupScreen() {
                   });
                   setSelectedLocation(null);
                   // Navigate to role-specific dashboard
-                  const dashboardRoute = getRoleDashboardRoute(result.data.user?.role || result.data?.role);
                   router.replace(dashboardRoute);
                 },
               },
