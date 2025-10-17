@@ -125,7 +125,7 @@ const DevicesScreen = () => {
       <View style={styles.binCard}>
         <View style={styles.cardHeader}>
           <View style={styles.headerLeft}>
-            <Text style={styles.binIcon}>🗑️</Text>
+            <Text style={styles.binIcon}></Text>
             <View>
               <Text style={styles.binId}>{bin.binId}</Text>
               <Text style={styles.binArea}>{bin.location?.area || 'No area'}</Text>
@@ -139,13 +139,13 @@ const DevicesScreen = () => {
 
         <View style={styles.cardBody}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>📍 Location:</Text>
+            <Text style={styles.detailLabel}>Location:</Text>
             <Text style={styles.detailValue}>{bin.location?.address || 'No address'}</Text>
           </View>
 
           {bin.location?.coordinates && (
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>🌍 Coordinates:</Text>
+              <Text style={styles.detailLabel}>Coordinates:</Text>
               <Text style={styles.detailValue}>
                 {bin.location.coordinates.lat}, {bin.location.coordinates.lng}
               </Text>
@@ -154,7 +154,7 @@ const DevicesScreen = () => {
 
           {bin.deviceId && (
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>📱 Device:</Text>
+              <Text style={styles.detailLabel}>Device:</Text>
               <Text style={styles.detailValue}>{bin.deviceId.deviceId || 'N/A'}</Text>
             </View>
           )}
@@ -168,7 +168,7 @@ const DevicesScreen = () => {
 
           {bin.isUrgent && (
             <View style={styles.urgentAlert}>
-              <Text style={styles.alertIcon}>🚨</Text>
+              <Text style={styles.alertIcon}></Text>
               <Text style={styles.urgentText}>URGENT</Text>
             </View>
           )}
@@ -178,7 +178,16 @@ const DevicesScreen = () => {
             onPress={() => handleViewDevice(bin)}
           >
             <Text style={styles.viewDeviceButtonText}>
-              📱 View Device
+              View Bin Mantainance History
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.registerDeviceButton}
+            onPress={() => Alert.alert('Coming Soon', 'Device registration functionality will be implemented')}
+          >
+            <Text style={styles.registerDeviceButtonText}>
+              + Register Device
             </Text>
           </TouchableOpacity>
         </View>
@@ -197,7 +206,7 @@ const DevicesScreen = () => {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>🗑️</Text>
+      <Text style={styles.emptyIcon}></Text>
       <Text style={styles.emptyText}>No bins found</Text>
     </View>
   );
@@ -293,19 +302,19 @@ const DevicesScreen = () => {
             ) : selectedDevice ? (
               <ScrollView style={styles.modalBody} contentContainerStyle={styles.modalBodyContent}>
                 <View style={styles.deviceInfoSection}>
-                  <Text style={styles.deviceIcon}>📱</Text>
+                  <Text style={styles.deviceIcon}></Text>
                   <Text style={styles.deviceIdText}>{selectedDevice.deviceId || 'N/A'}</Text>
                 </View>
 
                 <View style={styles.deviceDetailRow}>
-                  <Text style={styles.deviceLabel}>🏷️ Device Type:</Text>
+                  <Text style={styles.deviceLabel}>Device Type:</Text>
                   <Text style={styles.deviceValue}>
                     {selectedDevice.deviceType?.toUpperCase() || 'N/A'}
                   </Text>
                 </View>
 
                 <View style={styles.deviceDetailRow}>
-                  <Text style={styles.deviceLabel}>🔌 Status:</Text>
+                  <Text style={styles.deviceLabel}>Status:</Text>
                   <View style={styles.statusContainer}>
                     <View style={[
                       styles.statusDot,
@@ -318,14 +327,14 @@ const DevicesScreen = () => {
                 </View>
 
                 <View style={styles.deviceDetailRow}>
-                  <Text style={styles.deviceLabel}>🌐 Online Status:</Text>
+                  <Text style={styles.deviceLabel}>Online Status:</Text>
                   <Text style={styles.deviceValue}>
-                    {selectedDevice.isOnline ? 'Online ✅' : 'Offline ❌'}
+                    {selectedDevice.isOnline ? 'Online' : 'Offline'}
                   </Text>
                 </View>
 
                 <View style={styles.deviceDetailRow}>
-                  <Text style={styles.deviceLabel}>🔋 Battery Status:</Text>
+                  <Text style={styles.deviceLabel}>Battery Status:</Text>
                   <Text style={styles.deviceValue}>
                     {selectedDevice.batteryStatus || 'Unknown'}
                   </Text>
@@ -333,7 +342,7 @@ const DevicesScreen = () => {
 
                 {selectedDevice.daysSinceLastSignal !== null && selectedDevice.daysSinceLastSignal !== undefined && (
                   <View style={styles.deviceDetailRow}>
-                    <Text style={styles.deviceLabel}>📶 Last Signal:</Text>
+                    <Text style={styles.deviceLabel}>Last Signal:</Text>
                     <Text style={styles.deviceValue}>
                       {selectedDevice.daysSinceLastSignal === 0 
                         ? 'Today' 
@@ -344,7 +353,7 @@ const DevicesScreen = () => {
 
                 {selectedDevice.lastSignalTime && (
                   <View style={styles.deviceDetailRow}>
-                    <Text style={styles.deviceLabel}>🕒 Last Signal Time:</Text>
+                    <Text style={styles.deviceLabel}>Last Signal Time:</Text>
                     <Text style={styles.deviceValue}>
                       {new Date(selectedDevice.lastSignalTime).toLocaleString()}
                     </Text>
@@ -353,7 +362,7 @@ const DevicesScreen = () => {
 
                 {selectedDevice.location && (
                   <View style={styles.deviceDetailRow}>
-                    <Text style={styles.deviceLabel}>📍 Location:</Text>
+                    <Text style={styles.deviceLabel}>Location:</Text>
                     <Text style={styles.deviceValue}>
                       {selectedDevice.location.address || 'Not available'}
                     </Text>
@@ -361,7 +370,7 @@ const DevicesScreen = () => {
                 )}
 
                 <View style={styles.deviceDetailRow}>
-                  <Text style={styles.deviceLabel}>🆔 Device ID:</Text>
+                  <Text style={styles.deviceLabel}>Device ID:</Text>
                   <Text style={[styles.deviceValue, styles.deviceIdSmall]}>
                     {selectedDevice._id || selectedDevice.id || 'N/A'}
                   </Text>
@@ -382,7 +391,7 @@ const DevicesScreen = () => {
                           </Text>
                         </View>
                         {history.notes && (
-                          <Text style={styles.maintenanceNotes}>📝 {history.notes}</Text>
+                          <Text style={styles.maintenanceNotes}>{history.notes}</Text>
                         )}
                         {history.technicianId && (
                           <Text style={styles.maintenanceTechnician}>
@@ -391,7 +400,7 @@ const DevicesScreen = () => {
                         )}
                         {history.workOrderId && (
                           <Text style={styles.maintenanceWorkOrder}>
-                            🔖 {history.workOrderId.workOrderId}
+                            Work-OrderID:   {history.workOrderId.workOrderId}
                           </Text>
                         )}
                       </View>
@@ -559,12 +568,26 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: SPACING.small,
     alignItems: 'center',
+    backgroundColor: COLORS.success
   },
   viewDeviceButtonDisabled: {
     backgroundColor: COLORS.border,
     opacity: 0.6,
   },
   viewDeviceButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.white,
+  },
+  registerDeviceButton: {
+    backgroundColor: COLORS.success,
+    paddingVertical: SPACING.small,
+    paddingHorizontal: SPACING.medium,
+    borderRadius: 8,
+    marginTop: SPACING.small,
+    alignItems: 'center',
+  },
+  registerDeviceButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.white,
@@ -619,23 +642,12 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
+    backgroundColor: COLORS.white,
   },
   modalContent: {
+    flex: 1,
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: '95%',
     flexDirection: 'column',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -651,6 +663,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   closeButton: {
+    padding: 2,
     width: 32,
     height: 32,
     borderRadius: 16,
@@ -769,7 +782,8 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   maintenanceWorkOrder: {
-    fontSize: 12,
+    fontSize: 13,
+    paddingTop: 5,
     color: COLORS.roleTechnician,
     fontWeight: '500',
   },

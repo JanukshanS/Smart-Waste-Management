@@ -135,3 +135,8 @@ export const getDevices = async (params = {}) => {
   return client.get(endpoint);
 };
 
+// Register a new device
+export const registerDevice = async (deviceData) => {
+  return client.post('/devices', deviceData);
+};
+

@@ -19,6 +19,9 @@ const WorkOrderDetailsScreen = () => {
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [newDeviceId, setNewDeviceId] = useState('');
+  
+  // Diagnose fault modal state
+  const [showDiagnoseModal, setShowDiagnoseModal] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -114,6 +117,20 @@ const WorkOrderDetailsScreen = () => {
 
   const handleMarkAsCompleted = () => {
     setShowResolutionModal(true);
+  };
+
+  const handleDiagnoseFault = () => {
+    setShowDiagnoseModal(true);
+  };
+
+  const handleSignalTest = () => {
+    setShowDiagnoseModal(false);
+    Alert.alert('Signal Test', 'Signal sent successfully to the Bin');
+  };
+
+  const handlePowerTest = () => {
+    setShowDiagnoseModal(false);
+    Alert.alert('Power Test', 'Power test completed successfully');
   };
 
   const handleResolveWorkOrder = async () => {
@@ -499,7 +516,11 @@ const WorkOrderDetailsScreen = () => {
             {/* Start Work button - available for assigned work orders */}
             {workOrder.status !== 'in-progress' && workOrder.status !== 'completed' && (
               <Button
-                title="🔧 Start Work"
+                title={
+                  workOrder.status === 'pending' && !workOrder.technicianId 
+                    ? "Start Work (Assign First)" 
+                    : "Start Work"
+                }
                 onPress={handleStartWorkOrder}
                 style={[
                   styles.actionButton,
@@ -529,8 +550,8 @@ const WorkOrderDetailsScreen = () => {
 
             {/* Additional actions */}
             <Button
-              title="📝 Add Notes"
-              onPress={() => Alert.alert('Coming Soon', 'Add notes functionality will be implemented')}
+              title="Diagnose Fault"
+              onPress={handleDiagnoseFault}
               variant="outline"
               style={styles.actionButton}
               disabled={updating}
@@ -627,7 +648,68 @@ const WorkOrderDetailsScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-    </View>
+        </View>
+      </Modal>
+
+      {/* Diagnose Fault Modal */}
+      <Modal
+        visible={showDiagnoseModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowDiagnoseModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Diagnose Fault</Text>
+              <TouchableOpacity 
+                onPress={() => setShowDiagnoseModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Text style={styles.modalSubtitle}>
+                Select a diagnostic test to run on the device:
+              </Text>
+
+              <View style={styles.testButtonsContainer}>
+                <TouchableOpacity
+                  style={[styles.testButton, styles.signalTestButton]}
+                  onPress={handleSignalTest}
+                >
+                  <Text style={styles.testButtonIcon}></Text>
+                  <Text style={styles.testButtonTitle}>Signal Test</Text>
+                  <Text style={styles.testButtonDescription}>
+                    Test device connectivity and signal strength
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.testButton, styles.powerTestButton]}
+                  onPress={handlePowerTest}
+                >
+                  <Text style={styles.testButtonIcon}></Text>
+                  <Text style={styles.testButtonTitle}>Power Test</Text>
+                  <Text style={styles.testButtonDescription}>
+                    Test battery level and power consumption
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowDiagnoseModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </ScrollView>
   );
@@ -662,6 +744,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.large,
   },
   header: {
+    paddingTop: 80,
     backgroundColor: COLORS.white,
     padding: SPACING.large,
     alignItems: 'center',
@@ -672,12 +755,12 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: `${COLORS.roleTechnician}15`,
+    backgroundColor: `${COLORS.primary}15`,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.medium,
     borderWidth: 2,
-    borderColor: COLORS.roleTechnician,
+    borderColor: COLORS.primary,
   },
   iconText: {
     fontSize: 40,
@@ -801,7 +884,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    color: COLORS.roleTechnician,
+    color: COLORS.primary,
     fontWeight: '600',
   },
   completedContainer: {
@@ -945,6 +1028,46 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.white,
+  },
+  // Diagnose fault modal styles
+  testButtonsContainer: {
+    gap: SPACING.medium,
+  },
+  testButton: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: SPACING.large,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  signalTestButton: {
+    borderColor: '#1976D2',
+    backgroundColor: '#E3F2FD',
+  },
+  powerTestButton: {
+    borderColor: '#F57C00',
+    backgroundColor: '#FFF3E0',
+  },
+  testButtonIcon: {
+    fontSize: 1,
+  },
+  testButtonTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: SPACING.small / 2,
+  },
+  testButtonDescription: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

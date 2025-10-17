@@ -17,19 +17,19 @@ const WorkOrdersScreen = () => {
 
   // Status filters
   const statuses = [
-    { value: 'all', label: 'All', icon: '📋', color: COLORS.primary },
-    { value: 'pending', label: 'Pending', icon: '⏳', color: COLORS.warning },
-    { value: 'in-progress', label: 'In Progress', icon: '🔧', color: '#1976D2' },
-    { value: 'completed', label: 'Completed', icon: '✅', color: COLORS.success },
-    { value: 'escalated', label: 'Escalated', icon: '⚠️', color: COLORS.danger },
+    { value: 'all', label: 'All', icon: '', color: COLORS.primary },
+    { value: 'pending', label: 'Pending', icon: '', color: COLORS.warning },
+    { value: 'in-progress', label: 'In Progress', icon: '', color: '#1976D2' },
+    { value: 'completed', label: 'Completed', icon: '', color: COLORS.success },
+    { value: 'escalated', label: 'Escalated', icon: '', color: COLORS.danger },
   ];
 
   // Priority filters
   const priorities = [
-    { value: 'all', label: 'All Priority', icon: '🎯', color: COLORS.primary },
-    { value: 'low', label: 'Low', icon: '🟢', color: '#388E3C' },
-    { value: 'medium', label: 'Medium', icon: '🟡', color: '#F57C00' },
-    { value: 'high', label: 'High', icon: '🔴', color: '#C62828' },
+    { value: 'all', label: 'All Priority', icon: '', color: COLORS.primary },
+    { value: 'low', label: 'Low', icon: '', color: '#388E3C' },
+    { value: 'medium', label: 'Medium', icon: '', color: '#F57C00' },
+    { value: 'high', label: 'High', icon: '', color: '#C62828' },
   ];
 
   // Auto-refresh when screen comes into focus
@@ -107,7 +107,7 @@ const WorkOrdersScreen = () => {
     if (!loading || currentPage === 1) return null;
     return (
       <View style={styles.loadingMore}>
-        <ActivityIndicator size="small" color={COLORS.roleTechnician} />
+        <ActivityIndicator size="small" color={COLORS.primary} />
       </View>
     );
   };
@@ -216,7 +216,7 @@ const WorkOrdersScreen = () => {
       {/* Work Orders List */}
       {loading && currentPage === 1 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.roleTechnician} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading work orders...</Text>
         </View>
       ) : (
@@ -229,7 +229,7 @@ const WorkOrdersScreen = () => {
             <RefreshControl 
               refreshing={refreshing} 
               onRefresh={onRefresh} 
-              colors={[COLORS.roleTechnician]} 
+              colors={[COLORS.primary]} 
             />
           }
           onEndReached={loadMore}
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: COLORS.roleTechnician,
+    backgroundColor: COLORS.primary,
     padding: SPACING.large,
     paddingTop: SPACING.large + 20,
   },

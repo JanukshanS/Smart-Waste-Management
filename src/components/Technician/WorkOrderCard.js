@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.roleTechnician,
+    borderLeftColor: COLORS.white,
   },
   header: {
     flexDirection: 'row',
