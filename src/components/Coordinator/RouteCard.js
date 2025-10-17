@@ -64,7 +64,9 @@ const RouteCard = ({ route, onPress }) => {
           </View>
 
           {route.crewId && (
-            <Text style={styles.assignmentText}>Crew ID: {route.crewId}</Text>
+            <Text style={styles.assignmentText}>
+              Crew: {typeof route.crewId === 'object' ? route.crewId.name || route.crewId._id : route.crewId}
+            </Text>
           )}
 
           {route.vehicleId && (

@@ -349,8 +349,8 @@ const RouteDetailsScreen = () => {
             {/* Assignment Info */}
             {route.crewId && (
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Crew ID: </Text>
-                {route.crewId}
+                <Text style={styles.infoLabel}>Crew: </Text>
+                {typeof route.crewId === 'object' ? route.crewId.name || route.crewId._id : route.crewId}
               </Text>
             )}
             {route.vehicleId && (
