@@ -113,8 +113,13 @@ const RouteDetailsScreen = () => {
   };
 
   const handleAssignRoute = async () => {
+<<<<<<< HEAD
     if (!selectedCrew || !vehicleId.trim()) {
       Alert.alert("Error", "Please select a crew member and enter Vehicle ID");
+=======
+    if (!crewId.trim() || !vehicleId.trim()) {
+      Alert.alert("Error", "Please enter both Crew ID and Vehicle ID");
+>>>>>>> 9009a24 (feat: Enhance Coordinator screens with new map functionalities and UI improvements)
       return;
     }
 
@@ -128,7 +133,11 @@ const RouteDetailsScreen = () => {
       if (response.success) {
         Alert.alert("Success", "Route assigned successfully");
         setAssignDialogVisible(false);
+<<<<<<< HEAD
         setSelectedCrew(null);
+=======
+        setCrewId("");
+>>>>>>> 9009a24 (feat: Enhance Coordinator screens with new map functionalities and UI improvements)
         setVehicleId("");
         fetchRouteDetails();
       }
