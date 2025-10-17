@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api';
+import { getRoleDashboardRoute } from '../utils/navigation';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -75,8 +76,12 @@ export default function LoginScreen() {
                     email: '',
                     password: '',
                   });
-                  // Navigate to main dashboard
-                  router.replace('/');
+                  // Navigate to role-specific 
+                  const role = result.data?.message?.user?.role;
+                  console.log('Role:', role);
+                  
+                  const dashboardRoute = getRoleDashboardRoute(role);
+                  router.replace(dashboardRoute);
                 },
               },
             ]

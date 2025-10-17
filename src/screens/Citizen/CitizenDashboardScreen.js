@@ -14,9 +14,11 @@ import { COLORS, SPACING } from '../../constants/theme';
 import { citizenApi } from '../../api';
 import Button from '../../components/Button';
 import DashboardHeader from '../../components/DashboardHeader';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CitizenDashboardScreen = () => {
   const router = useRouter();
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
@@ -68,6 +70,31 @@ const CitizenDashboardScreen = () => {
 
   const handleRefresh = () => {
     fetchDashboardData(true);
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await logout();
+            if (result.success) {
+              router.replace('/auth-landing');
+            } else {
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const getStatusConfig = (status) => {
@@ -137,6 +164,9 @@ const CitizenDashboardScreen = () => {
                 Let's keep our environment clean
               </Text>
             </View>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -302,42 +332,6 @@ const CitizenDashboardScreen = () => {
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
-      return (
-      <View style={styles.container}>
-        <DashboardHeader
-          title="Citizen Dashboard"
-          subtitle="Waste Collection Services"
-        />
-
-        <ScrollView style={styles.content}>
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Create Request"
-              onPress={() => router.push("/citizen/create-request")}
-            />
-
-            <Button
-              title="My Requests"
-              onPress={() => router.push("/citizen/my-requests")}
-            />
-
-            <Button
-              title="Track Request"
-              onPress={() => router.push("/citizen/track-request")}
-            />
-
-            <Button
-              title="Find Bins"
-              onPress={() => router.push("/citizen/find-bins")}
-            />
-
-            <Button
-              title="Profile"
-              onPress={() => router.push("/citizen/profile")}
-            />
-          </View>
-        </ScrollView>
-      </View>
     </View>
   );
 };
@@ -634,6 +628,17 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: COLORS.white,
     fontWeight: '300',
+  },
+  logoutButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 8,
+  },
+  logoutButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
