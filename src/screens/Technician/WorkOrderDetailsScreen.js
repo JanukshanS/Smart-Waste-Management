@@ -22,6 +22,10 @@ const WorkOrderDetailsScreen = () => {
   
   // Diagnose fault modal state
   const [showDiagnoseModal, setShowDiagnoseModal] = useState(false);
+  
+  // Escalate modal state
+  const [showEscalateModal, setShowEscalateModal] = useState(false);
+  const [escalateReason, setEscalateReason] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -131,6 +135,38 @@ const WorkOrderDetailsScreen = () => {
   const handlePowerTest = () => {
     setShowDiagnoseModal(false);
     Alert.alert('Power Test', 'Power test completed successfully');
+  };
+
+  const handleEscalateIssue = () => {
+    setShowEscalateModal(true);
+  };
+
+  const handleEscalateWorkOrder = async () => {
+    // Validate escalation reason
+    if (!escalateReason.trim()) {
+      Alert.alert('Required', 'Please enter escalation reason');
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setShowEscalateModal(false);
+
+      const response = await technicianApi.escalateWorkOrder(id, escalateReason.trim());
+      
+      if (response.success) {
+        Alert.alert('Success', 'Work order escalated successfully');
+        setEscalateReason('');
+        fetchWorkOrderDetails(); // Refresh data
+      } else {
+        Alert.alert('Error', response.message || 'Failed to escalate work order');
+      }
+    } catch (error) {
+      console.error('Escalate work order error:', error);
+      Alert.alert('Error', 'Failed to escalate work order. Please try again.');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const handleResolveWorkOrder = async () => {
@@ -541,7 +577,7 @@ const WorkOrderDetailsScreen = () => {
                 />
                 <Button
                   title="⚠️ Escalate Issue"
-                  onPress={() => handleUpdateStatus('escalated')}
+                  onPress={handleEscalateIssue}
                   style={[styles.actionButton, styles.escalateButton]}
                   disabled={updating}
                 />
@@ -706,6 +742,65 @@ const WorkOrderDetailsScreen = () => {
                 onPress={() => setShowDiagnoseModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Escalate Issue Modal */}
+      <Modal
+        visible={showEscalateModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEscalateModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>⚠️ Escalate Issue</Text>
+              <TouchableOpacity 
+                onPress={() => setShowEscalateModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.modalSubtitle}>
+                Please provide a reason for escalating this work order:
+              </Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>
+                  Escalation Reason <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={styles.textArea}
+                  placeholder="Describe why this work order needs to be escalated..."
+                  placeholderTextColor={COLORS.textLight}
+                  value={escalateReason}
+                  onChangeText={setEscalateReason}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowEscalateModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.escalateSubmitButton]}
+                onPress={handleEscalateWorkOrder}
+              >
+                <Text style={styles.escalateSubmitButtonText}>⚠️ Escalate</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1068,6 +1163,15 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  // Escalate modal styles
+  escalateSubmitButton: {
+    backgroundColor: COLORS.warning,
+  },
+  escalateSubmitButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.white,
   },
 });
 

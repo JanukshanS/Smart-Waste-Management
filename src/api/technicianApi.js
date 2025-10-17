@@ -135,8 +135,21 @@ export const getDevices = async (params = {}) => {
   return client.get(endpoint);
 };
 
-// Register a new device
+/**
+ * Register a new device
+ * @param {Object} deviceData - Device data
+ */
 export const registerDevice = async (deviceData) => {
   return client.post('/devices', deviceData);
 };
 
+/**
+ * Escalate a work order
+ * @param {string} workOrderId - Work order ID
+ * @param {string} reason - Escalation reason
+ */
+export const escalateWorkOrder = async (workOrderId, reason) => {
+  return client.put(`/technician/work-orders/${workOrderId}/escalate`, {
+    reason,
+  });
+};
