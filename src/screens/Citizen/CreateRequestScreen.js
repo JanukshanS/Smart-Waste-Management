@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,13 +14,11 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { MapPicker } from '../../components/Admin';
 import { citizenApi } from '../../api';
-import { requestNotificationPermissions, notifyRequestCreated } from '../../services/notificationService';
 
 const CreateRequestScreen = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [useMapPicker, setUseMapPicker] = useState(true);
-  const [notificationPermission, setNotificationPermission] = useState(false);
 
   const [formData, setFormData] = useState({
     userId: '',
@@ -37,20 +35,6 @@ const CreateRequestScreen = () => {
     preferredDate: '',
     description: '',
   });
-
-  // Request notification permissions on mount
-  useEffect(() => {
-    const setupNotifications = async () => {
-      const hasPermission = await requestNotificationPermissions();
-      setNotificationPermission(hasPermission);
-      
-      if (!hasPermission) {
-        console.log('Notification permissions not granted. Notifications will be disabled.');
-      }
-    };
-
-    setupNotifications();
-  }, []);
 
   const wasteTypes = [
     { value: 'household', label: 'Household', icon: '🏠' },
@@ -143,19 +127,6 @@ const CreateRequestScreen = () => {
       const response = await citizenApi.createRequest(requestData);
 
       if (response.success) {
-        // Send push notification if permission granted
-        if (notificationPermission) {
-          try {
-            await notifyRequestCreated({
-              ...requestData,
-              _id: response.data?._id || 'new-request',
-            });
-          } catch (notifError) {
-            console.error('Failed to send notification:', notifError);
-            // Don't fail the whole process if notification fails
-          }
-        }
-
         Alert.alert(
           'Success! 🎉',
           'Your waste collection request has been created successfully!',
