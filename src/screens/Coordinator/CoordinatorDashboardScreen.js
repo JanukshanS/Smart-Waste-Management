@@ -14,6 +14,7 @@ import { Card } from "react-native-paper";
 import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
 import { BinMapView } from "../../components/Coordinator";
+import { useAuth } from "../../contexts/AuthContext";
 
 const CoordinatorDashboardScreen = () => {
   const router = useRouter();
