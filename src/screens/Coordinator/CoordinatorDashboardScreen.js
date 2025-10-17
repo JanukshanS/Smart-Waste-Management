@@ -14,6 +14,7 @@ import { Card } from "react-native-paper";
 import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
 import { useAuth } from "../../contexts/AuthContext";
+import { BinMapView } from "../../components/Coordinator";
 
 const CoordinatorDashboardScreen = () => {
   const router = useRouter();
@@ -22,6 +23,7 @@ const CoordinatorDashboardScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState(null);
+  const [urgentBins, setUrgentBins] = useState([]);
 
   const fetchDashboardData = async () => {
     try {
@@ -29,6 +31,16 @@ const CoordinatorDashboardScreen = () => {
       if (response.success) {
         setDashboardData(response.data);
         setError(null);
+      }
+
+      // Fetch urgent bins for map widget
+      const binsResponse = await coordinatorApi.getBins({
+        fillLevel: { gte: 90 },
+        limit: 10,
+        sort: "fillLevel:desc",
+      });
+      if (binsResponse.success) {
+        setUrgentBins(binsResponse.data);
       }
     } catch (err) {
       console.error("Error fetching dashboard:", err);
@@ -355,6 +367,33 @@ const CoordinatorDashboardScreen = () => {
               />
             </View>
 
+            {/* Map Widget */}
+            {urgentBins.length > 0 && (
+              <View style={styles.mapSection}>
+                <View style={styles.mapHeader}>
+                  <Text style={styles.sectionTitle}>🚨 Urgent Bins Map</Text>
+                  <TouchableOpacity
+                    style={styles.viewAllButton}
+                    onPress={() => router.push("/coordinator/bin-management")}
+                  >
+                    <Text style={styles.viewAllText}>View Full Map ›</Text>
+                  </TouchableOpacity>
+                </View>
+                <BinMapView
+                  bins={urgentBins}
+                  onBinPress={(bin) =>
+                    router.push(
+                      `/coordinator/bin-details?id=${bin._id || bin.binId}`
+                    )
+                  }
+                  height={250}
+                  showControls={false}
+                  showLegend={false}
+                  filteredStatus="urgent"
+                />
+              </View>
+            )}
+
             {/* Analytics Section */}
             <View style={styles.analyticsSection}>
               <Text style={styles.sectionTitle}>Analytics & Reports</Text>
@@ -617,6 +656,18 @@ const styles = StyleSheet.create({
   actionsSection: {
     paddingHorizontal: SPACING.large,
     marginTop: SPACING.small,
+  },
+
+  // Map Section
+  mapSection: {
+    paddingHorizontal: SPACING.large,
+    marginTop: SPACING.large,
+  },
+  mapHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: SPACING.medium,
   },
   actionCard: {
     flexDirection: "row",

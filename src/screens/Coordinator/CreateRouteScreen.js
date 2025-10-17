@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
 import Button from "../../components/Button";
+import { InteractiveMap } from "../../components/Coordinator";
 
 const CreateRouteScreen = () => {
   const router = useRouter();
@@ -26,6 +27,10 @@ const CreateRouteScreen = () => {
   const [routeName, setRouteName] = useState("");
   const [mode, setMode] = useState("optimize"); // 'optimize' or 'manual'
 
+  // Route preview
+  const [previewRoute, setPreviewRoute] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+
   const handleOptimizeRoute = async () => {
     try {
       setLoading(true);
@@ -36,7 +41,8 @@ const CreateRouteScreen = () => {
       });
 
       if (response.success) {
-        const stops = response.data.stops?.length || response.data.totalStops || 0;
+        const stops =
+          response.data.stops?.length || response.data.totalStops || 0;
         const distance = response.data.totalDistance || 0;
         const duration = response.data.estimatedDuration || 0;
 
@@ -44,17 +50,21 @@ const CreateRouteScreen = () => {
           Alert.alert(
             "No Route Generated",
             `No bins or requests found matching your criteria.\n\n` +
-            `Try lowering the fill level threshold (currently ${fillLevelThreshold}%) ` +
-            `or check if there are any active bins in the system.`,
+              `Try lowering the fill level threshold (currently ${fillLevelThreshold}%) ` +
+              `or check if there are any active bins in the system.`,
             [{ text: "OK" }]
           );
         } else {
+          // Set preview route for map display
+          setPreviewRoute(response.data);
+          setShowPreview(true);
+
           Alert.alert(
             "Route Optimized Successfully! ✅",
             `Generated route with:\n` +
-            `• ${stops} stops\n` +
-            `• ${distance.toFixed(1)} km total distance\n` +
-            `• ${Math.round(duration)} minutes estimated duration`,
+              `• ${stops} stops\n` +
+              `• ${distance.toFixed(1)} km total distance\n` +
+              `• ${Math.round(duration)} minutes estimated duration`,
             [
               {
                 text: "View Routes",
@@ -72,17 +82,18 @@ const CreateRouteScreen = () => {
       }
     } catch (err) {
       console.error("Error optimizing route:", err);
-      
+
       // Detailed error handling
       let errorMessage = "Failed to optimize route";
       if (err.status === 408) {
-        errorMessage = "Request timeout. Please check your connection and try again.";
+        errorMessage =
+          "Request timeout. Please check your connection and try again.";
       } else if (err.status === 500) {
         errorMessage = "Server error. Please contact support if this persists.";
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
@@ -239,6 +250,50 @@ const CreateRouteScreen = () => {
         </Card>
       )}
 
+      {/* Route Preview Map */}
+      {showPreview && previewRoute && (
+        <Card style={styles.card}>
+          <Card.Title
+            title="Route Preview"
+            subtitle={`${previewRoute.stops?.length || 0} stops • ${(
+              previewRoute.totalDistance || 0
+            ).toFixed(1)} km`}
+          />
+          <Card.Content>
+            <InteractiveMap
+              bins={[]} // No bins for route preview
+              routes={[previewRoute]}
+              showBins={false}
+              showRoutes={true}
+              showControls={true}
+              showLegend={true}
+              height={300}
+              style={styles.previewMap}
+            />
+
+            <View style={styles.previewActions}>
+              <Button
+                title="Save Route"
+                onPress={() => {
+                  // Navigate to route details or routes list
+                  router.push("/coordinator/routes");
+                }}
+                style={styles.saveButton}
+              />
+              <Button
+                title="Regenerate"
+                onPress={() => {
+                  setShowPreview(false);
+                  setPreviewRoute(null);
+                }}
+                variant="outline"
+                style={styles.regenerateButton}
+              />
+            </View>
+          </Card.Content>
+        </Card>
+      )}
+
       {/* Manual Route Mode */}
       {mode === "manual" && (
         <Card style={styles.card}>
@@ -388,6 +443,20 @@ const styles = StyleSheet.create({
   },
   generateButton: {
     marginTop: SPACING.small,
+  },
+  previewMap: {
+    borderRadius: 8,
+    marginBottom: SPACING.medium,
+  },
+  previewActions: {
+    flexDirection: "row",
+    gap: SPACING.medium,
+  },
+  saveButton: {
+    flex: 1,
+  },
+  regenerateButton: {
+    flex: 1,
   },
   infoTitle: {
     fontSize: 16,

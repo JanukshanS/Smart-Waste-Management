@@ -21,35 +21,39 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
 import { coordinatorApi } from '../../api';
+import { InteractiveMap } from "../../components/Coordinator";
 
 const RouteDetailsScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [route, setRoute] = useState(null);
   const [error, setError] = useState(null);
-  
+
   // Dialog states
   const [assignDialogVisible, setAssignDialogVisible] = useState(false);
   const [statusDialogVisible, setStatusDialogVisible] = useState(false);
   const [stopDialogVisible, setStopDialogVisible] = useState(false);
-  
+
   // Assignment form
-  const [crewId, setCrewId] = useState('');
-  const [vehicleId, setVehicleId] = useState('');
+  const [crewId, setCrewId] = useState("");
+  const [vehicleId, setVehicleId] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
-  
+
   // Status update form
-  const [newStatus, setNewStatus] = useState('');
+  const [newStatus, setNewStatus] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
-  
+
   // Stop update form
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedStopIndex, setSelectedStopIndex] = useState(null);
-  const [stopStatus, setStopStatus] = useState('');
-  const [stopReason, setStopReason] = useState('');
+
+  // Map view state
+  const [showMapView, setShowMapView] = useState(false);
+  const [stopStatus, setStopStatus] = useState("");
+  const [stopReason, setStopReason] = useState("");
   const [stopLoading, setStopLoading] = useState(false);
 
   useEffect(() => {
@@ -66,8 +70,8 @@ const RouteDetailsScreen = () => {
         setRoute(response.data);
       }
     } catch (err) {
-      console.error('Error fetching route details:', err);
-      setError('Failed to load route details');
+      console.error("Error fetching route details:", err);
+      setError("Failed to load route details");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -81,7 +85,7 @@ const RouteDetailsScreen = () => {
 
   const handleAssignRoute = async () => {
     if (!crewId.trim() || !vehicleId.trim()) {
-      Alert.alert('Error', 'Please enter both Crew ID and Vehicle ID');
+      Alert.alert("Error", "Please enter both Crew ID and Vehicle ID");
       return;
     }
 
@@ -93,15 +97,15 @@ const RouteDetailsScreen = () => {
       });
 
       if (response.success) {
-        Alert.alert('Success', 'Route assigned successfully');
+        Alert.alert("Success", "Route assigned successfully");
         setAssignDialogVisible(false);
-        setCrewId('');
-        setVehicleId('');
+        setCrewId("");
+        setVehicleId("");
         fetchRouteDetails();
       }
     } catch (err) {
-      console.error('Error assigning route:', err);
-      Alert.alert('Error', err.message || 'Failed to assign route');
+      console.error("Error assigning route:", err);
+      Alert.alert("Error", err.message || "Failed to assign route");
     } finally {
       setAssignLoading(false);
     }
@@ -109,20 +113,20 @@ const RouteDetailsScreen = () => {
 
   const handleUpdateStatus = async () => {
     if (!newStatus) {
-      Alert.alert('Error', 'Please select a status');
+      Alert.alert("Error", "Please select a status");
       return;
     }
 
     // Confirmation for irreversible changes
-    if (newStatus === 'completed' || newStatus === 'cancelled') {
+    if (newStatus === "completed" || newStatus === "cancelled") {
       Alert.alert(
-        'Confirm Status Change',
+        "Confirm Status Change",
         `Are you sure you want to mark this route as ${newStatus}? This action cannot be undone.`,
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: "Cancel", style: "cancel" },
           {
-            text: 'Confirm',
-            style: 'destructive',
+            text: "Confirm",
+            style: "destructive",
             onPress: () => updateStatus(),
           },
         ]
@@ -138,14 +142,14 @@ const RouteDetailsScreen = () => {
       const response = await coordinatorApi.updateRouteStatus(id, newStatus);
 
       if (response.success) {
-        Alert.alert('Success', 'Route status updated successfully');
+        Alert.alert("Success", "Route status updated successfully");
         setStatusDialogVisible(false);
-        setNewStatus('');
+        setNewStatus("");
         fetchRouteDetails();
       }
     } catch (err) {
-      console.error('Error updating status:', err);
-      Alert.alert('Error', err.message || 'Failed to update route status');
+      console.error("Error updating status:", err);
+      Alert.alert("Error", err.message || "Failed to update route status");
     } finally {
       setStatusLoading(false);
     }
@@ -154,14 +158,14 @@ const RouteDetailsScreen = () => {
   const handleOpenStopDialog = (stop, index) => {
     setSelectedStop(stop);
     setSelectedStopIndex(index);
-    setStopStatus(stop.status || 'pending');
-    setStopReason('');
+    setStopStatus(stop.status || "pending");
+    setStopReason("");
     setStopDialogVisible(true);
   };
 
   const handleUpdateStop = async () => {
-    if (stopStatus === 'skipped' && !stopReason.trim()) {
-      Alert.alert('Error', 'Please provide a reason for skipping this stop');
+    if (stopStatus === "skipped" && !stopReason.trim()) {
+      Alert.alert("Error", "Please provide a reason for skipping this stop");
       return;
     }
 
@@ -177,16 +181,16 @@ const RouteDetailsScreen = () => {
       );
 
       if (response.success) {
-        Alert.alert('Success', 'Stop status updated successfully');
+        Alert.alert("Success", "Stop status updated successfully");
         setStopDialogVisible(false);
         setSelectedStop(null);
         setSelectedStopIndex(null);
-        setStopReason('');
+        setStopReason("");
         fetchRouteDetails();
       }
     } catch (err) {
-      console.error('Error updating stop:', err);
-      Alert.alert('Error', err.message || 'Failed to update stop status');
+      console.error("Error updating stop:", err);
+      Alert.alert("Error", err.message || "Failed to update stop status");
     } finally {
       setStopLoading(false);
     }
@@ -194,15 +198,15 @@ const RouteDetailsScreen = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'draft':
-        return '#9E9E9E';
-      case 'assigned':
-        return '#2196F3';
-      case 'in-progress':
-        return '#FFA500';
-      case 'completed':
-        return '#4CAF50';
-      case 'cancelled':
+      case "draft":
+        return "#9E9E9E";
+      case "assigned":
+        return "#2196F3";
+      case "in-progress":
+        return "#FFA500";
+      case "completed":
+        return "#4CAF50";
+      case "cancelled":
         return COLORS.error;
       default:
         return COLORS.textLight;
@@ -211,20 +215,20 @@ const RouteDetailsScreen = () => {
 
   const getStopStatusColor = (status) => {
     switch (status) {
-      case 'completed':
-        return '#4CAF50';
-      case 'skipped':
+      case "completed":
+        return "#4CAF50";
+      case "skipped":
         return COLORS.error;
-      case 'pending':
+      case "pending":
       default:
-        return '#9E9E9E';
+        return "#9E9E9E";
     }
   };
 
   const calculateCompletionPercentage = () => {
     if (!route || !route.stops || route.stops.length === 0) return 0;
     const completedStops = route.stops.filter(
-      (stop) => stop.status === 'completed'
+      (stop) => stop.status === "completed"
     ).length;
     return Math.round((completedStops / route.stops.length) * 100);
   };
@@ -241,7 +245,7 @@ const RouteDetailsScreen = () => {
   if (error || !route) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || 'Route not found'}</Text>
+        <Text style={styles.errorText}>{error || "Route not found"}</Text>
         <Button title="Go Back" onPress={() => router.back()} />
       </View>
     );
@@ -263,8 +267,12 @@ const RouteDetailsScreen = () => {
           <Card.Content>
             <View style={styles.header}>
               <Text style={styles.title}>{route.routeName}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-                <Text style={styles.statusText}>{route.status?.toUpperCase()}</Text>
+              <View
+                style={[styles.statusBadge, { backgroundColor: statusColor }]}
+              >
+                <Text style={styles.statusText}>
+                  {route.status?.toUpperCase()}
+                </Text>
               </View>
             </View>
 
@@ -295,7 +303,8 @@ const RouteDetailsScreen = () => {
             </View>
 
             {/* Progress Bar */}
-            {(route.status === 'in-progress' || route.status === 'assigned') && (
+            {(route.status === "in-progress" ||
+              route.status === "assigned") && (
               <View style={styles.progressContainer}>
                 <Text style={styles.progressLabel}>
                   Completion: {completionPercentage}%
@@ -337,7 +346,7 @@ const RouteDetailsScreen = () => {
         </Card>
 
         {/* Action Buttons */}
-        {route.status !== 'completed' && route.status !== 'cancelled' && (
+        {route.status !== "completed" && route.status !== "cancelled" && (
           <View style={styles.actionsContainer}>
             {!route.crewId && (
               <Button
@@ -354,6 +363,41 @@ const RouteDetailsScreen = () => {
               style={styles.actionButton}
             />
           </View>
+        )}
+
+        {/* Route Map */}
+        {route.stops && route.stops.length > 0 && (
+          <Card style={styles.card}>
+            <Card.Content>
+              <View style={styles.mapHeader}>
+                <Text style={styles.sectionTitle}>Route Visualization</Text>
+                <TouchableOpacity
+                  style={styles.mapToggleButton}
+                  onPress={() => setShowMapView(!showMapView)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.mapToggleText}>
+                    {showMapView ? "📋 List View" : "🗺️ Map View"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {showMapView && (
+                <View style={styles.mapContainer}>
+                  <InteractiveMap
+                    bins={[]} // No bins for route view
+                    routes={[route]}
+                    showBins={false}
+                    showRoutes={true}
+                    showControls={true}
+                    showLegend={true}
+                    height={300}
+                    style={styles.routeMap}
+                  />
+                </View>
+              )}
+            </Card.Content>
+          </Card>
         )}
 
         {/* Stops List */}
@@ -375,53 +419,55 @@ const RouteDetailsScreen = () => {
                           styles.stopStatusBadge,
                           {
                             backgroundColor: getStopStatusColor(
-                              stop.status || 'pending'
+                              stop.status || "pending"
                             ),
                           },
                         ]}
                       >
                         <Text style={styles.stopStatusText}>
-                          {stop.status?.toUpperCase() || 'PENDING'}
+                          {stop.status?.toUpperCase() || "PENDING"}
                         </Text>
                       </View>
                     </View>
-                    
+
                     {stop.type && (
                       <Text style={styles.stopText}>
                         <Text style={styles.stopLabel}>Type: </Text>
                         {stop.type}
                       </Text>
                     )}
-                    
+
                     {stop.location && (
                       <Text style={styles.stopText}>
                         <Text style={styles.stopLabel}>Location: </Text>
-                        {stop.location.address || 
-                         `${stop.location.lat?.toFixed(4)}, ${stop.location.lng?.toFixed(4)}`}
+                        {stop.location.address ||
+                          `${stop.location.lat?.toFixed(
+                            4
+                          )}, ${stop.location.lng?.toFixed(4)}`}
                       </Text>
                     )}
-                    
+
                     {stop.binId && (
                       <Text style={styles.stopText}>
                         <Text style={styles.stopLabel}>Bin ID: </Text>
                         {stop.binId}
                       </Text>
                     )}
-                    
+
                     {stop.requestId && (
                       <Text style={styles.stopText}>
                         <Text style={styles.stopLabel}>Request ID: </Text>
                         {stop.requestId}
                       </Text>
                     )}
-                    
+
                     {stop.reason && (
                       <Text style={[styles.stopText, { color: COLORS.error }]}>
                         <Text style={styles.stopLabel}>Reason: </Text>
                         {stop.reason}
                       </Text>
                     )}
-                    
+
                     <Text style={styles.tapHint}>Tap to update status</Text>
                   </View>
                 </TouchableOpacity>
@@ -465,7 +511,7 @@ const RouteDetailsScreen = () => {
               disabled={assignLoading}
             />
             <Button
-              title={assignLoading ? 'Assigning...' : 'Assign'}
+              title={assignLoading ? "Assigning..." : "Assign"}
               onPress={handleAssignRoute}
               disabled={assignLoading}
             />
@@ -481,10 +527,7 @@ const RouteDetailsScreen = () => {
         >
           <Dialog.Title>Update Route Status</Dialog.Title>
           <Dialog.Content>
-            <RadioButton.Group
-              onValueChange={setNewStatus}
-              value={newStatus}
-            >
+            <RadioButton.Group onValueChange={setNewStatus} value={newStatus}>
               <View style={styles.radioItem}>
                 <RadioButton value="draft" />
                 <Text style={styles.radioLabel}>Draft</Text>
@@ -514,7 +557,7 @@ const RouteDetailsScreen = () => {
               disabled={statusLoading}
             />
             <Button
-              title={statusLoading ? 'Updating...' : 'Update'}
+              title={statusLoading ? "Updating..." : "Update"}
               onPress={handleUpdateStatus}
               disabled={statusLoading}
             />
@@ -553,7 +596,7 @@ const RouteDetailsScreen = () => {
                   </View>
                 </RadioButton.Group>
 
-                {stopStatus === 'skipped' && (
+                {stopStatus === "skipped" && (
                   <TextInput
                     mode="outlined"
                     label="Reason for skipping *"
@@ -576,7 +619,7 @@ const RouteDetailsScreen = () => {
               disabled={stopLoading}
             />
             <Button
-              title={stopLoading ? 'Updating...' : 'Update'}
+              title={stopLoading ? "Updating..." : "Update"}
               onPress={handleUpdateStop}
               disabled={stopLoading}
             />
@@ -594,8 +637,8 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.background,
     padding: SPACING.large,
   },
@@ -609,7 +652,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: COLORS.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.large,
     fontSize: 16,
   },
@@ -619,14 +662,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.medium,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
     flex: 1,
     marginRight: SPACING.small,
@@ -638,24 +681,24 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.white,
   },
   metricsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginBottom: SPACING.medium,
     paddingVertical: SPACING.medium,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
   },
   metricItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   metricValue: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
   },
   metricLabel: {
@@ -668,7 +711,7 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
     marginBottom: 8,
   },
@@ -682,7 +725,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   infoLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
   actionsContainer: {
     gap: SPACING.medium,
@@ -693,25 +736,48 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
     marginBottom: SPACING.medium,
   },
+  mapHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: SPACING.medium,
+  },
+  mapToggleButton: {
+    backgroundColor: COLORS.primary + "15",
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 20,
+  },
+  mapToggleText: {
+    color: COLORS.primary,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  mapContainer: {
+    marginTop: SPACING.small,
+  },
+  routeMap: {
+    borderRadius: 8,
+  },
   stopItem: {
     padding: SPACING.medium,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     borderRadius: 8,
     marginBottom: SPACING.small,
   },
   stopHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
   stopNumber: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
   },
   stopStatusBadge: {
@@ -721,7 +787,7 @@ const styles = StyleSheet.create({
   },
   stopStatusText: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.white,
   },
   stopText: {
@@ -730,12 +796,12 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   stopLabel: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
   tapHint: {
     fontSize: 11,
     color: COLORS.textLight,
-    fontStyle: 'italic',
+    fontStyle: "italic",
     marginTop: 4,
   },
   input: {
@@ -743,8 +809,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   radioItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
   radioLabel: {
