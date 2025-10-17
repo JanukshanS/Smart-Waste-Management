@@ -14,6 +14,8 @@ import { Card } from "react-native-paper";
 import { COLORS, SPACING } from "../../constants/theme";
 import { technicianApi } from "../../api";
 import { useAuth } from "../../contexts/AuthContext";
+import DashboardHeader from "../../components/DashboardHeader";
+import Button from "../../components/Button";
 
 const TechnicianDashboardScreen = () => {
   const router = useRouter();
