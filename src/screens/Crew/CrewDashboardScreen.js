@@ -14,10 +14,12 @@ import { Card } from 'react-native-paper';
 import { COLORS, SPACING } from '../../constants/theme';
 import { crewApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
 
 const CrewDashboardScreen = () => {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, clearUserData } = useAuth();
+  const { userDetails, clearUserDetails } = useUserDetails();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -26,11 +28,12 @@ const CrewDashboardScreen = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Support both _id (MongoDB) and id fields
-      const userId = user?._id || user?.id;
+      // Use logged-in user's ID from user details context or auth context
+      const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
       
       if (!userId) {
         console.error('User object:', JSON.stringify(user, null, 2));
+        console.error('UserDetails object:', JSON.stringify(userDetails, null, 2));
         throw new Error('User ID not found');
       }
 
@@ -71,7 +74,7 @@ const CrewDashboardScreen = () => {
     // Auto-refresh every 3 minutes
     const interval = setInterval(fetchDashboardData, 3 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, userDetails]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -88,6 +91,10 @@ const CrewDashboardScreen = () => {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
+          // Clear both contexts
+          clearUserDetails();
+          clearUserData();
+          
           const result = await logout();
           if (result.success) {
             router.replace('/auth-landing');
@@ -141,7 +148,7 @@ const CrewDashboardScreen = () => {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Welcome back! 👋</Text>
-            <Text style={styles.title}>{user?.name || 'Crew Member'}</Text>
+            <Text style={styles.title}>{userDetails?.name || user?.name || 'Crew Member'}</Text>
           </View>
           <View style={styles.headerButtons}>
             <TouchableOpacity style={styles.refreshButton} onPress={fetchDashboardData}>

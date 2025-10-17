@@ -13,10 +13,12 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { crewApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
 
 const ReportIssueScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { userDetails } = useUserDetails();
   const [issueType, setIssueType] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -45,7 +47,7 @@ const ReportIssueScreen = () => {
     try {
       setLoading(true);
 
-      const userId = user?._id || user?.id;
+      const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
       
       const issueData = {
         crewId: userId,
