@@ -1,15 +1,20 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Animated, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Animated, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import MapView, { Marker } from 'react-native-maps';
+import { Snackbar } from 'react-native-paper';
 import { COLORS, SPACING } from '../../constants/theme';
+import { citizenApi } from '../../api';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const RequestDetailsBottomSheet = ({ visible, onClose, request, loading }) => {
+const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onRequestUpdate }) => {
   const router = useRouter();
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [cancelling, setCancelling] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -83,6 +88,51 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading }) => {
     if (request?._id) {
       router.push(`/citizen/track-request?id=${request._id}`);
     }
+  };
+
+  const handleCancelRequest = () => {
+    Alert.alert(
+      'Cancel Request',
+      'Are you sure you want to cancel this request? This action cannot be undone.',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setCancelling(true);
+              const response = await citizenApi.cancelRequest(request._id);
+              
+              if (response.success) {
+                setSnackbarMessage('Request cancelled successfully!');
+                setSnackbarVisible(true);
+                
+                // Update the request status in the parent component
+                if (onRequestUpdate) {
+                  onRequestUpdate({ ...request, status: 'cancelled' });
+                }
+                
+                // Close the bottom sheet after a short delay
+                setTimeout(() => {
+                  onClose();
+                }, 1500);
+              } else {
+                Alert.alert('Error', response.message || 'Failed to cancel request');
+              }
+            } catch (error) {
+              console.error('Cancel request error:', error);
+              Alert.alert('Error', 'Failed to cancel request. Please try again.');
+            } finally {
+              setCancelling(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -279,6 +329,22 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading }) => {
 
                 {/* Action Buttons */}
                 <View style={styles.actionButtons}>
+                  {/* Cancel Button - only show for cancellable requests */}
+                  {request.status && ['pending', 'approved', 'scheduled'].includes(request.status) && (
+                    <TouchableOpacity 
+                      style={[styles.cancelButton, cancelling && styles.cancelButtonDisabled]}
+                      onPress={handleCancelRequest}
+                      activeOpacity={0.8}
+                      disabled={cancelling}
+                    >
+                      {cancelling ? (
+                        <ActivityIndicator size="small" color={COLORS.white} />
+                      ) : (
+                        <Text style={styles.cancelButtonText}>❌ Cancel Request</Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+
                   <TouchableOpacity 
                     style={styles.primaryButton}
                     onPress={handleTrackRequest}
@@ -300,6 +366,16 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading }) => {
           </ScrollView>
         </Animated.View>
       </View>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={styles.snackbar}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </Modal>
   );
 };
@@ -484,6 +560,29 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 16,
     fontWeight: '600',
+  },
+  cancelButton: {
+    backgroundColor: COLORS.error,
+    paddingVertical: SPACING.medium,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: SPACING.small,
+    shadowColor: COLORS.error,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cancelButtonDisabled: {
+    opacity: 0.6,
+  },
+  cancelButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  snackbar: {
+    backgroundColor: COLORS.success,
   },
 });
 
