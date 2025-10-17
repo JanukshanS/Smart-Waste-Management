@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { MapPin, RefreshCw } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
-import { BinDetailsBottomSheet } from '../../components/Citizen';
+import { BinDetailsBottomSheet, CitizenBottomNav } from '../../components/Citizen';
 import { citizenApi } from '../../api';
 
 const FindBinsScreen = () => {
@@ -137,7 +138,7 @@ const FindBinsScreen = () => {
   if (!location) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorIcon}>📍</Text>
+        <MapPin size={64} color={COLORS.primary} />
         <Text style={styles.errorTitle}>Location Not Available</Text>
         <Text style={styles.errorText}>
           Please enable location services to find nearby bins
@@ -203,9 +204,11 @@ const FindBinsScreen = () => {
             onPress={handleRefresh}
             disabled={refreshing}
           >
-            <Text style={styles.refreshButtonText}>
-              {refreshing ? '🔄' : '↻'}
-            </Text>
+            <RefreshCw 
+              size={20} 
+              color={COLORS.primary} 
+              style={refreshing ? { transform: [{ rotate: '360deg' }] } : {}}
+            />
           </TouchableOpacity>
         </View>
         
@@ -280,6 +283,9 @@ const FindBinsScreen = () => {
         onClose={() => setShowBottomSheet(false)}
         bin={selectedBin}
       />
+      
+      {/* Bottom Navigation */}
+      <CitizenBottomNav />
     </View>
   );
 };

@@ -362,6 +362,33 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
   },
+  errorContainer: {
+    padding: SPACING.large,
+  },
+  errorText: {
+    color: COLORS.error,
+    textAlign: "center",
+    fontSize: 16,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: SPACING.large * 2,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: SPACING.medium,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: SPACING.small,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: "center",
+  },
 });
 
 export default WorkOrdersScreen;

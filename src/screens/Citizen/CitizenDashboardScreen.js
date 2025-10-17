@@ -10,15 +10,36 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  Calendar, 
+  Truck, 
+  Check, 
+  Home, 
+  Recycle, 
+  Leaf, 
+  Smartphone, 
+  AlertTriangle, 
+  Trash2, 
+  ClipboardList, 
+  MapPin, 
+  User, 
+  BarChart3 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { citizenApi } from '../../api';
 import Button from '../../components/Button';
 import DashboardHeader from '../../components/DashboardHeader';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
+import { CitizenBottomNav } from '../../components/Citizen';
 
 const CitizenDashboardScreen = () => {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user, clearUserData } = useAuth();
+  const { userDetails, clearUserDetails } = useUserDetails();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
@@ -29,12 +50,12 @@ const CitizenDashboardScreen = () => {
   });
   const [recentRequests, setRecentRequests] = useState([]);
 
-  // Hardcoded userId for now
-  const userId = '68f17571b188a4a7463c1c27';
+  // Use logged-in user's ID from user details context or auth context
+  const userId = userDetails?.id || user?.id || '68f17571b188a4a7463c1c27';
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [user, userDetails]);
 
   const fetchDashboardData = async (isRefreshing = false) => {
     isRefreshing ? setRefreshing(true) : setLoading(true);
@@ -85,6 +106,10 @@ const CitizenDashboardScreen = () => {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
+            // Clear both contexts
+            clearUserDetails();
+            clearUserData();
+            
             const result = await logout();
             if (result.success) {
               router.replace('/auth-landing');
@@ -100,30 +125,30 @@ const CitizenDashboardScreen = () => {
   const getStatusConfig = (status) => {
     switch (status) {
       case 'pending':
-        return { color: COLORS.warning, icon: '⏳' };
+        return { color: COLORS.warning, icon: Clock, iconName: 'Clock' };
       case 'approved':
-        return { color: COLORS.info, icon: '✓' };
+        return { color: COLORS.info, icon: Check, iconName: 'Check' };
       case 'scheduled':
-        return { color: '#1976D2', icon: '📅' };
+        return { color: '#1976D2', icon: Calendar, iconName: 'Calendar' };
       case 'in-progress':
-        return { color: '#F57C00', icon: '🚛' };
+        return { color: '#F57C00', icon: Truck, iconName: 'Truck' };
       case 'completed':
-        return { color: COLORS.success, icon: '✅' };
+        return { color: COLORS.success, icon: CheckCircle, iconName: 'CheckCircle' };
       case 'cancelled':
-        return { color: COLORS.danger, icon: '❌' };
+        return { color: COLORS.danger, icon: XCircle, iconName: 'XCircle' };
       default:
-        return { color: COLORS.gray, icon: '?' };
+        return { color: COLORS.gray, icon: null, iconName: '?' };
     }
   };
 
   const getWasteTypeIcon = (wasteType) => {
     switch (wasteType) {
-      case 'household': return '🏠';
-      case 'recyclable': return '♻️';
-      case 'organic': return '🌱';
-      case 'electronic': return '📱';
-      case 'hazardous': return '⚠️';
-      default: return '🗑️';
+      case 'household': return { icon: Home, iconName: 'Home' };
+      case 'recyclable': return { icon: Recycle, iconName: 'Recycle' };
+      case 'organic': return { icon: Leaf, iconName: 'Leaf' };
+      case 'electronic': return { icon: Smartphone, iconName: 'Smartphone' };
+      case 'hazardous': return { icon: AlertTriangle, iconName: 'AlertTriangle' };
+      default: return { icon: Trash2, iconName: 'Trash2' };
     }
   };
 
@@ -146,6 +171,7 @@ const CitizenDashboardScreen = () => {
     <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -178,7 +204,7 @@ const CitizenDashboardScreen = () => {
             <View style={styles.statsGrid}>
               <View style={[styles.statCard, styles.statCardPrimary]}>
                 <View style={styles.statIconContainer}>
-                  <Text style={styles.statIcon}>📊</Text>
+                  <BarChart3 size={32} color={COLORS.citizenPrimary} />
                 </View>
                 <Text style={styles.statNumber}>{stats.total}</Text>
                 <Text style={styles.statLabel}>Total</Text>
@@ -186,7 +212,7 @@ const CitizenDashboardScreen = () => {
 
               <View style={[styles.statCard, styles.statCardWarning]}>
                 <View style={styles.statIconContainer}>
-                  <Text style={styles.statIcon}>⏳</Text>
+                  <Clock size={32} color={COLORS.citizenWarning} />
                 </View>
                 <Text style={styles.statNumber}>{stats.pending}</Text>
                 <Text style={styles.statLabel}>Pending</Text>
@@ -194,7 +220,7 @@ const CitizenDashboardScreen = () => {
 
               <View style={[styles.statCard, styles.statCardInfo]}>
                 <View style={styles.statIconContainer}>
-                  <Text style={styles.statIcon}>🚛</Text>
+                  <Truck size={32} color={COLORS.citizenInfo} />
                 </View>
                 <Text style={styles.statNumber}>{stats.inProgress}</Text>
                 <Text style={styles.statLabel}>Active</Text>
@@ -202,7 +228,7 @@ const CitizenDashboardScreen = () => {
 
               <View style={[styles.statCard, styles.statCardSuccess]}>
                 <View style={styles.statIconContainer}>
-                  <Text style={styles.statIcon}>✅</Text>
+                  <CheckCircle size={32} color={COLORS.citizenSuccess} />
                 </View>
                 <Text style={styles.statNumber}>{stats.completed}</Text>
                 <Text style={styles.statLabel}>Done</Text>
@@ -220,7 +246,7 @@ const CitizenDashboardScreen = () => {
                 activeOpacity={0.8}
               >
                 <View style={styles.actionButtonIcon}>
-                  <Text style={styles.actionButtonEmoji}>📋</Text>
+                  <ClipboardList size={28} color={COLORS.citizenPrimary} />
                 </View>
                 <Text style={styles.actionButtonText}>My Requests</Text>
               </TouchableOpacity>
@@ -231,7 +257,7 @@ const CitizenDashboardScreen = () => {
                 activeOpacity={0.8}
               >
                 <View style={styles.actionButtonIcon}>
-                  <Text style={styles.actionButtonEmoji}>📍</Text>
+                  <MapPin size={28} color={COLORS.citizenPrimary} />
                 </View>
                 <Text style={styles.actionButtonText}>Find Bins</Text>
               </TouchableOpacity>
@@ -242,7 +268,7 @@ const CitizenDashboardScreen = () => {
                 activeOpacity={0.8}
               >
                 <View style={styles.actionButtonIcon}>
-                  <Text style={styles.actionButtonEmoji}>👤</Text>
+                  <User size={28} color={COLORS.citizenPrimary} />
                 </View>
                 <Text style={styles.actionButtonText}>Profile</Text>
               </TouchableOpacity>
@@ -264,6 +290,8 @@ const CitizenDashboardScreen = () => {
               {recentRequests.map((request) => {
                 const statusConfig = getStatusConfig(request.status);
                 const wasteTypeIcon = getWasteTypeIcon(request.wasteType);
+                const StatusIcon = statusConfig.icon;
+                const WasteTypeIcon = wasteTypeIcon.icon;
 
                 return (
                   <TouchableOpacity
@@ -275,9 +303,7 @@ const CitizenDashboardScreen = () => {
                     activeOpacity={0.7}
                   >
                     <View style={styles.recentCardIcon}>
-                      <Text style={styles.recentCardEmoji}>
-                        {wasteTypeIcon}
-                      </Text>
+                      <WasteTypeIcon size={24} color={COLORS.citizenPrimary} />
                     </View>
                     <View style={styles.recentCardContent}>
                       <Text style={styles.recentCardTitle}>
@@ -293,9 +319,7 @@ const CitizenDashboardScreen = () => {
                         { backgroundColor: statusConfig.color },
                       ]}
                     >
-                      <Text style={styles.recentCardBadgeText}>
-                        {statusConfig.icon}
-                      </Text>
+                      {StatusIcon && <StatusIcon size={16} color={COLORS.white} />}
                     </View>
                   </TouchableOpacity>
                 );
@@ -307,7 +331,7 @@ const CitizenDashboardScreen = () => {
           {recentRequests.length === 0 && (
             <View style={styles.emptySection}>
               <View style={styles.emptyCard}>
-                <Text style={styles.emptyIcon}>🌱</Text>
+                <Leaf size={64} color={COLORS.citizenPrimary} />
                 <Text style={styles.emptyTitle}>Start Your Journey</Text>
                 <Text style={styles.emptyText}>
                   Create your first waste collection request and contribute to a
@@ -324,14 +348,9 @@ const CitizenDashboardScreen = () => {
           )}
         </View>
       </ScrollView>
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => router.push("/citizen/create-request")}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
+      
+      {/* Bottom Navigation */}
+      <CitizenBottomNav />
     </View>
   );
 };
@@ -340,6 +359,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.citizenBackground,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Space for bottom navigation
   },
   centered: {
     flex: 1,
@@ -375,6 +397,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.white,
     opacity: 0.9,
+  },
+  userInfo: {
+    fontSize: 12,
+    color: COLORS.white,
+    opacity: 0.8,
+    marginTop: 4,
   },
   
   // Main Content

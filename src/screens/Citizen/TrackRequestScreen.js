@@ -11,7 +11,26 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import MapView, { Marker } from 'react-native-maps';
+import { 
+  Clock, 
+  Check, 
+  Calendar, 
+  Truck, 
+  CheckCircle, 
+  XCircle, 
+  Home, 
+  Recycle, 
+  Leaf, 
+  Smartphone, 
+  AlertTriangle, 
+  Trash2, 
+  MapPin, 
+  User, 
+  ClipboardList, 
+  RefreshCw 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
+import { CitizenBottomNav } from '../../components/Citizen';
 import { citizenApi } from '../../api';
 
 const TrackRequestScreen = () => {
@@ -59,42 +78,42 @@ const TrackRequestScreen = () => {
   const getStatusConfig = (status) => {
     switch (status) {
       case 'pending':
-        return { color: COLORS.warning, bgColor: '#FFF3E0', icon: '⏳' };
+        return { color: COLORS.warning, bgColor: '#FFF3E0', icon: Clock, iconName: 'Clock' };
       case 'approved':
-        return { color: COLORS.info, bgColor: '#E3F2FD', icon: '✓' };
+        return { color: COLORS.info, bgColor: '#E3F2FD', icon: Check, iconName: 'Check' };
       case 'scheduled':
-        return { color: '#1976D2', bgColor: '#E1F5FE', icon: '📅' };
+        return { color: '#1976D2', bgColor: '#E1F5FE', icon: Calendar, iconName: 'Calendar' };
       case 'in-progress':
-        return { color: '#F57C00', bgColor: '#FFF3E0', icon: '🚛' };
+        return { color: '#F57C00', bgColor: '#FFF3E0', icon: Truck, iconName: 'Truck' };
       case 'completed':
-        return { color: COLORS.success, bgColor: '#E8F5E9', icon: '✅' };
+        return { color: COLORS.success, bgColor: '#E8F5E9', icon: CheckCircle, iconName: 'CheckCircle' };
       case 'cancelled':
-        return { color: COLORS.danger, bgColor: '#FFEBEE', icon: '❌' };
+        return { color: COLORS.danger, bgColor: '#FFEBEE', icon: XCircle, iconName: 'XCircle' };
       default:
-        return { color: COLORS.gray, bgColor: COLORS.background, icon: '?' };
+        return { color: COLORS.gray, bgColor: COLORS.background, icon: null, iconName: '?' };
     }
   };
 
   const getWasteTypeIcon = (wasteType) => {
     switch (wasteType) {
-      case 'household': return '🏠';
-      case 'recyclable': return '♻️';
-      case 'organic': return '🌱';
-      case 'electronic': return '📱';
-      case 'hazardous': return '⚠️';
-      default: return '🗑️';
+      case 'household': return { icon: Home, iconName: 'Home' };
+      case 'recyclable': return { icon: Recycle, iconName: 'Recycle' };
+      case 'organic': return { icon: Leaf, iconName: 'Leaf' };
+      case 'electronic': return { icon: Smartphone, iconName: 'Smartphone' };
+      case 'hazardous': return { icon: AlertTriangle, iconName: 'AlertTriangle' };
+      default: return { icon: Trash2, iconName: 'Trash2' };
     }
   };
 
   const getTimelineIcon = (iconName) => {
     switch (iconName) {
-      case 'check': return '✓';
-      case 'clock': return '⏰';
-      case 'calendar': return '📅';
-      case 'truck': return '🚛';
-      case 'checkmark': return '✅';
-      case 'close': return '❌';
-      default: return '•';
+      case 'check': return { icon: Check, iconName: 'Check' };
+      case 'clock': return { icon: Clock, iconName: 'Clock' };
+      case 'calendar': return { icon: Calendar, iconName: 'Calendar' };
+      case 'truck': return { icon: Truck, iconName: 'Truck' };
+      case 'checkmark': return { icon: CheckCircle, iconName: 'CheckCircle' };
+      case 'close': return { icon: XCircle, iconName: 'XCircle' };
+      default: return { icon: null, iconName: '•' };
     }
   };
 
@@ -144,28 +163,31 @@ const TrackRequestScreen = () => {
   const wasteTypeIcon = getWasteTypeIcon(request.wasteType);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          colors={[COLORS.primary]}
-          tintColor={COLORS.primary}
-        />
-      }
-    >
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={[styles.contentContainer, styles.scrollContent]}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
+      >
       {/* Header Card */}
       <View style={styles.headerCard}>
         <View style={styles.headerTop}>
           <View style={styles.wasteTypeContainer}>
-            <Text style={styles.wasteTypeIcon}>{wasteTypeIcon}</Text>
+            {(() => {
+              const WasteTypeIcon = wasteTypeIcon.icon;
+              return <WasteTypeIcon size={28} color={COLORS.primary} />;
+            })()}
             <Text style={styles.wasteType}>{request.wasteType}</Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: statusConfig.bgColor }]}>
             <Text style={[styles.statusText, { color: statusConfig.color }]}>
-              {statusConfig.icon} {request.status.toUpperCase()}
+              {request.status.toUpperCase()}
             </Text>
           </View>
         </View>
@@ -187,31 +209,43 @@ const TrackRequestScreen = () => {
 
       {/* Timeline Card */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>📍 Request Timeline</Text>
+        <Text style={styles.sectionTitle}>
+          <MapPin size={18} color={COLORS.primary} /> Request Timeline
+        </Text>
         <View style={styles.timelineContainer}>
           {request.timeline && request.timeline.length > 0 ? (
-            request.timeline.map((item, index) => (
-              <View key={index} style={styles.timelineItem}>
-                <View style={styles.timelineLeft}>
-                  <View
-                    style={[
-                      styles.timelineIconContainer,
-                      item.completed
-                        ? styles.timelineIconCompleted
-                        : styles.timelineIconPending,
-                    ]}
-                  >
-                    <Text
+            request.timeline.map((item, index) => {
+              const timelineIcon = getTimelineIcon(item.icon);
+              const TimelineIcon = timelineIcon.icon;
+              return (
+                <View key={index} style={styles.timelineItem}>
+                  <View style={styles.timelineLeft}>
+                    <View
                       style={[
-                        styles.timelineIconText,
+                        styles.timelineIconContainer,
                         item.completed
-                          ? styles.timelineIconTextCompleted
-                          : styles.timelineIconTextPending,
+                          ? styles.timelineIconCompleted
+                          : styles.timelineIconPending,
                       ]}
                     >
-                      {getTimelineIcon(item.icon)}
-                    </Text>
-                  </View>
+                      {TimelineIcon ? (
+                        <TimelineIcon
+                          size={16}
+                          color={item.completed ? COLORS.white : COLORS.textLight}
+                        />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.timelineIconText,
+                            item.completed
+                              ? styles.timelineIconTextCompleted
+                              : styles.timelineIconTextPending,
+                          ]}
+                        >
+                          {timelineIcon.iconName}
+                        </Text>
+                      )}
+                    </View>
                   {index < request.timeline.length - 1 && (
                     <View
                       style={[
@@ -235,7 +269,8 @@ const TrackRequestScreen = () => {
                   <Text style={styles.timelineDate}>{formatDateTime(item.date)}</Text>
                 </View>
               </View>
-            ))
+            );
+            })
           ) : (
             <Text style={styles.noTimelineText}>No timeline data available</Text>
           )}
@@ -244,7 +279,9 @@ const TrackRequestScreen = () => {
 
       {/* Map Card */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>📍 Pickup Location</Text>
+        <Text style={styles.sectionTitle}>
+          <MapPin size={18} color={COLORS.primary} /> Pickup Location
+        </Text>
         <View style={styles.addressInfo}>
           <Text style={styles.addressText}>
             <Text style={styles.addressLabel}>Street: </Text>
@@ -289,7 +326,9 @@ const TrackRequestScreen = () => {
 
       {/* Requester Info Card */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>👤 Requester Information</Text>
+        <Text style={styles.sectionTitle}>
+          <User size={18} color={COLORS.primary} /> Requester Information
+        </Text>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Name:</Text>
           <Text style={styles.infoValue}>{request.userId?.name || 'N/A'}</Text>
@@ -306,7 +345,9 @@ const TrackRequestScreen = () => {
 
       {/* Additional Details Card */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>📋 Additional Details</Text>
+        <Text style={styles.sectionTitle}>
+          <ClipboardList size={18} color={COLORS.primary} /> Additional Details
+        </Text>
         {request.description && request.description.trim() !== '' && (
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Description:</Text>
@@ -342,7 +383,9 @@ const TrackRequestScreen = () => {
           onPress={handleRefresh}
           activeOpacity={0.8}
         >
-          <Text style={styles.refreshButtonText}>🔄 Refresh Status</Text>
+          <Text style={styles.refreshButtonText}>
+            <RefreshCw size={16} color={COLORS.white} /> Refresh Status
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -353,7 +396,11 @@ const TrackRequestScreen = () => {
           <Text style={styles.backButtonText}>← Back to Requests</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+      
+      {/* Bottom Navigation */}
+      <CitizenBottomNav />
+    </View>
   );
 };
 
@@ -365,6 +412,9 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: SPACING.medium,
     paddingBottom: SPACING.large * 2,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Space for bottom navigation
   },
   centered: {
     flex: 1,

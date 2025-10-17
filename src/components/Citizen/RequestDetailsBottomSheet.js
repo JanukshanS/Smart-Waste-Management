@@ -3,6 +3,20 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Animated, 
 import { useRouter } from 'expo-router';
 import MapView, { Marker } from 'react-native-maps';
 import { Snackbar } from 'react-native-paper';
+import { 
+  Home, 
+  Recycle, 
+  Leaf, 
+  Smartphone, 
+  AlertTriangle, 
+  Package, 
+  User, 
+  ClipboardList, 
+  MapPin, 
+  XCircle, 
+  Calendar, 
+  DollarSign 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { citizenApi } from '../../api';
 
@@ -52,11 +66,11 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
   if (!request && !loading) return null;
 
   const wasteTypeIcons = {
-    household: '🏠',
-    recyclable: '♻️',
-    organic: '🌱',
-    electronic: '📱',
-    hazardous: '⚠️',
+    household: Home,
+    recyclable: Recycle,
+    organic: Leaf,
+    electronic: Smartphone,
+    hazardous: AlertTriangle,
   };
 
   const statusColors = {
@@ -69,7 +83,7 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
   };
 
   const statusConfig = request ? statusColors[request.status] || statusColors.pending : statusColors.pending;
-  const icon = request ? wasteTypeIcons[request.wasteType] || '📦' : '📦';
+  const IconComponent = request ? wasteTypeIcons[request.wasteType] || Package : Package;
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -181,7 +195,7 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
                 {/* Header */}
                 <View style={styles.header}>
                   <View style={styles.headerLeft}>
-                    <Text style={styles.icon}>{icon}</Text>
+                    <IconComponent size={32} color={COLORS.primary} />
                     <View>
                       <Text style={styles.wasteType}>{request.wasteType}</Text>
                       <Text style={styles.trackingId}>#{request.trackingId}</Text>
@@ -197,7 +211,9 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
                 {/* User Information */}
                 {request.userId && (
                   <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>👤 Requester Information</Text>
+                    <Text style={styles.sectionTitle}>
+                      <User size={18} color={COLORS.primary} /> Requester Information
+                    </Text>
                     <View style={styles.infoCard}>
                       <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Name:</Text>
@@ -217,7 +233,9 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
 
                 {/* Request Details */}
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>📋 Request Details</Text>
+                  <Text style={styles.sectionTitle}>
+                    <ClipboardList size={18} color={COLORS.primary} /> Request Details
+                  </Text>
                   <View style={styles.infoCard}>
                     <View style={styles.infoRow}>
                       <Text style={styles.infoLabel}>Waste Type:</Text>
@@ -242,7 +260,9 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
 
                 {/* Address Information with Map */}
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>📍 Pickup Address</Text>
+                  <Text style={styles.sectionTitle}>
+                    <MapPin size={18} color={COLORS.primary} /> Pickup Address
+                  </Text>
                   
                   {/* Address Text */}
                   <View style={styles.infoCard}>
@@ -340,7 +360,9 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
                       {cancelling ? (
                         <ActivityIndicator size="small" color={COLORS.white} />
                       ) : (
-                        <Text style={styles.cancelButtonText}>❌ Cancel Request</Text>
+                        <Text style={styles.cancelButtonText}>
+                          <XCircle size={16} color={COLORS.white} /> Cancel Request
+                        </Text>
                       )}
                     </TouchableOpacity>
                   )}
@@ -350,7 +372,9 @@ const RequestDetailsBottomSheet = ({ visible, onClose, request, loading, onReque
                     onPress={handleTrackRequest}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.primaryButtonText}>📍 Track Request</Text>
+                    <Text style={styles.primaryButtonText}>
+                      <MapPin size={16} color={COLORS.white} /> Track Request
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 

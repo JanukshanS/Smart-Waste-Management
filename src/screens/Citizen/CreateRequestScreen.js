@@ -12,19 +12,34 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { 
+  Home, 
+  Recycle, 
+  Leaf, 
+  Smartphone, 
+  AlertTriangle, 
+  Map, 
+  Keyboard, 
+  Calendar, 
+  ClipboardList 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { MapPicker } from '../../components/Admin';
+import { CitizenBottomNav } from '../../components/Citizen';
 import { citizenApi } from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
 
 const CreateRequestScreen = () => {
   const router = useRouter();
+  const { user } = useAuth();
+  const { userDetails } = useUserDetails();
   const [loading, setLoading] = useState(false);
   const [useMapPicker, setUseMapPicker] = useState(true);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [formData, setFormData] = useState({
-    userId: '',
     wasteType: 'household',
     quantity: '',
     address: {
@@ -40,11 +55,11 @@ const CreateRequestScreen = () => {
   });
 
   const wasteTypes = [
-    { value: 'household', label: 'Household', icon: '🏠' },
-    { value: 'recyclable', label: 'Recyclable', icon: '♻️' },
-    { value: 'organic', label: 'Organic', icon: '🌱' },
-    { value: 'electronic', label: 'Electronic', icon: '📱' },
-    { value: 'hazardous', label: 'Hazardous', icon: '⚠️' },
+    { value: 'household', label: 'Household', icon: Home },
+    { value: 'recyclable', label: 'Recyclable', icon: Recycle },
+    { value: 'organic', label: 'Organic', icon: Leaf },
+    { value: 'electronic', label: 'Electronic', icon: Smartphone },
+    { value: 'hazardous', label: 'Hazardous', icon: AlertTriangle },
   ];
 
   const updateFormData = (field, value) => {
@@ -109,10 +124,6 @@ const CreateRequestScreen = () => {
   };
 
   const validateForm = () => {
-    if (!formData.userId.trim()) {
-      Alert.alert('Validation Error', 'Please enter User ID');
-      return false;
-    }
     if (!formData.quantity.trim()) {
       Alert.alert('Validation Error', 'Please enter quantity');
       return false;
@@ -145,6 +156,7 @@ const CreateRequestScreen = () => {
       // Prepare request data
       const requestData = {
         ...formData,
+        userId: userDetails?.id || user?.id, // Use user details from context or auth context
         address: {
           ...formData.address,
           coordinates: {
@@ -184,7 +196,6 @@ const CreateRequestScreen = () => {
 
   const resetForm = () => {
     setFormData({
-      userId: formData.userId, // Keep userId
       wasteType: 'household',
       quantity: '',
       address: {
@@ -201,9 +212,13 @@ const CreateRequestScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={styles.header}>
         <Text style={styles.title}>Create Waste Request</Text>
         <Text style={styles.subtitle}>Schedule your waste collection</Text>
       </View>
@@ -212,42 +227,39 @@ const CreateRequestScreen = () => {
         {/* User ID - Temporary */}
         <View style={styles.tempNotice}>
           <Text style={styles.tempNoticeText}>
-            ⚠️ Temporary: Enter User ID manually (will be automatic later)
+            <AlertTriangle size={16} color={COLORS.warningText} /> User ID will be automatically assigned from your logged-in account
           </Text>
         </View>
-
-        <Text style={styles.label}>User ID *</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.userId}
-          onChangeText={(value) => updateFormData('userId', value)}
-          placeholder="Enter your user ID"
-          placeholderTextColor={COLORS.textLight}
-        />
 
         {/* Waste Type Selection */}
         <Text style={styles.sectionTitle}>Waste Type *</Text>
         <View style={styles.wasteTypeContainer}>
-          {wasteTypes.map((type) => (
-            <TouchableOpacity
-              key={type.value}
-              style={[
-                styles.wasteTypeCard,
-                formData.wasteType === type.value && styles.wasteTypeCardSelected,
-              ]}
-              onPress={() => updateFormData('wasteType', type.value)}
-            >
-              <Text style={styles.wasteTypeIcon}>{type.icon}</Text>
-              <Text
+          {wasteTypes.map((type) => {
+            const IconComponent = type.icon;
+            return (
+              <TouchableOpacity
+                key={type.value}
                 style={[
-                  styles.wasteTypeText,
-                  formData.wasteType === type.value && styles.wasteTypeTextSelected,
+                  styles.wasteTypeCard,
+                  formData.wasteType === type.value && styles.wasteTypeCardSelected,
                 ]}
+                onPress={() => updateFormData('wasteType', type.value)}
               >
-                {type.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <IconComponent 
+                  size={32} 
+                  color={formData.wasteType === type.value ? COLORS.primary : COLORS.text} 
+                />
+                <Text
+                  style={[
+                    styles.wasteTypeText,
+                    formData.wasteType === type.value && styles.wasteTypeTextSelected,
+                  ]}
+                >
+                  {type.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Quantity */}
@@ -291,7 +303,7 @@ const CreateRequestScreen = () => {
             onPress={() => setUseMapPicker(true)}
           >
             <Text style={[styles.toggleButtonText, useMapPicker && styles.toggleButtonTextActive]}>
-              🗺️ Use Map
+              <Map size={16} color={useMapPicker ? COLORS.white : COLORS.textLight} /> Use Map
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -299,7 +311,7 @@ const CreateRequestScreen = () => {
             onPress={() => setUseMapPicker(false)}
           >
             <Text style={[styles.toggleButtonText, !useMapPicker && styles.toggleButtonTextActive]}>
-              ⌨️ Manual Entry
+              <Keyboard size={16} color={!useMapPicker ? COLORS.white : COLORS.textLight} /> Manual Entry
             </Text>
           </TouchableOpacity>
         </View>
@@ -351,7 +363,7 @@ const CreateRequestScreen = () => {
           style={styles.datePickerButton} 
           onPress={showDatePickerModal}
         >
-          <Text style={styles.datePickerIcon}>📅</Text>
+          <Calendar size={20} color={COLORS.text} />
           <Text style={[
             styles.datePickerText,
             !formData.preferredDate && styles.datePickerPlaceholder
@@ -404,7 +416,9 @@ const CreateRequestScreen = () => {
           {loading ? (
             <ActivityIndicator color={COLORS.white} />
           ) : (
-            <Text style={styles.submitButtonText}>📋 Submit Request</Text>
+            <Text style={styles.submitButtonText}>
+              <ClipboardList size={16} color={COLORS.white} /> Submit Request
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -412,7 +426,11 @@ const CreateRequestScreen = () => {
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+      
+      {/* Bottom Navigation */}
+      <CitizenBottomNav />
+    </View>
   );
 };
 
@@ -420,6 +438,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Space for bottom navigation
   },
   header: {
     backgroundColor: COLORS.primary,
