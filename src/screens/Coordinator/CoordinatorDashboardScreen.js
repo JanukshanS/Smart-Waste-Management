@@ -15,7 +15,6 @@ import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
 import { BinMapView } from "../../components/Coordinator";
 import { useAuth } from "../../contexts/AuthContext";
-import { BinMapView } from "../../components/Coordinator";
 
 const CoordinatorDashboardScreen = () => {
   const router = useRouter();
