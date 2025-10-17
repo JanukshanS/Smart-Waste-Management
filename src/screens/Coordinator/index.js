@@ -1,6 +1,14 @@
 export { default as CoordinatorDashboardScreen } from './CoordinatorDashboardScreen';
 export { default as BinsScreen } from './BinsScreen';
-export { default as RequestsScreen } from './RequestsScreen';
-export { default as RoutesScreen } from './RoutesScreen';
-export { default as CreateRouteScreen } from './CreateRouteScreen';
+export { default as BinDetailsScreen } from "./BinDetailsScreen";
+export { default as BinManagementScreen } from "./BinManagementScreen";
+export { default as RequestsScreen } from "./RequestsScreen";
+export { default as AllRequestsScreen } from "./AllRequestsScreen";
+export { default as RequestDetailsScreen } from "./RequestDetailsScreen";
+export { default as RoutesScreen } from "./RoutesScreen";
+export { default as CreateRouteScreen } from "./CreateRouteScreen";
+export { default as RouteDetailsScreen } from "./RouteDetailsScreen";
+export { default as CollectionHistoryScreen } from "./CollectionHistoryScreen";
+export { default as AnalyticsScreen } from "./AnalyticsScreen";
+export { default as ScheduleScreen } from "./ScheduleScreen";
 

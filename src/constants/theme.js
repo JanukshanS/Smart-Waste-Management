@@ -38,6 +38,24 @@ export const COLORS = {
   dangerText: '#C62828',
   infoText: '#1565C0',
   successText: '#2E7D32',
+  
+  // Citizen Portal Green & White Theme
+  citizenPrimary: '#1B5E20',      // Deep forest green
+  citizenPrimaryLight: '#2E7D32', // Medium green
+  citizenPrimaryLighter: '#4CAF50', // Light green
+  citizenPrimaryPale: '#A5D6A7',  // Pale green
+  citizenAccent: '#66BB6A',       // Bright green accent
+  citizenBackground: '#F1F8F4',   // Very light mint
+  citizenCard: '#FFFFFF',         // Pure white
+  citizenBorder: '#C8E6C9',       // Light green border
+  citizenTextDark: '#1B5E20',     // Dark green text
+  citizenTextMedium: '#2E7D32',   // Medium green text
+  citizenTextLight: '#558B2F',    // Light green text
+  citizenTextGray: '#616161',     // Gray text
+  citizenSuccess: '#66BB6A',      // Success green
+  citizenWarning: '#FFA726',      // Warning orange
+  citizenDanger: '#EF5350',       // Danger red
+  citizenInfo: '#42A5F5',         // Info blue
 };
 
 export const SPACING = {

@@ -7,13 +7,13 @@ export const API_CONFIG = {
 // API Endpoints
 export const ENDPOINTS = {
   // Auth
-  SIGNUP: '/admin/users',
+  SIGNUP: '/auth/signup',
+  LOGIN: '/auth/login',
   
   // Dashboard
   DASHBOARD: '/admin/dashboard',
   
   // Add more endpoints as needed
-  // LOGIN: '/auth/login',
   // USERS: '/admin/users',
 };
 
