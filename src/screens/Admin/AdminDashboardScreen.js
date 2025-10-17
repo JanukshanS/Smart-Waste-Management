@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, 
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
+import DashboardHeader from '../../components/DashboardHeader';
 import { StatCard, ExpandableCard, MiniStat, RoleBadge } from '../../components/Admin';
 import { adminApi } from '../../api';
 
@@ -50,17 +51,18 @@ const AdminDashboardScreen = () => {
   const data = dashboardData || {};
 
   return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Admin Dashboard</Text>
-        <Text style={styles.subtitle}>System Overview & Management</Text>
-      </View>
+    <View style={styles.container}>
+      <DashboardHeader 
+        title="Admin Dashboard"
+        subtitle="System Overview & Management"
+      />
+      
+      <ScrollView 
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
+        }
+      >
 
       {/* Quick Stats - Always Visible */}
       <View style={styles.quickStatsContainer}>
@@ -279,7 +281,8 @@ const AdminDashboardScreen = () => {
       <View style={styles.footer}>
         <Text style={styles.footerText}>Last updated: {new Date().toLocaleString()}</Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -287,6 +290,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  content: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -298,23 +304,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.medium,
     fontSize: 16,
     color: COLORS.textLight,
-  },
-  header: {
-    backgroundColor: COLORS.primary,
-    padding: SPACING.large,
-    paddingTop: SPACING.large + 20,
-    paddingBottom: SPACING.large + 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.white,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.white,
-    opacity: 0.9,
   },
   quickStatsContainer: {
     padding: SPACING.medium,

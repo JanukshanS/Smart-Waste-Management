@@ -9,16 +9,21 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { COLORS, SPACING } from '../constants/theme';
+import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api';
 
-export default function SignupScreen({ navigation }) {
+export default function SignupScreen() {
+  const router = useRouter();
+  const { signup } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    role: 'citizen',
-    status: 'active',
+    password: '',
+    confirmPassword: '',
     street: '',
     city: '',
     postalCode: '',
@@ -34,7 +39,7 @@ export default function SignupScreen({ navigation }) {
   };
 
   const validateForm = () => {
-    const { name, email, phone, street, city, postalCode } = formData;
+    const { name, email, phone, password, confirmPassword, street, city, postalCode } = formData;
 
     if (!name.trim()) {
       Alert.alert('Validation Error', 'Please enter your name');
@@ -48,6 +53,16 @@ export default function SignupScreen({ navigation }) {
 
     if (!phone.trim()) {
       Alert.alert('Validation Error', 'Please enter your phone number');
+      return false;
+    }
+
+    if (!password.trim() || password.length < 6) {
+      Alert.alert('Validation Error', 'Password must be at least 6 characters long');
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Validation Error', 'Passwords do not match');
       return false;
     }
 
@@ -69,8 +84,7 @@ export default function SignupScreen({ navigation }) {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      role: formData.role,
-      status: formData.status,
+      password: formData.password,
       address: {
         street: formData.street,
         city: formData.city,
@@ -86,30 +100,38 @@ export default function SignupScreen({ navigation }) {
       const result = await authApi.signup(userData);
 
       if (result.success) {
-        Alert.alert(
-          'Success',
-          'Account created successfully!',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Reset form
-                setFormData({
-                  name: '',
-                  email: '',
-                  phone: '',
-                  role: 'citizen',
-                  status: 'active',
-                  street: '',
-                  city: '',
-                  postalCode: '',
-                  lat: '',
-                  lng: '',
-                });
+        // Store user data using auth context
+        const authResult = await signup(result.data.user || result.data, result.data.token || 'mock-token');
+        
+        if (authResult.success) {
+          Alert.alert(
+            'Success',
+            'Account created successfully!',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  // Reset form
+                  setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    password: '',
+                    confirmPassword: '',
+                    street: '',
+                    city: '',
+                    postalCode: '',
+                    lat: '',
+                    lng: '',
+                  });
+                  router.replace('/');
+                },
               },
-            },
-          ]
-        );
+            ]
+          );
+        } else {
+          Alert.alert('Error', authResult.error || 'Failed to store signup data');
+        }
       } else {
         Alert.alert('Error', result.error || 'Failed to create account');
       }
@@ -126,7 +148,7 @@ export default function SignupScreen({ navigation }) {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
@@ -171,7 +193,7 @@ export default function SignupScreen({ navigation }) {
             <Text style={styles.label}>Phone Number *</Text>
             <TextInput
               style={styles.input}
-              placeholder="+94771234567"
+              placeholder="94712345678"
               value={formData.phone}
               onChangeText={(value) => handleInputChange('phone', value)}
               keyboardType="phone-pad"
@@ -180,29 +202,27 @@ export default function SignupScreen({ navigation }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Role</Text>
-            <View style={styles.roleContainer}>
-              {['citizen', 'coordinator', 'technician'].map((role) => (
-                <TouchableOpacity
-                  key={role}
-                  style={[
-                    styles.roleButton,
-                    formData.role === role && styles.roleButtonActive,
-                  ]}
-                  onPress={() => handleInputChange('role', role)}
-                  disabled={loading}
-                >
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      formData.role === role && styles.roleButtonTextActive,
-                    ]}
-                  >
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={styles.label}>Password *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange('password', value)}
+              secureTextEntry
+              editable={!loading}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirm Password *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleInputChange('confirmPassword', value)}
+              secureTextEntry
+              editable={!loading}
+            />
           </View>
         </View>
 
@@ -301,104 +321,78 @@ export default function SignupScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: '#22c55e',
+    backgroundColor: COLORS.primary,
     paddingTop: 50,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
+    paddingBottom: SPACING.large,
+    paddingHorizontal: SPACING.large,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    shadowColor: '#22c55e',
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   backButton: {
-    marginBottom: 10,
+    marginBottom: SPACING.small,
   },
   backButtonText: {
     fontSize: 16,
-    color: '#ffffff',
+    color: COLORS.white,
     fontWeight: '600',
   },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: COLORS.white,
     marginBottom: 5,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#ffffff',
+    color: COLORS.white,
     opacity: 0.9,
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.large,
     paddingBottom: 40,
   },
   section: {
-    marginTop: 25,
+    marginTop: SPACING.large + SPACING.small,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 15,
+    color: COLORS.text,
+    marginBottom: SPACING.medium,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: SPACING.medium,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    color: COLORS.text,
+    marginBottom: SPACING.small,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
-    color: '#1f2937',
+    color: COLORS.text,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: COLORS.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  roleButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: '#ffffff',
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    alignItems: 'center',
-  },
-  roleButtonActive: {
-    backgroundColor: '#dcfce7',
-    borderColor: '#22c55e',
-  },
-  roleButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6b7280',
-  },
-  roleButtonTextActive: {
-    color: '#22c55e',
   },
   row: {
     flexDirection: 'row',
@@ -408,12 +402,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   signupButton: {
-    backgroundColor: '#22c55e',
+    backgroundColor: COLORS.primary,
     borderRadius: 12,
-    padding: 16,
+    padding: SPACING.medium,
     alignItems: 'center',
-    marginTop: 30,
-    shadowColor: '#22c55e',
+    marginTop: SPACING.large,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -423,7 +417,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   signupButtonText: {
-    color: '#ffffff',
+    color: COLORS.white,
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -431,15 +425,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: SPACING.large,
   },
   footerText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: COLORS.textLight,
   },
   footerLink: {
     fontSize: 14,
-    color: '#22c55e',
+    color: COLORS.primary,
     fontWeight: '600',
   },
 });
