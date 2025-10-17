@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS, SPACING } from '../../constants/theme';
 import { MapPicker } from '../../components/Admin';
 import { citizenApi } from '../../api';
@@ -19,6 +20,8 @@ const CreateRequestScreen = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [useMapPicker, setUseMapPicker] = useState(true);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [formData, setFormData] = useState({
     userId: '',
@@ -76,6 +79,33 @@ const CreateRequestScreen = () => {
         },
       },
     }));
+  };
+
+  const handleDateChange = (event, date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    
+    if (date) {
+      setSelectedDate(date);
+      // Format date to YYYY-MM-DD
+      const formattedDate = date.toISOString().split('T')[0];
+      updateFormData('preferredDate', formattedDate);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return 'Select a date';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
 
   const validateForm = () => {
@@ -317,14 +347,40 @@ const CreateRequestScreen = () => {
 
         {/* Preferred Date */}
         <Text style={styles.label}>Preferred Collection Date *</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.preferredDate}
-          onChangeText={(value) => updateFormData('preferredDate', value)}
-          placeholder="YYYY-MM-DD (e.g., 2025-10-19)"
-          placeholderTextColor={COLORS.textLight}
-        />
-        <Text style={styles.helpText}>Format: YYYY-MM-DD (e.g., 2025-10-19)</Text>
+        <TouchableOpacity 
+          style={styles.datePickerButton} 
+          onPress={showDatePickerModal}
+        >
+          <Text style={styles.datePickerIcon}>📅</Text>
+          <Text style={[
+            styles.datePickerText,
+            !formData.preferredDate && styles.datePickerPlaceholder
+          ]}>
+            {formatDateDisplay(formData.preferredDate)}
+          </Text>
+        </TouchableOpacity>
+        
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
+            minimumDate={new Date()}
+            textColor={COLORS.text}
+          />
+        )}
+        
+        {Platform.OS === 'ios' && showDatePicker && (
+          <View style={styles.iosDatePickerActions}>
+            <TouchableOpacity 
+              style={styles.iosDatePickerButton}
+              onPress={() => setShowDatePicker(false)}
+            >
+              <Text style={styles.iosDatePickerButtonText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Description */}
         <Text style={styles.label}>Additional Notes (Optional)</Text>
@@ -501,6 +557,43 @@ const styles = StyleSheet.create({
   },
   halfInput: {
     flex: 1,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    padding: SPACING.medium,
+    marginBottom: SPACING.medium,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  datePickerIcon: {
+    fontSize: 20,
+    marginRight: SPACING.small,
+  },
+  datePickerText: {
+    fontSize: 15,
+    color: COLORS.text,
+  },
+  datePickerPlaceholder: {
+    color: COLORS.textLight,
+  },
+  iosDatePickerActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: SPACING.medium,
+  },
+  iosDatePickerButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.large,
+    paddingVertical: SPACING.small,
+    borderRadius: 8,
+  },
+  iosDatePickerButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
   submitButton: {
     backgroundColor: COLORS.primary,
