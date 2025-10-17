@@ -167,23 +167,98 @@ const TechnicianDashboardScreen = () => {
         }
       />
       
-      <ScrollView style={styles.content}>
-        <View style={styles.buttonContainer}>
-          <Button 
-            title="Work Orders" 
+      <ScrollView 
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Stats Section */}
+        <View style={styles.statsSection}>
+          <Text style={styles.sectionTitle}>Work Order Statistics</Text>
+          <View style={styles.statsGrid}>
+            <StatBox 
+              value={stats.pending} 
+              label="Pending" 
+              icon="" 
+              color={COLORS.warning} 
+            />
+            <StatBox 
+              value={stats.inProgress} 
+              label="In Progress" 
+              icon="" 
+              color={COLORS.primary} 
+            />
+            <StatBox 
+              value={stats.resolved} 
+              label="Resolved" 
+              icon="" 
+              color={COLORS.success} 
+            />
+            <StatBox 
+              value={stats.urgent} 
+              label="Urgent" 
+              icon="" 
+              color={COLORS.error} 
+            />
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.actionsSection}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <ActionCard
+            title="Work Orders"
+            description="View and manage work orders"
+            icon=""
             onPress={() => router.push('/technician/work-orders')}
+            color={COLORS.primary}
           />
-          
-          <Button 
-            title="Device Management" 
+          <ActionCard
+            title="Device Management"
+            description="Register and manage devices"
+            icon=""
             onPress={() => router.push('/technician/devices')}
+            color={COLORS.secondary}
           />
-          
-          <Button 
-            title="Parts Availability" 
-            onPress={() => router.push('/technician/parts-availability')}
+          <ActionCard
+            title="Parts Availability"
+            description="View parts availability"
+            icon=""
+            onPress={() => router.push('/technician/availability')}
+            color={COLORS.success}
           />
         </View>
+
+        {/* Urgent Work Orders */}
+        {urgentWorkOrders.length > 0 && (
+          <View style={styles.urgentSection}>
+            <Text style={styles.sectionTitle}>Urgent Work Orders</Text>
+            {urgentWorkOrders.map((workOrder) => (
+              <TouchableOpacity
+                key={workOrder._id}
+                style={styles.workOrderCard}
+                onPress={() => router.push(`/technician/work-order-details?id=${workOrder._id}`)}
+              >
+                <View style={styles.workOrderHeader}>
+                  <Text style={styles.workOrderTitle}>{workOrder.title}</Text>
+                  <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(workOrder.priority) }]}>
+                    <Text style={styles.priorityBadgeText}>{workOrder.priority}</Text>
+                  </View>
+                </View>
+                <Text style={styles.workOrderDetail}>Device: {workOrder.deviceId}</Text>
+                <Text style={styles.workOrderDetail}>Status: {workOrder.status}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Error Display */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -193,13 +268,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.large,
   },
   content: {
     flex: 1,
+    padding: SPACING.large,
   },
-  buttonContainer: {
-    marginTop: SPACING.medium,
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    padding: SPACING.large,
   },
   logoutButton: {
     backgroundColor: COLORS.error,
@@ -220,16 +299,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFEBEE",
     padding: SPACING.medium,
     borderRadius: 12,
-    marginHorizontal: SPACING.large,
     marginTop: SPACING.medium,
   },
   errorText: {
     color: COLORS.error,
     textAlign: "center",
   },
-  section: {
-    paddingHorizontal: SPACING.large,
-    marginTop: SPACING.large,
+  statsSection: {
+    marginBottom: SPACING.large,
+  },
+  actionsSection: {
+    marginBottom: SPACING.large,
+  },
+  urgentSection: {
+    marginBottom: SPACING.large,
   },
   sectionTitle: {
     fontSize: 20,
@@ -246,8 +329,8 @@ const styles = StyleSheet.create({
     width: "48%",
     backgroundColor: COLORS.white,
     padding: SPACING.medium,
-    borderRadius: 16,
-    borderLeftWidth: 4,
+    borderRadius: 10,
+    borderLeftWidth: 0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -255,10 +338,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginBottom: SPACING.medium,
   },
-  statBoxIcon: {
-    fontSize: 24,
-    marginBottom: SPACING.small,
-  },
+
   statBoxValue: {
     fontSize: 32,
     fontWeight: "bold",
@@ -273,7 +353,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: COLORS.white,
     padding: SPACING.medium,
-    borderRadius: 16,
+    borderRadius: 10,
     marginBottom: SPACING.medium,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -281,17 +361,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  actionIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: SPACING.medium,
-  },
-  actionIcon: {
-    fontSize: 24,
-  },
+
   actionContent: {
     flex: 1,
   },
@@ -312,7 +382,12 @@ const styles = StyleSheet.create({
   workOrderCard: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
+    padding: SPACING.medium,
     marginBottom: SPACING.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.error,
