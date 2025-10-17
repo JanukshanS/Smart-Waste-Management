@@ -14,10 +14,12 @@ import { Card } from 'react-native-paper';
 import { COLORS, SPACING } from '../../constants/theme';
 import { crewApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
 
 const CrewDashboardScreen = () => {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, clearUserData } = useAuth();
+  const { userDetails, clearUserDetails } = useUserDetails();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -26,25 +28,39 @@ const CrewDashboardScreen = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Support both _id (MongoDB) and id fields
-      const userId = user?._id || user?.id;
+      // Use logged-in user's ID from user details context or auth context
+      const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
       
       if (!userId) {
+        // Don't log error if both user contexts are null (user logged out)
+        if (user === null && userDetails === null) {
+          console.log('User logged out, skipping dashboard fetch');
+          return;
+        }
         console.error('User object:', JSON.stringify(user, null, 2));
+        console.error('UserDetails object:', JSON.stringify(userDetails, null, 2));
         throw new Error('User ID not found');
       }
 
-      const [dashResponse, routeResponse] = await Promise.all([
-        crewApi.getDashboard(userId),
-        crewApi.getActiveRoute(userId),
-      ]);
+      // Get crew details which includes dashboard data and current route
+      const dashResponse = await crewApi.getDashboard(userId);
 
-      if (dashResponse.success) {
-        setDashboardData(dashResponse.data);
-      }
+      if (dashResponse.success && dashResponse.data) {
+        const { crew, profile, currentRoute, routeHistory } = dashResponse.data;
+        
+        // Set dashboard data from profile performance metrics
+        setDashboardData({
+          totalRoutes: profile?.performanceMetrics?.totalRoutesCompleted || 0,
+          completedStops: profile?.performanceMetrics?.totalStopsCompleted || 0,
+          averageCompletionTime: profile?.performanceMetrics?.averageCompletionTime || 0,
+          onTimeRate: profile?.performanceMetrics?.onTimeCompletionRate || 0,
+          routeHistory: routeHistory || []
+        });
 
-      if (routeResponse.success) {
-        setActiveRoute(routeResponse.data);
+        // Set active route if exists
+        if (currentRoute) {
+          setActiveRoute(currentRoute);
+        }
       }
 
       setError(null);
@@ -58,12 +74,16 @@ const CrewDashboardScreen = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    // Only fetch if we have user data
+    const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
+    if (userId) {
+      fetchDashboardData();
 
-    // Auto-refresh every 3 minutes
-    const interval = setInterval(fetchDashboardData, 3 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [user]);
+      // Auto-refresh every 3 minutes
+      const interval = setInterval(fetchDashboardData, 3 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user, userDetails]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -80,6 +100,10 @@ const CrewDashboardScreen = () => {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
+          // Clear both contexts
+          clearUserDetails();
+          clearUserData();
+          
           const result = await logout();
           if (result.success) {
             router.replace('/auth-landing');
@@ -133,7 +157,7 @@ const CrewDashboardScreen = () => {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Welcome back! 👋</Text>
-            <Text style={styles.title}>{user?.name || 'Crew Member'}</Text>
+            <Text style={styles.title}>{userDetails?.name || user?.name || 'Crew Member'}</Text>
           </View>
           <View style={styles.headerButtons}>
             <TouchableOpacity style={styles.refreshButton} onPress={fetchDashboardData}>
@@ -183,13 +207,17 @@ const CrewDashboardScreen = () => {
 
                 <View style={styles.routeStats}>
                   <View style={styles.routeStatItem}>
-                    <Text style={styles.routeStatValue}>{activeRoute.stops?.length || 0}</Text>
+                    <Text style={styles.routeStatValue}>
+                      {(activeRoute.stops && Array.isArray(activeRoute.stops)) ? activeRoute.stops.length : 0}
+                    </Text>
                     <Text style={styles.routeStatLabel}>Total Stops</Text>
                   </View>
                   <View style={styles.routeStatDivider} />
                   <View style={styles.routeStatItem}>
                     <Text style={styles.routeStatValue}>
-                      {activeRoute.stops?.filter((s) => s.status === 'completed').length || 0}
+                      {(activeRoute.stops && Array.isArray(activeRoute.stops)) 
+                        ? activeRoute.stops.filter((s) => s.status === 'completed').length 
+                        : 0}
                     </Text>
                     <Text style={styles.routeStatLabel}>Completed</Text>
                   </View>
