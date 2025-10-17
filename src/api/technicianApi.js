@@ -1,4 +1,5 @@
 import client from './client';
+import { TECHNICIAN_ID } from '../constants/devConfig';
 
 /**
  * Technician API

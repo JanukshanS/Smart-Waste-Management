@@ -1,14 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { 
+  Home, 
+  Recycle, 
+  Leaf, 
+  Smartphone, 
+  AlertTriangle, 
+  Package, 
+  MapPin, 
+  Calendar, 
+  DollarSign 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 
 const RequestCard = ({ request, onPress }) => {
   const wasteTypeIcons = {
-    household: '🏠',
-    recyclable: '♻️',
-    organic: '🌱',
-    electronic: '📱',
-    hazardous: '⚠️',
+    household: Home,
+    recyclable: Recycle,
+    organic: Leaf,
+    electronic: Smartphone,
+    hazardous: AlertTriangle,
   };
 
   const statusColors = {
@@ -21,7 +32,7 @@ const RequestCard = ({ request, onPress }) => {
   };
 
   const statusConfig = statusColors[request.status] || statusColors.pending;
-  const icon = wasteTypeIcons[request.wasteType] || '📦';
+  const IconComponent = wasteTypeIcons[request.wasteType] || Package;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -41,7 +52,9 @@ const RequestCard = ({ request, onPress }) => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.icon}>{icon}</Text>
+          <View style={styles.iconContainer}>
+            <IconComponent size={32} color={COLORS.citizenPrimary} />
+          </View>
           <View style={styles.headerText}>
             <Text style={styles.wasteType}>{request.wasteType}</Text>
             <Text style={styles.trackingId}>#{request.trackingId}</Text>
@@ -57,25 +70,37 @@ const RequestCard = ({ request, onPress }) => {
       {/* Details */}
       <View style={styles.details}>
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>📦 Quantity:</Text>
+          <View style={styles.detailLabelContainer}>
+            <Package size={16} color={COLORS.citizenTextGray} />
+            <Text style={styles.detailLabel}> Quantity:</Text>
+          </View>
           <Text style={styles.detailValue}>{request.quantity}</Text>
         </View>
         
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>📍 Location:</Text>
+          <View style={styles.detailLabelContainer}>
+            <MapPin size={16} color={COLORS.citizenTextGray} />
+            <Text style={styles.detailLabel}> Location:</Text>
+          </View>
           <Text style={styles.detailValue} numberOfLines={1}>
             {request.address.street}, {request.address.city}
           </Text>
         </View>
         
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>📅 Preferred Date:</Text>
+          <View style={styles.detailLabelContainer}>
+            <Calendar size={16} color={COLORS.citizenTextGray} />
+            <Text style={styles.detailLabel}> Preferred Date:</Text>
+          </View>
           <Text style={styles.detailValue}>{formatDate(request.preferredDate)}</Text>
         </View>
 
         {request.estimatedCost > 0 && (
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>💰 Estimated Cost:</Text>
+            <View style={styles.detailLabelContainer}>
+              <DollarSign size={16} color={COLORS.citizenTextGray} />
+              <Text style={styles.detailLabel}> Estimated Cost:</Text>
+            </View>
             <Text style={styles.detailValue}>Rs. {request.estimatedCost.toFixed(2)}</Text>
           </View>
         )}
@@ -119,8 +144,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  icon: {
-    fontSize: 32,
+  iconContainer: {
     marginRight: SPACING.small,
   },
   headerText: {
@@ -157,10 +181,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: SPACING.small / 2 + 2,
   },
+  detailLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   detailLabel: {
     fontSize: 14,
     color: COLORS.citizenTextGray,
     fontWeight: '500',
+    marginLeft: 4,
   },
   detailValue: {
     fontSize: 14,

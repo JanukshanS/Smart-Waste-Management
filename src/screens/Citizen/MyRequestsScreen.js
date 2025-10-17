@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { 
+  ClipboardList, 
+  Clock, 
+  Check, 
+  Calendar, 
+  Truck, 
+  CheckCircle, 
+  XCircle 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
-import { RequestCard, RequestDetailsBottomSheet } from '../../components/Citizen';
+import { RequestCard, RequestDetailsBottomSheet, CitizenBottomNav } from '../../components/Citizen';
 import { citizenApi } from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
 
 const MyRequestsScreen = () => {
   const router = useRouter();
+  const { user } = useAuth();
+  const { userDetails } = useUserDetails();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [requests, setRequests] = useState([]);
@@ -17,17 +30,14 @@ const MyRequestsScreen = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Hardcoded user ID for now (will be from AuthContext later)
-  const userId = '68f17571b188a4a7463c1c27';
-
   const statuses = [
-    { value: 'all', label: 'All', icon: '📋', color: COLORS.citizenPrimary },
-    { value: 'pending', label: 'Pending', icon: '⏳', color: COLORS.citizenWarning },
-    { value: 'approved', label: 'Approved', icon: '✓', color: COLORS.citizenInfo },
-    { value: 'scheduled', label: 'Scheduled', icon: '📅', color: '#1976D2' },
-    { value: 'in-progress', label: 'In Progress', icon: '🚛', color: '#F57C00' },
-    { value: 'completed', label: 'Completed', icon: '✅', color: COLORS.citizenSuccess },
-    { value: 'cancelled', label: 'Cancelled', icon: '❌', color: COLORS.citizenDanger },
+    { value: 'all', label: 'All', icon: ClipboardList, color: COLORS.citizenPrimary },
+    { value: 'pending', label: 'Pending', icon: Clock, color: COLORS.citizenWarning },
+    { value: 'approved', label: 'Approved', icon: Check, color: COLORS.citizenInfo },
+    { value: 'scheduled', label: 'Scheduled', icon: Calendar, color: '#1976D2' },
+    { value: 'in-progress', label: 'In Progress', icon: Truck, color: '#F57C00' },
+    { value: 'completed', label: 'Completed', icon: CheckCircle, color: COLORS.citizenSuccess },
+    { value: 'cancelled', label: 'Cancelled', icon: XCircle, color: COLORS.citizenDanger },
   ];
 
   useEffect(() => {
@@ -39,7 +49,7 @@ const MyRequestsScreen = () => {
       setLoading(currentPage === 1 && !refreshing);
 
       const response = await citizenApi.getMyRequests({
-        userId,
+        userId: userDetails?.id || user?.id,
         status: selectedStatus,
         page: currentPage,
         limit: 20,
@@ -136,7 +146,7 @@ const MyRequestsScreen = () => {
     if (loading) return null;
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>📋</Text>
+        <ClipboardList size={64} color={COLORS.citizenPrimary} />
         <Text style={styles.emptyTitle}>No Requests Found</Text>
         <Text style={styles.emptyText}>
           {selectedStatus === 'all'
@@ -172,29 +182,35 @@ const MyRequestsScreen = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScrollContent}
         >
-          {statuses.map((status) => (
-            <TouchableOpacity
-              key={status.value}
-              style={[
-                styles.filterChip,
-                selectedStatus === status.value && styles.filterChipSelected,
-                selectedStatus === status.value && { 
-                  backgroundColor: status.color,
-                  borderColor: status.color 
-                }
-              ]}
-              onPress={() => handleStatusFilter(status.value)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.filterChipIcon}>{status.icon}</Text>
-              <Text style={[
-                styles.filterChipText,
-                selectedStatus === status.value && styles.filterChipTextSelected
-              ]}>
-                {status.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {statuses.map((status) => {
+            const IconComponent = status.icon;
+            return (
+              <TouchableOpacity
+                key={status.value}
+                style={[
+                  styles.filterChip,
+                  selectedStatus === status.value && styles.filterChipSelected,
+                  selectedStatus === status.value && { 
+                    backgroundColor: status.color,
+                    borderColor: status.color 
+                  }
+                ]}
+                onPress={() => handleStatusFilter(status.value)}
+                activeOpacity={0.7}
+              >
+                <IconComponent 
+                  size={16} 
+                  color={selectedStatus === status.value ? COLORS.white : COLORS.citizenTextDark} 
+                />
+                <Text style={[
+                  styles.filterChipText,
+                  selectedStatus === status.value && styles.filterChipTextSelected
+                ]}>
+                  {status.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
@@ -230,15 +246,6 @@ const MyRequestsScreen = () => {
         />
       )}
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => router.push('/citizen/create-request')}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
-
       {/* Request Details Bottom Sheet */}
       <RequestDetailsBottomSheet
         visible={showBottomSheet}
@@ -247,6 +254,9 @@ const MyRequestsScreen = () => {
         loading={loadingDetails}
         onRequestUpdate={handleRequestUpdate}
       />
+      
+      {/* Bottom Navigation */}
+      <CitizenBottomNav />
     </View>
   );
 };
@@ -331,6 +341,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: SPACING.medium,
+    paddingBottom: 100, // Space for bottom navigation
   },
   loadingContainer: {
     flex: 1,
