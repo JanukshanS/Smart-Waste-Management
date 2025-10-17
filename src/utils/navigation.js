@@ -4,15 +4,16 @@
 
 /**
  * Get the dashboard route based on user role
- * @param {string} role - User role (admin, citizen, coordinator, technician)
+ * @param {string} role - User role (admin, citizen, coordinator, technician, crew)
  * @returns {string} - Route path for the role's dashboard
  */
 export const getRoleDashboardRoute = (role) => {
   const roleRoutes = {
-    admin: '/admin',
-    citizen: '/citizen',
-    coordinator: '/coordinator',
-    technician: '/technician',
+    admin: "/admin",
+    citizen: "/citizen",
+    coordinator: "/coordinator",
+    technician: "/technician",
+    crew: "/crew",
   };
 
   return roleRoutes[role?.toLowerCase()] || '/citizen';
@@ -25,10 +26,11 @@ export const getRoleDashboardRoute = (role) => {
  */
 export const getRoleDashboardTitle = (role) => {
   const roleTitles = {
-    admin: 'Admin Dashboard',
-    citizen: 'Citizen Dashboard',
-    coordinator: 'Coordinator Dashboard',
-    technician: 'Technician Dashboard',
+    admin: "Admin Dashboard",
+    citizen: "Citizen Dashboard",
+    coordinator: "Coordinator Dashboard",
+    technician: "Technician Dashboard",
+    crew: "Crew Dashboard",
   };
 
   return roleTitles[role?.toLowerCase()] || 'Citizen Dashboard';
@@ -40,6 +42,6 @@ export const getRoleDashboardTitle = (role) => {
  * @returns {boolean} - Whether the role is valid
  */
 export const isValidRole = (role) => {
-  const validRoles = ['admin', 'citizen', 'coordinator', 'technician'];
+  const validRoles = ["admin", "citizen", "coordinator", "technician", "crew"];
   return validRoles.includes(role?.toLowerCase());
 };

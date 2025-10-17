@@ -11,4 +11,7 @@ export { default as RouteDetailsScreen } from "./RouteDetailsScreen";
 export { default as CollectionHistoryScreen } from "./CollectionHistoryScreen";
 export { default as AnalyticsScreen } from "./AnalyticsScreen";
 export { default as ScheduleScreen } from "./ScheduleScreen";
+export { default as CrewsScreen } from "./CrewsScreen";
+export { default as CreateCrewScreen } from "./CreateCrewScreen";
+export { default as CrewDetailsScreen } from "./CrewDetailsScreen";
 

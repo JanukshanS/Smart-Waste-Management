@@ -60,10 +60,25 @@ export default function LoginScreen() {
       });
 
       if (result.success) {
+        // Extract user and token from API response
+        // API structure: { success, message: { token, user }, data }
+        const userData = result.data.message?.user || result.data.user || result.data;
+        const token = result.data.message?.token || result.data.token || 'mock-token';
+        
+        console.log('Login response:', JSON.stringify(result.data, null, 2));
+        console.log('User data to store:', JSON.stringify(userData, null, 2));
+        
         // Store user data using auth context
-        const authResult = await login(result.data.user || result.data, result.data.token || 'mock-token');
+        const authResult = await login(userData, token);
         
         if (authResult.success) {
+          // Get role from the user object
+          const role = userData.role;
+          console.log('User role:', role);
+          console.log('User ID:', userData._id || userData.id);
+                  
+          const dashboardRoute = getRoleDashboardRoute(role);
+          
           Alert.alert(
             'Success',
             'Login successful!',
@@ -76,11 +91,7 @@ export default function LoginScreen() {
                     email: '',
                     password: '',
                   });
-                  // Navigate to role-specific 
-                  const role = result.data?.message?.user?.role;
-                  console.log('Role:', role);
-                  
-                  const dashboardRoute = getRoleDashboardRoute(role);
+                  // Navigate to role-specific dashboard
                   router.replace(dashboardRoute);
                 },
               },

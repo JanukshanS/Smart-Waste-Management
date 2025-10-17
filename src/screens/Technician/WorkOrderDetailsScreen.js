@@ -862,7 +862,75 @@ const styles = StyleSheet.create({
   },
   workOrderId: {
     fontSize: 24,
-    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.text,
+  },
+  badgesContainer: {
+    flexDirection: "row",
+    gap: SPACING.small,
+  },
+  priorityBadge: {
+    paddingHorizontal: SPACING.small,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 10,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  loadingText: {
+    marginTop: SPACING.medium,
+    color: COLORS.textLight,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 16,
+    marginBottom: SPACING.medium,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.large,
+    paddingVertical: SPACING.medium,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  section: {
+    padding: SPACING.large,
+  },
+  statusCard: {
+    padding: SPACING.medium,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textTransform: "capitalize",
+  },
+  card: {
+    marginHorizontal: SPACING.large,
+    marginBottom: SPACING.medium,
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
     color: COLORS.text,
     marginBottom: SPACING.medium,
   },
@@ -1176,4 +1244,3 @@ const styles = StyleSheet.create({
 });
 
 export default WorkOrderDetailsScreen;
-

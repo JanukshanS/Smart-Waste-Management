@@ -111,6 +111,15 @@ const MyRequestsScreen = () => {
     setSelectedRequest(null);
   };
 
+  const handleRequestUpdate = (updatedRequest) => {
+    // Update the request in the list
+    setRequests(prevRequests => 
+      prevRequests.map(req => 
+        req._id === updatedRequest._id ? updatedRequest : req
+      )
+    );
+  };
+
   const renderRequestCard = ({ item }) => (
     <RequestCard request={item} onPress={handleRequestPress} />
   );
@@ -237,6 +246,7 @@ const MyRequestsScreen = () => {
         onClose={handleCloseBottomSheet}
         request={selectedRequest}
         loading={loadingDetails}
+        onRequestUpdate={handleRequestUpdate}
       />
     </View>
   );

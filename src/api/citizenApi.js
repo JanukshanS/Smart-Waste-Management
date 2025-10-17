@@ -62,7 +62,29 @@ export const trackRequest = async (requestId) => {
 // Cancel request
 export const cancelRequest = async (requestId) => {
   try {
-    const response = await client.delete(`/citizen/requests/${requestId}`);
+    const response = await client.put(`/citizen/requests/${requestId}/cancel`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get nearby bins
+export const getNearbyBins = async (params = {}) => {
+  try {
+    const { lat, lng, radius = 5000 } = params;
+    
+    if (!lat || !lng) {
+      throw new Error('Latitude and longitude are required');
+    }
+    
+    const queryParams = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      radius: radius.toString(),
+    });
+    
+    const response = await client.get(`/citizen/bins/nearby?${queryParams.toString()}`);
     return response;
   } catch (error) {
     throw error;
@@ -75,5 +97,6 @@ export default {
   getRequestById,
   trackRequest,
   cancelRequest,
+  getNearbyBins,
 };
 

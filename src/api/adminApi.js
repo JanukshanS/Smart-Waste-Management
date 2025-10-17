@@ -139,6 +139,139 @@ export const getEfficiencyReports = async (startDate, endDate) => {
   }
 };
 
+/**
+ * PRIVACY SETTINGS
+ */
+
+// Get privacy settings
+export const getPrivacySettings = async () => {
+  try {
+    const response = await client.get('/admin/privacy-settings');
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update privacy settings
+export const updatePrivacySettings = async (settings, adminId) => {
+  try {
+    const response = await client.put(`/admin/privacy-settings?adminId=${adminId}`, settings);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Export privacy report
+export const exportPrivacyReport = async () => {
+  try {
+    const response = await client.get('/admin/privacy-settings/export');
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * SECURITY MONITORING
+ */
+
+// Get security logs
+export const getSecurityLogs = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (filters.eventType) {
+      queryParams.append('eventType', filters.eventType);
+    }
+    if (filters.severity) {
+      queryParams.append('severity', filters.severity);
+    }
+    if (filters.page) {
+      queryParams.append('page', filters.page);
+    }
+    if (filters.limit) {
+      queryParams.append('limit', filters.limit);
+    }
+    
+    const endpoint = `/admin/security/logs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await client.get(endpoint);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get active sessions
+export const getActiveSessions = async () => {
+  try {
+    const response = await client.get('/admin/security/sessions');
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Force logout user
+export const forceLogout = async (userId, adminId) => {
+  try {
+    const response = await client.post(`/admin/security/force-logout/${userId}?adminId=${adminId}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update security policies
+export const updateSecurityPolicies = async (policies, adminId) => {
+  try {
+    const response = await client.put(`/admin/security/policies?adminId=${adminId}`, policies);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * BILLING CONFIGURATION
+ */
+
+// Get billing configuration
+export const getBillingConfig = async () => {
+  try {
+    const response = await client.get('/admin/billing/config');
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update billing configuration
+export const updateBillingConfig = async (config, adminId) => {
+  try {
+    const response = await client.put(`/admin/billing/config?adminId=${adminId}`, config);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get payment reports
+export const getPaymentReports = async (startDate, endDate) => {
+  try {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    
+    const endpoint = `/admin/reports/payments${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await client.get(endpoint);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default {
   getDashboardStats,
   getUsers,
@@ -148,4 +281,17 @@ export default {
   deleteUser,
   getCollectionReports,
   getEfficiencyReports,
+  // Privacy
+  getPrivacySettings,
+  updatePrivacySettings,
+  exportPrivacyReport,
+  // Security
+  getSecurityLogs,
+  getActiveSessions,
+  forceLogout,
+  updateSecurityPolicies,
+  // Billing
+  getBillingConfig,
+  updateBillingConfig,
+  getPaymentReports,
 };

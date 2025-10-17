@@ -1,4 +1,3 @@
-import WorkOrderDetailsScreen from '../../src/screens/Technician/WorkOrderDetailsScreen';
+import { WorkOrderDetailsScreen } from "../../src/screens/Technician";
 
 export default WorkOrderDetailsScreen;
-

@@ -1,4 +1,3 @@
-import RegisterDeviceScreen from '../../src/screens/Technician/RegisterDeviceScreen';
+import { RegisterDeviceScreen } from "../../src/screens/Technician";
 
 export default RegisterDeviceScreen;
-

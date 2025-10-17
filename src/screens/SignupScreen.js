@@ -112,10 +112,19 @@ export default function SignupScreen() {
       const result = await authApi.signup(userData);
 
       if (result.success) {
+        // Extract user and token from API response
+        // API structure: { success, message: { token, user }, data }
+        const userData = result.data.message?.user || result.data.user || result.data;
+        const token = result.data.message?.token || result.data.token || 'mock-token';
+        
         // Store user data using auth context
-        const authResult = await signup(result.data.user || result.data, result.data.token || 'mock-token');
+        const authResult = await signup(userData, token);
         
         if (authResult.success) {
+          // Get role from the user object
+          const role = userData.role;
+          const dashboardRoute = getRoleDashboardRoute(role);
+          
           Alert.alert(
             'Success',
             'Account created successfully!',
@@ -138,7 +147,6 @@ export default function SignupScreen() {
                   });
                   setSelectedLocation(null);
                   // Navigate to role-specific dashboard
-                  const dashboardRoute = getRoleDashboardRoute(result.data.user?.role || result.data?.role);
                   router.replace(dashboardRoute);
                 },
               },
