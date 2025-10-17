@@ -38,9 +38,12 @@ const RouteDetailsScreen = () => {
   const [stopDialogVisible, setStopDialogVisible] = useState(false);
 
   // Assignment form
+  const [crews, setCrews] = useState([]);
+  const [selectedCrew, setSelectedCrew] = useState(null);
   const [crewId, setCrewId] = useState("");
   const [vehicleId, setVehicleId] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
+  const [crewsLoading, setCrewsLoading] = useState(false);
 
   // Status update form
   const [newStatus, setNewStatus] = useState("");
@@ -83,23 +86,49 @@ const RouteDetailsScreen = () => {
     fetchRouteDetails();
   };
 
+  const fetchAvailableCrews = async () => {
+    try {
+      setCrewsLoading(true);
+      const response = await coordinatorApi.getCrews({ status: "active" });
+      if (response.success) {
+        // Filter to show only available or assigned crews
+        const availableCrews = response.data.filter(
+          (crew) =>
+            crew.availability === "available" ||
+            crew.profile?.availability === "available"
+        );
+        setCrews(availableCrews);
+      }
+    } catch (err) {
+      console.error("Error fetching crews:", err);
+      Alert.alert("Error", "Failed to load crews");
+    } finally {
+      setCrewsLoading(false);
+    }
+  };
+
+  const handleOpenAssignDialog = () => {
+    setAssignDialogVisible(true);
+    fetchAvailableCrews();
+  };
+
   const handleAssignRoute = async () => {
-    if (!crewId.trim() || !vehicleId.trim()) {
-      Alert.alert("Error", "Please enter both Crew ID and Vehicle ID");
+    if (!selectedCrew || !vehicleId.trim()) {
+      Alert.alert("Error", "Please select a crew member and enter Vehicle ID");
       return;
     }
 
     try {
       setAssignLoading(true);
       const response = await coordinatorApi.assignRoute(id, {
-        crewId: crewId.trim(),
+        crewId: selectedCrew._id,
         vehicleId: vehicleId.trim(),
       });
 
       if (response.success) {
         Alert.alert("Success", "Route assigned successfully");
         setAssignDialogVisible(false);
-        setCrewId("");
+        setSelectedCrew(null);
         setVehicleId("");
         fetchRouteDetails();
       }
@@ -349,10 +378,7 @@ const RouteDetailsScreen = () => {
         {route.status !== "completed" && route.status !== "cancelled" && (
           <View style={styles.actionsContainer}>
             {!route.crewId && (
-              <Button
-                title="Assign Route"
-                onPress={() => setAssignDialogVisible(true)}
-              />
+              <Button title="Assign Route" onPress={handleOpenAssignDialog} />
             )}
             <Button
               title="Update Status"
@@ -485,15 +511,48 @@ const RouteDetailsScreen = () => {
         >
           <Dialog.Title>Assign Route</Dialog.Title>
           <Dialog.Content>
-            <TextInput
-              mode="outlined"
-              label="Crew ID *"
-              placeholder="Enter crew identifier"
-              value={crewId}
-              onChangeText={setCrewId}
-              style={styles.input}
-              disabled={assignLoading}
-            />
+            {crewsLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color={COLORS.primary} />
+                <Text style={styles.loadingText}>Loading crews...</Text>
+              </View>
+            ) : crews.length === 0 ? (
+              <Text style={styles.noCrewsText}>
+                No available crew members found. Please create crew members
+                first.
+              </Text>
+            ) : (
+              <>
+                <Text style={styles.dialogLabel}>Select Crew Member *</Text>
+                <ScrollView style={styles.crewList} nestedScrollEnabled>
+                  {crews.map((crew) => (
+                    <TouchableOpacity
+                      key={crew._id}
+                      style={[
+                        styles.crewItem,
+                        selectedCrew?._id === crew._id &&
+                          styles.crewItemSelected,
+                      ]}
+                      onPress={() => setSelectedCrew(crew)}
+                      disabled={assignLoading}
+                    >
+                      <View style={styles.crewItemContent}>
+                        <Text style={styles.crewName}>{crew.name}</Text>
+                        <Text style={styles.crewEmail}>{crew.email}</Text>
+                        {crew.profile?.vehicleId && (
+                          <Text style={styles.crewVehicle}>
+                            🚛 {crew.profile.vehicleId}
+                          </Text>
+                        )}
+                      </View>
+                      {selectedCrew?._id === crew._id && (
+                        <Text style={styles.checkmark}>✓</Text>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
             <TextInput
               mode="outlined"
               label="Vehicle ID *"
@@ -501,7 +560,7 @@ const RouteDetailsScreen = () => {
               value={vehicleId}
               onChangeText={setVehicleId}
               style={styles.input}
-              disabled={assignLoading}
+              disabled={assignLoading || crewsLoading}
             />
           </Dialog.Content>
           <Dialog.Actions>
@@ -513,7 +572,7 @@ const RouteDetailsScreen = () => {
             <Button
               title={assignLoading ? "Assigning..." : "Assign"}
               onPress={handleAssignRoute}
-              disabled={assignLoading}
+              disabled={assignLoading || crewsLoading || crews.length === 0}
             />
           </Dialog.Actions>
         </Dialog>
@@ -822,6 +881,66 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textLight,
     marginBottom: SPACING.medium,
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: SPACING.medium,
+  },
+  dialogLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: SPACING.small,
+  },
+  crewList: {
+    maxHeight: 200,
+    marginBottom: SPACING.medium,
+  },
+  crewItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: SPACING.medium,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 8,
+    marginBottom: SPACING.small,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  crewItemSelected: {
+    backgroundColor: COLORS.primary + "15",
+    borderColor: COLORS.primary,
+  },
+  crewItemContent: {
+    flex: 1,
+  },
+  crewName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  crewEmail: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginBottom: 4,
+  },
+  crewVehicle: {
+    fontSize: 12,
+    color: COLORS.text,
+  },
+  checkmark: {
+    fontSize: 24,
+    color: COLORS.primary,
+    fontWeight: "bold",
+  },
+  noCrewsText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: "center",
+    marginVertical: SPACING.medium,
   },
 });
 
