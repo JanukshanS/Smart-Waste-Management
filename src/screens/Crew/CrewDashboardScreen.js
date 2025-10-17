@@ -32,6 +32,11 @@ const CrewDashboardScreen = () => {
       const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
       
       if (!userId) {
+        // Don't log error if both user contexts are null (user logged out)
+        if (user === null && userDetails === null) {
+          console.log('User logged out, skipping dashboard fetch');
+          return;
+        }
         console.error('User object:', JSON.stringify(user, null, 2));
         console.error('UserDetails object:', JSON.stringify(userDetails, null, 2));
         throw new Error('User ID not found');
@@ -69,11 +74,15 @@ const CrewDashboardScreen = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    // Only fetch if we have user data
+    const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
+    if (userId) {
+      fetchDashboardData();
 
-    // Auto-refresh every 3 minutes
-    const interval = setInterval(fetchDashboardData, 3 * 60 * 1000);
-    return () => clearInterval(interval);
+      // Auto-refresh every 3 minutes
+      const interval = setInterval(fetchDashboardData, 3 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
   }, [user, userDetails]);
 
   const onRefresh = () => {

@@ -53,7 +53,8 @@ const CrewProfileScreen = () => {
   const updateAvailability = async (newAvailability) => {
     try {
       setUpdating(true);
-      const response = await crewApi.updateAvailability(user._id, newAvailability);
+      const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
+      const response = await crewApi.updateAvailability(userId, newAvailability);
       
       if (response.success) {
         setAvailability(newAvailability);
@@ -82,7 +83,7 @@ const CrewProfileScreen = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, [user]);
+  }, [user, userDetails]);
 
   if (loading) {
     return (
@@ -122,17 +123,17 @@ const CrewProfileScreen = () => {
             
             <View style={styles.infoRow}>
               <Text style={styles.label}>Name:</Text>
-              <Text style={styles.value}>{profile?.crew?.name || 'N/A'}</Text>
+              <Text style={styles.value}>{profile?.name || userDetails?.name || user?.name || 'N/A'}</Text>
             </View>
             
             <View style={styles.infoRow}>
               <Text style={styles.label}>Email:</Text>
-              <Text style={styles.value}>{profile?.crew?.email || 'N/A'}</Text>
+              <Text style={styles.value}>{profile?.email || userDetails?.email || user?.email || 'N/A'}</Text>
             </View>
             
             <View style={styles.infoRow}>
               <Text style={styles.label}>Phone:</Text>
-              <Text style={styles.value}>{profile?.crew?.phone || 'N/A'}</Text>
+              <Text style={styles.value}>{profile?.phone || userDetails?.phone || user?.phone || 'N/A'}</Text>
             </View>
             
             <View style={styles.infoRow}>
@@ -149,7 +150,7 @@ const CrewProfileScreen = () => {
             
             <View style={styles.infoRow}>
               <Text style={styles.label}>Vehicle ID:</Text>
-              <Text style={styles.value}>{profile?.profile?.vehicleId || 'Not assigned'}</Text>
+              <Text style={styles.value}>{profile?.vehicleId || 'Not assigned'}</Text>
             </View>
             
             <View style={styles.infoRow}>

@@ -161,12 +161,13 @@ export const getProfile = async (crewId) => {
     // Get crew details which includes profile information
     const response = await client.get(`/coordinator/crews/${crewId}`);
     if (response.success && response.data) {
-      const { crew, profile } = response.data;
+      const { crew, profile, currentRoute } = response.data;
       return {
         success: true,
         data: {
           ...crew,
-          profile: profile
+          profile: profile,
+          vehicleId: currentRoute?.vehicleId || null
         }
       };
     }
