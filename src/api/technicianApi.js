@@ -1,158 +1,155 @@
 import client from './client';
+import { TECHNICIAN_ID } from '../constants/devConfig';
 
 /**
  * Technician API
  * Handles all technician-related API calls
  */
 
+// Technician ID is imported from devConfig.js
+// To change the ID, update it in src/constants/devConfig.js
+
 /**
- * Get all work orders
- * @param {object} filters - Optional filters (status, priority, technicianId, page, limit)
+ * Get work orders for the technician
+ * @param {Object} params - Query parameters
+ * @param {string} params.status - Filter by status (pending, in-progress, completed, escalated)
+ * @param {string} params.priority - Filter by priority (low, medium, high)
+ * @param {number} params.page - Page number
+ * @param {number} params.limit - Items per page
  */
-export const getWorkOrders = async (filters = {}) => {
-  try {
-    const queryParams = new URLSearchParams();
-    
-    if (filters.status) {
-      queryParams.append('status', filters.status);
-    }
-    if (filters.priority) {
-      queryParams.append('priority', filters.priority);
-    }
-    if (filters.technicianId) {
-      queryParams.append('technicianId', filters.technicianId);
-    }
-    if (filters.page) {
-      queryParams.append('page', filters.page);
-    }
-    if (filters.limit) {
-      queryParams.append('limit', filters.limit);
-    }
-    
-    const endpoint = `/technician/work-orders${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    const response = await client.get(endpoint);
-    return response;
-  } catch (error) {
-    console.error('Error fetching work orders:', error);
-    throw error;
+export const getWorkOrders = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  
+  if (params.status && params.status !== 'all') {
+    queryParams.append('status', params.status);
   }
+  if (params.priority && params.priority !== 'all') {
+    queryParams.append('priority', params.priority);
+  }
+  if (params.page) {
+    queryParams.append('page', params.page);
+  }
+  if (params.limit) {
+    queryParams.append('limit', params.limit);
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = `/technician/work-orders${queryString ? `?${queryString}` : ''}`;
+  
+  return client.get(endpoint);
 };
 
 /**
  * Get work order details by ID
- * @param {string} workOrderId - Work Order ID
+ * @param {string} workOrderId - Work order ID
  */
 export const getWorkOrderDetails = async (workOrderId) => {
-  try {
-    const response = await client.get(`/technician/work-orders/${workOrderId}`);
-    return response;
-  } catch (error) {
-    console.error('Error fetching work order details:', error);
-    throw error;
-  }
+  return client.get(`/technician/work-orders/${workOrderId}`);
 };
 
 /**
- * Self-assign a work order
- * @param {string} workOrderId - Work Order ID
- * @param {string} technicianId - Technician ID
+ * Update work order status
+ * @param {string} workOrderId - Work order ID
+ * @param {Object} data - Update data
  */
-export const assignWorkOrder = async (workOrderId, technicianId) => {
-  try {
-    const response = await client.put(`/technician/work-orders/${workOrderId}/assign`, {
-      technicianId,
-    });
-    return response;
-  } catch (error) {
-    console.error('Error assigning work order:', error);
-    throw error;
-  }
+export const updateWorkOrder = async (workOrderId, data) => {
+  return client.put(`/technician/work-orders/${workOrderId}`, data);
 };
 
 /**
- * Start working on a work order
- * @param {string} workOrderId - Work Order ID
+ * Assign work order to technician
+ * @param {string} workOrderId - Work order ID
+ * @param {string} technicianId - Technician ID (optional, uses default if not provided)
+ */
+export const assignWorkOrder = async (workOrderId, technicianId = TECHNICIAN_ID) => {
+  return client.put(`/technician/work-orders/${workOrderId}/assign`, {
+    technicianId,
+  });
+};
+
+/**
+ * Start work on a work order
+ * @param {string} workOrderId - Work order ID
  */
 export const startWorkOrder = async (workOrderId) => {
-  try {
-    const response = await client.put(`/technician/work-orders/${workOrderId}/start`);
-    return response;
-  } catch (error) {
-    console.error('Error starting work order:', error);
-    throw error;
-  }
+  return client.put(`/technician/work-orders/${workOrderId}/start`);
 };
 
 /**
- * Resolve a work order
- * @param {string} workOrderId - Work Order ID
- * @param {object} resolutionData - Resolution data (actionTaken, resolutionNotes, newDeviceId)
+ * Resolve/complete a work order
+ * @param {string} workOrderId - Work order ID
+ * @param {Object} resolutionData - Resolution details
+ * @param {string} resolutionData.actionTaken - Action taken (e.g., "repaired")
+ * @param {string} resolutionData.resolutionNotes - Resolution notes
+ * @param {string} resolutionData.newDeviceId - New device ID (optional)
  */
 export const resolveWorkOrder = async (workOrderId, resolutionData) => {
-  try {
-    const response = await client.put(`/technician/work-orders/${workOrderId}/resolve`, resolutionData);
-    return response;
-  } catch (error) {
-    console.error('Error resolving work order:', error);
-    throw error;
-  }
+  return client.put(`/technician/work-orders/${workOrderId}/resolve`, resolutionData);
 };
 
 /**
- * Escalate a work order
- * @param {string} workOrderId - Work Order ID
- * @param {string} reason - Escalation reason
+ * Get all bins
+ * @param {Object} params - Query parameters
+ * @param {number} params.page - Page number
+ * @param {number} params.limit - Items per page
  */
-export const escalateWorkOrder = async (workOrderId, reason) => {
-  try {
-    const response = await client.put(`/technician/work-orders/${workOrderId}/escalate`, { reason });
-    return response;
-  } catch (error) {
-    console.error('Error escalating work order:', error);
-    throw error;
+export const getBins = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  
+  if (params.page) {
+    queryParams.append('page', params.page);
   }
+  if (params.limit) {
+    queryParams.append('limit', params.limit);
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = `/bins${queryString ? `?${queryString}` : ''}`;
+  
+  return client.get(endpoint);
+};
+
+/**
+ * Get all devices
+ * @param {Object} params - Query parameters
+ * @param {string} params.binId - Filter by bin ID
+ * @param {number} params.page - Page number
+ * @param {number} params.limit - Items per page
+ */
+export const getDevices = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  
+  if (params.binId) {
+    queryParams.append('binId', params.binId);
+  }
+  if (params.page) {
+    queryParams.append('page', params.page);
+  }
+  if (params.limit) {
+    queryParams.append('limit', params.limit);
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = `/devices${queryString ? `?${queryString}` : ''}`;
+  
+  return client.get(endpoint);
 };
 
 /**
  * Register a new device
- * @param {object} deviceData - Device data (deviceId, deviceType, binId)
+ * @param {Object} deviceData - Device data
  */
 export const registerDevice = async (deviceData) => {
-  try {
-    const response = await client.post('/technician/devices/register', deviceData);
-    return response;
-  } catch (error) {
-    console.error('Error registering device:', error);
-    throw error;
-  }
+  return client.post('/devices', deviceData);
 };
 
 /**
- * Get device details by ID
- * @param {string} deviceId - Device ID
+ * Escalate a work order
+ * @param {string} workOrderId - Work order ID
+ * @param {string} reason - Escalation reason
  */
-export const getDeviceDetails = async (deviceId) => {
-  try {
-    const response = await client.get(`/technician/devices/${deviceId}`);
-    return response;
-  } catch (error) {
-    console.error('Error fetching device details:', error);
-    throw error;
-  }
+export const escalateWorkOrder = async (workOrderId, reason) => {
+  return client.put(`/technician/work-orders/${workOrderId}/escalate`, {
+    reason,
+  });
 };
-
-/**
- * Update device status
- * @param {string} deviceId - Device ID
- * @param {string} status - New status (active, offline, decommissioned)
- */
-export const updateDeviceStatus = async (deviceId, status) => {
-  try {
-    const response = await client.put(`/technician/devices/${deviceId}/status`, { status });
-    return response;
-  } catch (error) {
-    console.error('Error updating device status:', error);
-    throw error;
-  }
-};
-
