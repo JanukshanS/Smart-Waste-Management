@@ -62,7 +62,7 @@ export const trackRequest = async (requestId) => {
 // Cancel request
 export const cancelRequest = async (requestId) => {
   try {
-    const response = await client.delete(`/citizen/requests/${requestId}`);
+    const response = await client.put(`/citizen/requests/${requestId}/cancel`);
     return response;
   } catch (error) {
     throw error;
