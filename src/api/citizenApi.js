@@ -49,6 +49,16 @@ export const getRequestById = async (requestId) => {
   }
 };
 
+// Track request (with timeline)
+export const trackRequest = async (requestId) => {
+  try {
+    const response = await client.get(`/citizen/requests/${requestId}/track`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Cancel request
 export const cancelRequest = async (requestId) => {
   try {
@@ -63,6 +73,7 @@ export default {
   createRequest,
   getMyRequests,
   getRequestById,
+  trackRequest,
   cancelRequest,
 };
 

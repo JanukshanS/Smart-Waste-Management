@@ -12,12 +12,12 @@ const RequestCard = ({ request, onPress }) => {
   };
 
   const statusColors = {
-    pending: { bg: COLORS.warningBg, text: COLORS.warningText, label: 'Pending' },
-    approved: { bg: COLORS.infoBg, text: COLORS.info, label: 'Approved' },
-    scheduled: { bg: '#E3F2FD', text: '#1976D2', label: 'Scheduled' },
+    pending: { bg: '#FFF4E6', text: COLORS.citizenWarning, label: 'Pending' },
+    approved: { bg: '#E3F2FD', text: COLORS.citizenInfo, label: 'Approved' },
+    scheduled: { bg: '#E1F5FE', text: '#1976D2', label: 'Scheduled' },
     'in-progress': { bg: '#FFF3E0', text: '#F57C00', label: 'In Progress' },
-    completed: { bg: '#E8F5E9', text: '#388E3C', label: 'Completed' },
-    cancelled: { bg: COLORS.dangerBg, text: COLORS.dangerText, label: 'Cancelled' },
+    completed: { bg: COLORS.citizenBackground, text: COLORS.citizenPrimary, label: 'Completed' },
+    cancelled: { bg: '#FFEBEE', text: COLORS.citizenDanger, label: 'Cancelled' },
   };
 
   const statusConfig = statusColors[request.status] || statusColors.pending;
@@ -95,16 +95,18 @@ const RequestCard = ({ request, onPress }) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: SPACING.medium,
+    borderRadius: 16,
+    padding: SPACING.medium + 2,
     marginBottom: SPACING.medium,
-    shadowColor: COLORS.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowColor: COLORS.citizenPrimary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: COLORS.citizenBorder,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+    borderLeftColor: COLORS.citizenAccent,
   },
   header: {
     flexDirection: 'row',
@@ -127,42 +129,43 @@ const styles = StyleSheet.create({
   wasteType: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.text,
+    color: COLORS.citizenTextDark,
     textTransform: 'capitalize',
   },
   trackingId: {
     fontSize: 12,
-    color: COLORS.textLight,
+    color: COLORS.citizenTextGray,
     marginTop: 2,
   },
   statusBadge: {
-    paddingHorizontal: SPACING.small,
-    paddingVertical: SPACING.small / 2,
-    borderRadius: 12,
+    paddingHorizontal: SPACING.small + 2,
+    paddingVertical: SPACING.small / 2 + 1,
+    borderRadius: 14,
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   details: {
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    paddingTop: SPACING.small,
-    marginBottom: SPACING.small,
+    borderTopColor: COLORS.citizenBorder,
+    paddingTop: SPACING.small + 2,
+    marginBottom: SPACING.small + 2,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: SPACING.small / 2,
+    marginBottom: SPACING.small / 2 + 2,
   },
   detailLabel: {
     fontSize: 14,
-    color: COLORS.textLight,
+    color: COLORS.citizenTextGray,
+    fontWeight: '500',
   },
   detailValue: {
     fontSize: 14,
-    color: COLORS.text,
-    fontWeight: '500',
+    color: COLORS.citizenTextDark,
+    fontWeight: '600',
     flex: 1,
     textAlign: 'right',
   },
@@ -171,19 +174,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    paddingTop: SPACING.small,
+    borderTopColor: COLORS.citizenBorder,
+    paddingTop: SPACING.small + 2,
   },
   createdDate: {
     fontSize: 12,
-    color: COLORS.textLight,
+    color: COLORS.citizenTextGray,
   },
   viewDetails: {
     fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: '600',
+    color: COLORS.citizenAccent,
+    fontWeight: '700',
   },
 });
 
 export default RequestCard;
+
 
