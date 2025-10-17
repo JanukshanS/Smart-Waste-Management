@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
-import { RequestCard } from '../../components/Citizen';
+import { RequestCard, RequestDetailsBottomSheet } from '../../components/Citizen';
 import { citizenApi } from '../../api';
 
 const MyRequestsScreen = () => {
@@ -13,18 +13,21 @@ const MyRequestsScreen = () => {
   const [pagination, setPagination] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   // Hardcoded user ID for now (will be from AuthContext later)
   const userId = '68f17571b188a4a7463c1c27';
 
   const statuses = [
-    { value: 'all', label: 'All', icon: '📋', color: COLORS.primary },
-    { value: 'pending', label: 'Pending', icon: '⏳', color: COLORS.warning },
-    { value: 'approved', label: 'Approved', icon: '✓', color: COLORS.info },
+    { value: 'all', label: 'All', icon: '📋', color: COLORS.citizenPrimary },
+    { value: 'pending', label: 'Pending', icon: '⏳', color: COLORS.citizenWarning },
+    { value: 'approved', label: 'Approved', icon: '✓', color: COLORS.citizenInfo },
     { value: 'scheduled', label: 'Scheduled', icon: '📅', color: '#1976D2' },
     { value: 'in-progress', label: 'In Progress', icon: '🚛', color: '#F57C00' },
-    { value: 'completed', label: 'Completed', icon: '✅', color: COLORS.success },
-    { value: 'cancelled', label: 'Cancelled', icon: '❌', color: COLORS.danger },
+    { value: 'completed', label: 'Completed', icon: '✅', color: COLORS.citizenSuccess },
+    { value: 'cancelled', label: 'Cancelled', icon: '❌', color: COLORS.citizenDanger },
   ];
 
   useEffect(() => {
@@ -78,9 +81,33 @@ const MyRequestsScreen = () => {
     setCurrentPage(1);
   };
 
-  const handleRequestPress = (request) => {
-    // Navigate to request details (will implement later)
-    router.push(`/citizen/track-request?id=${request._id}`);
+  const handleRequestPress = async (request) => {
+    try {
+      setShowBottomSheet(true);
+      setLoadingDetails(true);
+      setSelectedRequest(null);
+
+      // Fetch full request details
+      const response = await citizenApi.getRequestById(request._id);
+
+      if (response.success) {
+        setSelectedRequest(response.data);
+      } else {
+        Alert.alert('Error', response.message || 'Failed to load request details');
+        setShowBottomSheet(false);
+      }
+    } catch (error) {
+      console.error('Fetch request details error:', error);
+      Alert.alert('Error', 'Failed to load request details. Please try again.');
+      setShowBottomSheet(false);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleCloseBottomSheet = () => {
+    setShowBottomSheet(false);
+    setSelectedRequest(null);
   };
 
   const renderRequestCard = ({ item }) => (
@@ -175,7 +202,7 @@ const MyRequestsScreen = () => {
       {/* Requests List */}
       {loading && currentPage === 1 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={COLORS.citizenPrimary} />
           <Text style={styles.loadingText}>Loading your requests...</Text>
         </View>
       ) : (
@@ -185,7 +212,7 @@ const MyRequestsScreen = () => {
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.citizenAccent]} tintColor={COLORS.citizenAccent} />
           }
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
@@ -202,6 +229,14 @@ const MyRequestsScreen = () => {
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
+
+      {/* Request Details Bottom Sheet */}
+      <RequestDetailsBottomSheet
+        visible={showBottomSheet}
+        onClose={handleCloseBottomSheet}
+        request={selectedRequest}
+        loading={loadingDetails}
+      />
     </View>
   );
 };
@@ -209,12 +244,14 @@ const MyRequestsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.citizenBackground,
   },
   header: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.citizenPrimary,
     padding: SPACING.large,
     paddingTop: SPACING.large + 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   title: {
     fontSize: 24,
@@ -225,13 +262,13 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: COLORS.white,
-    opacity: 0.9,
+    opacity: 0.95,
   },
   filterSection: {
     backgroundColor: COLORS.white,
-    paddingVertical: SPACING.medium,
+    paddingVertical: SPACING.medium + 2,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.citizenBorder,
   },
   filterScrollContent: {
     paddingHorizontal: SPACING.medium,
@@ -240,21 +277,21 @@ const styles = StyleSheet.create({
   filterChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.small,
+    paddingVertical: SPACING.small + 2,
     paddingHorizontal: SPACING.medium,
-    borderRadius: 20,
-    backgroundColor: COLORS.background,
+    borderRadius: 24,
+    backgroundColor: COLORS.citizenBackground,
     borderWidth: 2,
-    borderColor: COLORS.border,
+    borderColor: COLORS.citizenBorder,
     marginRight: SPACING.small,
   },
   filterChipSelected: {
     borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: COLORS.citizenPrimary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   filterChipIcon: {
     fontSize: 16,
@@ -263,7 +300,7 @@ const styles = StyleSheet.create({
   filterChipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.text,
+    color: COLORS.citizenTextDark,
   },
   filterChipTextSelected: {
     color: COLORS.white,
@@ -271,15 +308,16 @@ const styles = StyleSheet.create({
   },
   resultsInfo: {
     padding: SPACING.medium,
-    paddingTop: SPACING.small,
-    paddingBottom: SPACING.small,
+    paddingTop: SPACING.small + 2,
+    paddingBottom: SPACING.small + 2,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.citizenBorder,
   },
   resultsText: {
     fontSize: 12,
-    color: COLORS.textLight,
+    color: COLORS.citizenTextGray,
+    fontWeight: '500',
   },
   listContent: {
     padding: SPACING.medium,
@@ -293,7 +331,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: SPACING.medium,
     fontSize: 14,
-    color: COLORS.textLight,
+    color: COLORS.citizenTextMedium,
   },
   loadingMore: {
     paddingVertical: SPACING.medium,
@@ -304,6 +342,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.large * 2,
     marginTop: SPACING.large * 2,
+    backgroundColor: COLORS.white,
+    marginHorizontal: SPACING.medium,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: COLORS.citizenBorder,
   },
   emptyIcon: {
     fontSize: 64,
@@ -312,41 +355,46 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.text,
+    color: COLORS.citizenTextDark,
     marginBottom: SPACING.small,
   },
   emptyText: {
     fontSize: 14,
-    color: COLORS.textLight,
+    color: COLORS.citizenTextGray,
     textAlign: 'center',
     marginBottom: SPACING.large,
   },
   createButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.citizenAccent,
     paddingHorizontal: SPACING.large,
     paddingVertical: SPACING.medium,
-    borderRadius: 8,
+    borderRadius: 12,
+    shadowColor: COLORS.citizenPrimary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   createButtonText: {
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   fab: {
     position: 'absolute',
     right: SPACING.large,
     bottom: SPACING.large,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.primary,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: COLORS.citizenAccent,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: COLORS.citizenPrimary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 10,
   },
   fabIcon: {
     fontSize: 32,
