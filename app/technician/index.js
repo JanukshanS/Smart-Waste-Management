@@ -1,4 +1,3 @@
-import TechnicianDashboardScreen from '../../src/screens/Technician/TechnicianDashboardScreen';
+import { TechnicianDashboardScreen } from "../../src/screens/Technician";
 
 export default TechnicianDashboardScreen;
-

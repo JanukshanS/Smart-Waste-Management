@@ -673,11 +673,161 @@
 
 ---
 
+## Epic 4.5: Privacy and Security Management
+
+### User Story 4.5.1: Manage Privacy Settings ⚠️ NEW REQUIREMENT
+
+**As an** Admin  
+**I want to** configure privacy and data protection settings  
+**So that** the system complies with data protection regulations
+
+**API Endpoint:** `GET/PUT /api/admin/privacy-settings`
+
+**Acceptance Criteria:**
+
+- [ ] Configure data encryption settings (enabled/disabled)
+- [ ] Set data retention policies (days to keep data)
+- [ ] Configure anonymization rules for reports
+- [ ] Enable/disable data collection features
+- [ ] Set cookie and tracking preferences
+- [ ] Configure audit logging level
+- [ ] Export privacy compliance reports
+- [ ] Audit trail of privacy setting changes
+- [ ] Validate settings before saving
+- [ ] Success confirmation after updates
+
+**Implementation Checklist:**
+
+- [ ] Create `PrivacySettingsActivity.java`
+- [ ] Create `activity_privacy_settings.xml`
+- [ ] Add privacy configuration form
+- [ ] Integrate `GET/PUT /api/admin/privacy-settings` API
+- [ ] Add validation for settings
+- [ ] Implement audit logging
+- [ ] Add export functionality
+- [ ] Test all privacy configurations
+
+---
+
+### User Story 4.5.2: Monitor System Security ⚠️ NEW REQUIREMENT
+
+**As an** Admin  
+**I want to** monitor system security and access logs  
+**So that** I can ensure system integrity and detect threats
+
+**API Endpoint:** `GET /api/admin/security/logs?type=...&startDate=...&endDate=...`
+
+**Acceptance Criteria:**
+
+- [ ] View login attempt logs (successful/failed)
+- [ ] Monitor failed authentication attempts
+- [ ] View active user sessions
+- [ ] Set account lockout policies
+- [ ] Configure session timeout settings
+- [ ] Force logout users if needed
+- [ ] View IP address access patterns
+- [ ] Export security reports
+- [ ] Real-time security alerts
+- [ ] Filter logs by user, IP, date range
+
+**Implementation Checklist:**
+
+- [ ] Create `SecurityMonitoringActivity.java`
+- [ ] Create `activity_security_monitoring.xml`
+- [ ] Integrate security logs API
+- [ ] Add log filtering and search
+- [ ] Implement session management
+- [ ] Add security policy configuration
+- [ ] Add real-time alerts
+- [ ] Test security monitoring features
+
+---
+
+## Epic 4.6: Billing and Financial Management
+
+### User Story 4.6.1: Manage Billing Configuration ⚠️ NEW REQUIREMENT
+
+**As an** Admin  
+**I want to** configure billing settings and rates  
+**So that** the system can calculate costs accurately
+
+**API Endpoint:** `GET/PUT /api/admin/billing/config`
+
+**Acceptance Criteria:**
+
+- [ ] Configure billing rates for each waste type
+- [ ] Set up payment gateway settings
+- [ ] Configure tax rates and calculations
+- [ ] Set minimum and maximum charges
+- [ ] Configure payment methods accepted
+- [ ] Set payment due date policies
+- [ ] Enable/disable billing features
+- [ ] Validate billing configuration
+- [ ] Success confirmation after updates
+- [ ] Preview cost calculations
+
+**Implementation Checklist:**
+
+- [ ] Create `BillingConfigActivity.java`
+- [ ] Create `activity_billing_config.xml`
+- [ ] Add billing rate configuration form
+- [ ] Integrate billing config API
+- [ ] Add payment gateway settings
+- [ ] Implement cost calculation preview
+- [ ] Add validation for rates
+- [ ] Test billing configuration
+
+---
+
+### User Story 4.6.2: View Payment Reports ⚠️ NEW REQUIREMENT
+
+**As an** Admin  
+**I want to** view payment and billing reports  
+**So that** I can monitor financial performance
+
+**API Endpoint:** `GET /api/admin/reports/payments?startDate=...&endDate=...`
+
+**Acceptance Criteria:**
+
+- [ ] Display total revenue by period
+- [ ] Show payment success/failure rates
+- [ ] Display revenue by waste type
+- [ ] Show outstanding payments
+- [ ] Display payment method breakdown
+- [ ] Filter by date range
+- [ ] Export financial reports
+- [ ] Show payment trends
+- [ ] Display refund information
+- [ ] Generate tax reports
+
+**Implementation Checklist:**
+
+- [ ] Add payment reports section to SystemReportsActivity
+- [ ] Create payment statistics cards
+- [ ] Integrate payment reports API
+- [ ] Add financial charts
+- [ ] Implement date filtering
+- [ ] Add export functionality
+- [ ] Test with payment data
+
+---
+
 ## Updated Implementation Summary
 
-**Total User Stories:** 18 (11 existing + 7 bin management)
+**Total User Stories:** 22 (18 existing + 4 new privacy/billing)
 
-**New API Endpoints:**
+**All API Endpoints:**
+- `GET /api/admin/users` - List users
+- `POST /api/admin/users` - Create user
+- `PUT /api/admin/users/{id}/role` - Update role
+- `PUT /api/users/{id}` - Update user status
+- `DELETE /api/admin/users/{id}` - Delete user
+- `GET /api/admin/reports/collections` - Collection stats
+- `GET /api/admin/reports/efficiency` - Efficiency report
+- `GET /api/admin/reports/devices` - Device report
+- `GET /api/admin/system/health` - System health
+- `GET /api/admin/export` - Export data
+- `GET /api/admin/dashboard` - Dashboard overview
 - `GET /api/bins` - List all bins
 - `POST /api/bins` - Create bin
 - `GET /api/bins/{id}` - Get bin details
@@ -686,10 +836,22 @@
 - `PUT /api/bins/{id}/empty` - Empty bin
 - `PUT /api/bins/{id}/maintenance` - Set maintenance
 - `DELETE /api/bins/{id}` - Delete bin
+- `GET/PUT /api/admin/privacy-settings` - Privacy configuration ⚠️ NEW
+- `GET /api/admin/security/logs` - Security monitoring ⚠️ NEW
+- `GET/PUT /api/admin/billing/config` - Billing configuration ⚠️ NEW
+- `GET /api/admin/reports/payments` - Payment reports ⚠️ NEW
 
 **Updated Priority Order:**
 1. User Management (Stories 4.1.1 - 4.1.5) ✅ COMPLETE
 2. Dashboard Overview (Story 4.3.1) ✅ COMPLETE
 3. System Reports (Stories 4.2.1 - 4.2.5) ✅ COMPLETE
-4. **Smart Bin Management (Stories 4.4.1 - 4.4.7)** 🔄 IN PROGRESS
+4. Smart Bin Management (Stories 4.4.1 - 4.4.7) 🔄 IN PROGRESS
+5. **Privacy and Security (Stories 4.5.1 - 4.5.2)** ⚠️ NEW REQUIREMENT
+6. **Billing Management (Stories 4.6.1 - 4.6.2)** ⚠️ NEW REQUIREMENT
+
+**Case Study Alignment:**
+- ✅ Member 1 (Coordinator): Fully implemented
+- ⚠️ Member 2 (Admin): 80% complete (missing privacy/billing)
+- ✅ Member 3 (Citizen): Fully implemented
+- ❌ Member 4 (Technician): Backend complete, frontend pending
 

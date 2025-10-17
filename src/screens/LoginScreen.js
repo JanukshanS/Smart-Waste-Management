@@ -105,6 +105,13 @@ export default function LoginScreen() {
         const authResult = await login(userData, token);
         
         if (authResult.success) {
+          // Get role from the user object
+          const role = userData.role;
+          console.log('User role:', role);
+          console.log('User ID:', userData._id || userData.id);
+                  
+          const dashboardRoute = getRoleDashboardRoute(role);
+          
           Alert.alert(
             'Success',
             'Login successful!',

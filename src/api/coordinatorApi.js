@@ -239,3 +239,80 @@ export const updateStopStatus = async (routeId, stopIndex, stopData) => {
     throw error;
   }
 };
+
+/**
+ * CREW MANAGEMENT
+ */
+
+/**
+ * Get all crew members
+ * @param {object} filters - Optional filters (status, page, limit, sort)
+ */
+export const getCrews = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (filters.status) {
+      queryParams.append('status', filters.status);
+    }
+    if (filters.page) {
+      queryParams.append('page', filters.page);
+    }
+    if (filters.limit) {
+      queryParams.append('limit', filters.limit);
+    }
+    if (filters.sort) {
+      queryParams.append('sort', filters.sort);
+    }
+    
+    const endpoint = `/coordinator/crews${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await client.get(endpoint);
+    return response;
+  } catch (error) {
+    console.error('Error fetching crews:', error);
+    throw error;
+  }
+};
+
+/**
+ * Create a new crew member
+ * @param {object} crewData - Crew data (name, email, phone, password, vehicleId, address)
+ */
+export const createCrew = async (crewData) => {
+  try {
+    const response = await client.post('/coordinator/crews', crewData);
+    return response;
+  } catch (error) {
+    console.error('Error creating crew:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get crew details by ID
+ * @param {string} crewId - Crew ID
+ */
+export const getCrewDetails = async (crewId) => {
+  try {
+    const response = await client.get(`/coordinator/crews/${crewId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching crew details:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update crew availability
+ * @param {string} crewId - Crew ID
+ * @param {string} availability - New availability status (available, assigned, unavailable, on-leave)
+ */
+export const updateCrewAvailability = async (crewId, availability) => {
+  try {
+    const response = await client.put(`/coordinator/crews/${crewId}/availability`, { availability });
+    return response;
+  } catch (error) {
+    console.error('Error updating crew availability:', error);
+    throw error;
+  }
+};
