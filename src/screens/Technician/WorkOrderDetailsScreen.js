@@ -550,7 +550,7 @@ const WorkOrderDetailsScreen = () => {
             )}
 
             {/* Start Work button - available for assigned work orders */}
-            {workOrder.status !== 'in-progress' && workOrder.status !== 'completed' && (
+            {workOrder.status !== 'in-progress' && workOrder.status !== 'completed' && workOrder.status !== 'escalated' && (
               <Button
                 title={
                   workOrder.status === 'pending' && !workOrder.technicianId 
@@ -584,14 +584,27 @@ const WorkOrderDetailsScreen = () => {
               </>
             )}
 
+            {/* Escalated status message */}
+            {workOrder.status === 'escalated' && (
+              <View style={styles.escalatedContainer}>
+                <Text style={styles.escalatedIcon}>⚠️</Text>
+                <Text style={styles.escalatedTitle}>Work Order Escalated</Text>
+                <Text style={styles.escalatedMessage}>
+                  This work order has been escalated to management. Please wait for further instructions.
+                </Text>
+              </View>
+            )}
+
             {/* Additional actions */}
-            <Button
-              title="Diagnose Fault"
-              onPress={handleDiagnoseFault}
-              variant="outline"
-              style={styles.actionButton}
-              disabled={updating}
-            />
+            {workOrder.status !== 'escalated' && (
+              <Button
+                title="Diagnose Fault"
+                onPress={handleDiagnoseFault}
+                variant="outline"
+                style={styles.actionButton}
+                disabled={updating}
+              />
+            )}
           </>
         )}
 
@@ -1240,6 +1253,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.white,
+  },
+  // Escalated status styles
+  escalatedContainer: {
+    backgroundColor: '#FFF3E0',
+    borderRadius: 12,
+    padding: SPACING.large,
+    marginBottom: SPACING.medium,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.warning,
+    alignItems: 'center',
+  },
+  escalatedIcon: {
+    fontSize: 32,
+    marginBottom: SPACING.small,
+  },
+  escalatedTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.warning,
+    marginBottom: SPACING.small,
+  },
+  escalatedMessage: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

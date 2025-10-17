@@ -27,7 +27,6 @@ const TechnicianDashboardScreen = () => {
     pending: 0,
     inProgress: 0,
     resolved: 0,
-    urgent: 0,
   });
   const [error, setError] = useState(null);
 
@@ -57,11 +56,8 @@ const TechnicianDashboardScreen = () => {
         const resolved = response.data.filter(
           (wo) => wo.status === "resolved"
         ).length;
-        const urgent = response.data.filter(
-          (wo) => wo.priority === "urgent"
-        ).length;
 
-        setStats({ pending, inProgress, resolved, urgent });
+        setStats({ pending, inProgress, resolved });
         setError(null);
       }
     } catch (err) {
@@ -151,9 +147,6 @@ const TechnicianDashboardScreen = () => {
     }
   };
 
-  const urgentWorkOrders = workOrders
-    .filter((wo) => wo.priority === "urgent" && wo.status !== "resolved")
-    .slice(0, 3);
 
   return (
     <View style={styles.container}>
@@ -195,12 +188,6 @@ const TechnicianDashboardScreen = () => {
               icon="" 
               color={COLORS.success} 
             />
-            <StatBox 
-              value={stats.urgent} 
-              label="Urgent" 
-              icon="" 
-              color={COLORS.error} 
-            />
           </View>
         </View>
 
@@ -229,29 +216,6 @@ const TechnicianDashboardScreen = () => {
             color={COLORS.success}
           />
         </View>
-
-        {/* Urgent Work Orders */}
-        {urgentWorkOrders.length > 0 && (
-          <View style={styles.urgentSection}>
-            <Text style={styles.sectionTitle}>Urgent Work Orders</Text>
-            {urgentWorkOrders.map((workOrder) => (
-              <TouchableOpacity
-                key={workOrder._id}
-                style={styles.workOrderCard}
-                onPress={() => router.push(`/technician/work-order-details?id=${workOrder._id}`)}
-              >
-                <View style={styles.workOrderHeader}>
-                  <Text style={styles.workOrderTitle}>{workOrder.title}</Text>
-                  <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(workOrder.priority) }]}>
-                    <Text style={styles.priorityBadgeText}>{workOrder.priority}</Text>
-                  </View>
-                </View>
-                <Text style={styles.workOrderDetail}>Device: {workOrder.deviceId}</Text>
-                <Text style={styles.workOrderDetail}>Status: {workOrder.status}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
 
         {/* Error Display */}
         {error && (
@@ -311,9 +275,6 @@ const styles = StyleSheet.create({
   actionsSection: {
     marginBottom: SPACING.large,
   },
-  urgentSection: {
-    marginBottom: SPACING.large,
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -326,7 +287,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   statBox: {
-    width: "48%",
+    width: "31%",
     backgroundColor: COLORS.white,
     padding: SPACING.medium,
     borderRadius: 10,
@@ -378,47 +339,6 @@ const styles = StyleSheet.create({
   actionArrow: {
     fontSize: 32,
     fontWeight: "300",
-  },
-  workOrderCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: SPACING.medium,
-    marginBottom: SPACING.medium,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.error,
-  },
-  workOrderHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: SPACING.small,
-  },
-  workOrderTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
-    flex: 1,
-  },
-  priorityBadge: {
-    paddingHorizontal: SPACING.small,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  priorityBadgeText: {
-    color: COLORS.white,
-    fontSize: 10,
-    fontWeight: "600",
-    textTransform: "uppercase",
-  },
-  workOrderDetail: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    marginBottom: 4,
   },
 });
 
