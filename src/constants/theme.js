@@ -30,10 +30,14 @@ export const COLORS = {
   // Alert backgrounds
   warningBg: '#FFF3E0',
   dangerBg: '#FFEBEE',
+  infoBg: '#E3F2FD',
+  successBg: '#E8F5E9',
   
   // Alert text
   warningText: '#E65100',
   dangerText: '#C62828',
+  infoText: '#1565C0',
+  successText: '#2E7D32',
 };
 
 export const SPACING = {
