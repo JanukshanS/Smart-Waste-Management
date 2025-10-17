@@ -69,11 +69,34 @@ export const cancelRequest = async (requestId) => {
   }
 };
 
+// Get nearby bins
+export const getNearbyBins = async (params = {}) => {
+  try {
+    const { lat, lng, radius = 5000 } = params;
+    
+    if (!lat || !lng) {
+      throw new Error('Latitude and longitude are required');
+    }
+    
+    const queryParams = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      radius: radius.toString(),
+    });
+    
+    const response = await client.get(`/citizen/bins/nearby?${queryParams.toString()}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default {
   createRequest,
   getMyRequests,
   getRequestById,
   trackRequest,
   cancelRequest,
+  getNearbyBins,
 };
 
