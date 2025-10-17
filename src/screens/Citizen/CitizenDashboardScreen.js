@@ -133,7 +133,9 @@ const CitizenDashboardScreen = () => {
           <View style={styles.headerContent}>
             <View>
               <Text style={styles.greeting}>Hello! 👋</Text>
-              <Text style={styles.subtitle}>Let's keep our environment clean</Text>
+              <Text style={styles.subtitle}>
+                Let's keep our environment clean
+              </Text>
             </View>
           </View>
         </View>
@@ -184,7 +186,7 @@ const CitizenDashboardScreen = () => {
             <View style={styles.actionsRow}>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => router.push('/citizen/my-requests')}
+                onPress={() => router.push("/citizen/my-requests")}
                 activeOpacity={0.8}
               >
                 <View style={styles.actionButtonIcon}>
@@ -195,7 +197,7 @@ const CitizenDashboardScreen = () => {
 
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => router.push('/citizen/find-bins')}
+                onPress={() => router.push("/citizen/find-bins")}
                 activeOpacity={0.8}
               >
                 <View style={styles.actionButtonIcon}>
@@ -206,7 +208,7 @@ const CitizenDashboardScreen = () => {
 
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => router.push('/citizen/profile')}
+                onPress={() => router.push("/citizen/profile")}
                 activeOpacity={0.8}
               >
                 <View style={styles.actionButtonIcon}>
@@ -222,7 +224,9 @@ const CitizenDashboardScreen = () => {
             <View style={styles.recentSection}>
               <View style={styles.recentHeader}>
                 <Text style={styles.sectionTitle}>Recent Activity</Text>
-                <TouchableOpacity onPress={() => router.push('/citizen/my-requests')}>
+                <TouchableOpacity
+                  onPress={() => router.push("/citizen/my-requests")}
+                >
                   <Text style={styles.seeAllLink}>View All →</Text>
                 </TouchableOpacity>
               </View>
@@ -235,20 +239,33 @@ const CitizenDashboardScreen = () => {
                   <TouchableOpacity
                     key={request._id}
                     style={styles.recentCard}
-                    onPress={() => router.push(`/citizen/track-request?id=${request._id}`)}
+                    onPress={() =>
+                      router.push(`/citizen/track-request?id=${request._id}`)
+                    }
                     activeOpacity={0.7}
                   >
                     <View style={styles.recentCardIcon}>
-                      <Text style={styles.recentCardEmoji}>{wasteTypeIcon}</Text>
+                      <Text style={styles.recentCardEmoji}>
+                        {wasteTypeIcon}
+                      </Text>
                     </View>
                     <View style={styles.recentCardContent}>
-                      <Text style={styles.recentCardTitle}>{request.wasteType}</Text>
+                      <Text style={styles.recentCardTitle}>
+                        {request.wasteType}
+                      </Text>
                       <Text style={styles.recentCardSubtitle}>
                         {request.quantity} • {formatDate(request.createdAt)}
                       </Text>
                     </View>
-                    <View style={[styles.recentCardBadge, { backgroundColor: statusConfig.color }]}>
-                      <Text style={styles.recentCardBadgeText}>{statusConfig.icon}</Text>
+                    <View
+                      style={[
+                        styles.recentCardBadge,
+                        { backgroundColor: statusConfig.color },
+                      ]}
+                    >
+                      <Text style={styles.recentCardBadgeText}>
+                        {statusConfig.icon}
+                      </Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -263,11 +280,12 @@ const CitizenDashboardScreen = () => {
                 <Text style={styles.emptyIcon}>🌱</Text>
                 <Text style={styles.emptyTitle}>Start Your Journey</Text>
                 <Text style={styles.emptyText}>
-                  Create your first waste collection request and contribute to a cleaner environment
+                  Create your first waste collection request and contribute to a
+                  cleaner environment
                 </Text>
                 <TouchableOpacity
                   style={styles.emptyButton}
-                  onPress={() => router.push('/citizen/create-request')}
+                  onPress={() => router.push("/citizen/create-request")}
                 >
                   <Text style={styles.emptyButtonText}>Create Request</Text>
                 </TouchableOpacity>
@@ -276,50 +294,50 @@ const CitizenDashboardScreen = () => {
           )}
         </View>
       </ScrollView>
-
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push('/citizen/create-request')}
+        onPress={() => router.push("/citizen/create-request")}
         activeOpacity={0.85}
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
-  return (
-    <View style={styles.container}>
-      <DashboardHeader 
-        title="Citizen Dashboard"
-        subtitle="Waste Collection Services"
-      />
-      
-      <ScrollView style={styles.content}>
-        <View style={styles.buttonContainer}>
-        <Button 
-          title="Create Request" 
-          onPress={() => router.push('/citizen/create-request')}
+      return (
+      <View style={styles.container}>
+        <DashboardHeader
+          title="Citizen Dashboard"
+          subtitle="Waste Collection Services"
         />
-        
-        <Button 
-          title="My Requests" 
-          onPress={() => router.push('/citizen/my-requests')}
-        />
-        
-        <Button 
-          title="Track Request" 
-          onPress={() => router.push('/citizen/track-request')}
-        />
-        
-        <Button 
-          title="Find Bins" 
-          onPress={() => router.push('/citizen/find-bins')}
-        />
-        
-        <Button 
-          title="Profile" 
-          onPress={() => router.push('/citizen/profile')}
-        />
-        </View>
-      </ScrollView>
+
+        <ScrollView style={styles.content}>
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Create Request"
+              onPress={() => router.push("/citizen/create-request")}
+            />
+
+            <Button
+              title="My Requests"
+              onPress={() => router.push("/citizen/my-requests")}
+            />
+
+            <Button
+              title="Track Request"
+              onPress={() => router.push("/citizen/track-request")}
+            />
+
+            <Button
+              title="Find Bins"
+              onPress={() => router.push("/citizen/find-bins")}
+            />
+
+            <Button
+              title="Profile"
+              onPress={() => router.push("/citizen/profile")}
+            />
+          </View>
+        </ScrollView>
+      </View>
     </View>
   );
 };
