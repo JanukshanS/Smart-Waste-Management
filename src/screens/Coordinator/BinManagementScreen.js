@@ -140,22 +140,22 @@ const BinManagementScreen = () => {
       {/* View Mode Selector */}
       <View style={styles.viewModeContainer}>
         <Chip
-          selected={viewMode === 'stats'}
-          onPress={() => setViewMode('stats')}
+          selected={viewMode === "stats"}
+          onPress={() => setViewMode("stats")}
           style={styles.viewModeChip}
         >
           📊 Overview
         </Chip>
         <Chip
-          selected={viewMode === 'map'}
-          onPress={() => setViewMode('map')}
+          selected={viewMode === "map"}
+          onPress={() => setViewMode("map")}
           style={styles.viewModeChip}
         >
           🗺️ Map
         </Chip>
         <Chip
-          selected={viewMode === 'list'}
-          onPress={() => setViewMode('list')}
+          selected={viewMode === "list"}
+          onPress={() => setViewMode("list")}
           style={styles.viewModeChip}
         >
           📋 List
@@ -176,60 +176,103 @@ const BinManagementScreen = () => {
         )}
 
         {/* Stats Overview Mode */}
-        {viewMode === 'stats' && (
-          <BinStatsOverview 
-            bins={bins} 
-            onCategoryPress={handleCategoryPress}
-          />
+        {viewMode === "stats" && (
+          <BinStatsOverview bins={bins} onCategoryPress={handleCategoryPress} />
         )}
 
         {/* Map View Mode */}
-        {viewMode === 'map' && (
-          <BinMapView 
-            bins={bins} 
-            onBinPress={handleBinPress}
-          />
+        {viewMode === "map" && (
+          <>
+            {/* Filter Chips for Map */}
+            <View style={styles.filterContainer}>
+              <Chip
+                selected={activeFilter === "all"}
+                onPress={() => handleFilterChange("all")}
+                style={styles.filterChip}
+              >
+                All ({getFilterCount("all")})
+              </Chip>
+              <Chip
+                selected={activeFilter === "urgent"}
+                onPress={() => handleFilterChange("urgent")}
+                style={styles.filterChip}
+              >
+                🚨 Urgent ({getFilterCount("urgent")})
+              </Chip>
+              <Chip
+                selected={activeFilter === "filling"}
+                onPress={() => handleFilterChange("filling")}
+                style={styles.filterChip}
+              >
+                ⚠️ Filling ({getFilterCount("filling")})
+              </Chip>
+              <Chip
+                selected={activeFilter === "normal"}
+                onPress={() => handleFilterChange("normal")}
+                style={styles.filterChip}
+              >
+                ✅ Normal ({getFilterCount("normal")})
+              </Chip>
+              <Chip
+                selected={activeFilter === "offline"}
+                onPress={() => handleFilterChange("offline")}
+                style={styles.filterChip}
+              >
+                📴 Offline ({getFilterCount("offline")})
+              </Chip>
+            </View>
+
+            {/* Enhanced Map View */}
+            <BinMapView
+              bins={filteredBins}
+              onBinPress={handleBinPress}
+              height={400}
+              showControls={true}
+              showLegend={true}
+              filteredStatus={activeFilter !== "all" ? activeFilter : null}
+            />
+          </>
         )}
 
         {/* List View Mode */}
-        {viewMode === 'list' && (
+        {viewMode === "list" && (
           <>
             {/* Filter Chips */}
             <View style={styles.filterContainer}>
               <Chip
-                selected={activeFilter === 'all'}
-                onPress={() => handleFilterChange('all')}
+                selected={activeFilter === "all"}
+                onPress={() => handleFilterChange("all")}
                 style={styles.filterChip}
               >
-                All ({getFilterCount('all')})
+                All ({getFilterCount("all")})
               </Chip>
               <Chip
-                selected={activeFilter === 'urgent'}
-                onPress={() => handleFilterChange('urgent')}
+                selected={activeFilter === "urgent"}
+                onPress={() => handleFilterChange("urgent")}
                 style={styles.filterChip}
               >
-                🚨 Urgent ({getFilterCount('urgent')})
+                🚨 Urgent ({getFilterCount("urgent")})
               </Chip>
               <Chip
-                selected={activeFilter === 'filling'}
-                onPress={() => handleFilterChange('filling')}
+                selected={activeFilter === "filling"}
+                onPress={() => handleFilterChange("filling")}
                 style={styles.filterChip}
               >
-                ⚠️ Filling ({getFilterCount('filling')})
+                ⚠️ Filling ({getFilterCount("filling")})
               </Chip>
               <Chip
-                selected={activeFilter === 'normal'}
-                onPress={() => handleFilterChange('normal')}
+                selected={activeFilter === "normal"}
+                onPress={() => handleFilterChange("normal")}
                 style={styles.filterChip}
               >
-                ✅ Normal ({getFilterCount('normal')})
+                ✅ Normal ({getFilterCount("normal")})
               </Chip>
               <Chip
-                selected={activeFilter === 'offline'}
-                onPress={() => handleFilterChange('offline')}
+                selected={activeFilter === "offline"}
+                onPress={() => handleFilterChange("offline")}
                 style={styles.filterChip}
               >
-                📴 Offline ({getFilterCount('offline')})
+                📴 Offline ({getFilterCount("offline")})
               </Chip>
             </View>
 
@@ -248,8 +291,8 @@ const BinManagementScreen = () => {
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>No bins found</Text>
                   <Text style={styles.emptySubtext}>
-                    {activeFilter === 'all' 
-                      ? 'No bins available in the system'
+                    {activeFilter === "all"
+                      ? "No bins available in the system"
                       : `No bins match the ${activeFilter} filter`}
                   </Text>
                 </View>
@@ -266,7 +309,7 @@ const BinManagementScreen = () => {
         label="Add Bin"
         onPress={() => {
           // Future: Navigate to add bin screen
-          console.log('Add new bin');
+          console.log("Add new bin");
         }}
       />
     </View>
