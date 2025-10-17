@@ -23,7 +23,6 @@
 6. ✅ **Success Handling** - Alert with options to view requests or create another
 7. ✅ **Error Handling** - User-friendly error messages
 8. ✅ **Responsive Design** - Follows theme constants and design rules
-9. ✅ **Push Notifications** - 🔔 Instant notification when request is created successfully
 
 ### Form Fields
 **Required:**
