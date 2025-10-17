@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Card } from 'react-native-paper';
-import { COLORS, SPACING } from '../../constants/theme';
-import Button from '../../components/Button';
-import { coordinatorApi } from '../../api';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Card } from "react-native-paper";
+import { COLORS, SPACING } from "../../constants/theme";
+import { coordinatorApi } from "../../api";
 
 const CoordinatorDashboardScreen = () => {
   const router = useRouter();
@@ -21,8 +28,8 @@ const CoordinatorDashboardScreen = () => {
         setError(null);
       }
     } catch (err) {
-      console.error('Error fetching dashboard:', err);
-      setError('Failed to load dashboard data');
+      console.error("Error fetching dashboard:", err);
+      setError("Failed to load dashboard data");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -31,7 +38,7 @@ const CoordinatorDashboardScreen = () => {
 
   useEffect(() => {
     fetchDashboardData();
-    
+
     // Auto-refresh every 5 minutes
     const interval = setInterval(fetchDashboardData, 5 * 60 * 1000);
     return () => clearInterval(interval);
@@ -51,16 +58,76 @@ const CoordinatorDashboardScreen = () => {
     );
   }
 
+  const ActionCard = ({
+    title,
+    description,
+    icon,
+    onPress,
+    color = COLORS.primary,
+  }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles.actionCard}
+      activeOpacity={0.7}
+    >
+      <View
+        style={[styles.actionIconContainer, { backgroundColor: color + "15" }]}
+      >
+        <Text style={[styles.actionIcon, { color }]}>{icon}</Text>
+      </View>
+      <View style={styles.actionContent}>
+        <Text style={styles.actionTitle}>{title}</Text>
+        <Text style={styles.actionDescription}>{description}</Text>
+      </View>
+      <Text style={[styles.actionArrow, { color }]}>›</Text>
+    </TouchableOpacity>
+  );
+
+  const StatBox = ({ value, label, icon, color = COLORS.primary, trend }) => (
+    <View style={[styles.statBox, { borderLeftColor: color }]}>
+      <View style={styles.statBoxHeader}>
+        <Text style={styles.statBoxIcon}>{icon}</Text>
+        {trend && (
+          <Text
+            style={[
+              styles.trendText,
+              { color: trend > 0 ? "#4CAF50" : COLORS.error },
+            ]}
+          >
+            {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}%
+          </Text>
+        )}
+      </View>
+      <Text style={[styles.statBoxValue, { color }]}>{value}</Text>
+      <Text style={styles.statBoxLabel}>{label}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.primary]}
+          />
         }
       >
-        <Text style={styles.title}>Coordinator Dashboard</Text>
-        <Text style={styles.subtitle}>Route & Collection Management</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Welcome back! 👋</Text>
+            <Text style={styles.title}>Coordinator Dashboard</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={fetchDashboardData}
+          >
+            <Text style={styles.refreshIcon}>🔄</Text>
+          </TouchableOpacity>
+        </View>
 
         {error && (
           <View style={styles.errorContainer}>
@@ -68,95 +135,237 @@ const CoordinatorDashboardScreen = () => {
           </View>
         )}
 
-        {/* Statistics Section */}
         {dashboardData && (
           <>
-            <Text style={styles.sectionTitle}>Overview</Text>
-            
-            {/* Bins Statistics */}
-            <Card style={styles.statCard}>
-              <Card.Content>
-                <Text style={styles.statTitle}>Smart Bins</Text>
-                <View style={styles.statGrid}>
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{dashboardData.bins?.total || 0}</Text>
-                    <Text style={styles.statLabel}>Total Bins</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: COLORS.error }]}>
-                      {dashboardData.bins?.full || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Full (≥90%)</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: '#FFA500' }]}>
-                      {dashboardData.bins?.filling || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Filling (70-89%)</Text>
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
+            {/* Quick Stats Grid */}
+            <View style={styles.statsGrid}>
+              <StatBox
+                value={dashboardData.bins?.total || 0}
+                label="Total Bins"
+                icon="🗑️"
+                color={COLORS.primary}
+              />
+              <StatBox
+                value={dashboardData.bins?.full || 0}
+                label="Full Bins"
+                icon="🔴"
+                color={COLORS.error}
+              />
+              <StatBox
+                value={dashboardData.requests?.pending || 0}
+                label="Pending Requests"
+                icon="⏳"
+                color="#FFA500"
+              />
+              <StatBox
+                value={dashboardData.routes?.active || 0}
+                label="Active Routes"
+                icon="🚛"
+                color="#4CAF50"
+              />
+            </View>
 
-            {/* Requests Statistics */}
-            <Card style={styles.statCard}>
-              <Card.Content>
-                <Text style={styles.statTitle}>Waste Requests</Text>
-                <View style={styles.statGrid}>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: '#FFA500' }]}>
-                      {dashboardData.requests?.pending || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Pending</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: '#4CAF50' }]}>
-                      {dashboardData.requests?.approved || 0}
-                    </Text>
-                    <Text style={styles.statLabel}>Approved</Text>
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
+            {/* Status Overview Cards */}
+            <View style={styles.overviewSection}>
+              <Text style={styles.sectionTitle}>Status Overview</Text>
 
-            {/* Routes Statistics */}
-            <Card style={styles.statCard}>
-              <Card.Content>
-                <Text style={styles.statTitle}>Collection Routes</Text>
-                <View style={styles.statGrid}>
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{dashboardData.routes?.active || 0}</Text>
-                    <Text style={styles.statLabel}>Active Routes</Text>
+              {/* Bins Overview Card */}
+              <Card style={styles.overviewCard}>
+                <Card.Content>
+                  <View style={styles.overviewHeader}>
+                    <View>
+                      <Text style={styles.overviewTitle}>🗑️ Smart Bins</Text>
+                      <Text style={styles.overviewSubtitle}>
+                        Real-time monitoring
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.viewAllButton}
+                      onPress={() => router.push("/coordinator/bins")}
+                    >
+                      <Text style={styles.viewAllText}>View All ›</Text>
+                    </TouchableOpacity>
                   </View>
-                </View>
-              </Card.Content>
-            </Card>
+                  <View style={styles.progressContainer}>
+                    <View style={styles.progressRow}>
+                      <View style={styles.progressLabel}>
+                        <View
+                          style={[
+                            styles.progressDot,
+                            { backgroundColor: COLORS.error },
+                          ]}
+                        />
+                        <Text style={styles.progressText}>Full</Text>
+                      </View>
+                      <Text style={styles.progressValue}>
+                        {dashboardData.bins?.full || 0}
+                      </Text>
+                    </View>
+                    <View style={styles.progressRow}>
+                      <View style={styles.progressLabel}>
+                        <View
+                          style={[
+                            styles.progressDot,
+                            { backgroundColor: "#FFA500" },
+                          ]}
+                        />
+                        <Text style={styles.progressText}>Filling</Text>
+                      </View>
+                      <Text style={styles.progressValue}>
+                        {dashboardData.bins?.filling || 0}
+                      </Text>
+                    </View>
+                    <View style={styles.progressRow}>
+                      <View style={styles.progressLabel}>
+                        <View
+                          style={[
+                            styles.progressDot,
+                            { backgroundColor: "#4CAF50" },
+                          ]}
+                        />
+                        <Text style={styles.progressText}>Normal</Text>
+                      </View>
+                      <Text style={styles.progressValue}>
+                        {(dashboardData.bins?.total || 0) -
+                          (dashboardData.bins?.full || 0) -
+                          (dashboardData.bins?.filling || 0)}
+                      </Text>
+                    </View>
+                  </View>
+                </Card.Content>
+              </Card>
+
+              {/* Requests Overview Card */}
+              <Card style={styles.overviewCard}>
+                <Card.Content>
+                  <View style={styles.overviewHeader}>
+                    <View>
+                      <Text style={styles.overviewTitle}>
+                        📋 Waste Requests
+                      </Text>
+                      <Text style={styles.overviewSubtitle}>
+                        Manage collection requests
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.viewAllButton}
+                      onPress={() => router.push("/coordinator/requests")}
+                    >
+                      <Text style={styles.viewAllText}>View All ›</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.requestStats}>
+                    <View style={styles.requestStatItem}>
+                      <Text
+                        style={[styles.requestStatValue, { color: "#FFA500" }]}
+                      >
+                        {dashboardData.requests?.pending || 0}
+                      </Text>
+                      <Text style={styles.requestStatLabel}>Pending</Text>
+                    </View>
+                    <View style={styles.requestStatDivider} />
+                    <View style={styles.requestStatItem}>
+                      <Text
+                        style={[styles.requestStatValue, { color: "#4CAF50" }]}
+                      >
+                        {dashboardData.requests?.approved || 0}
+                      </Text>
+                      <Text style={styles.requestStatLabel}>Approved</Text>
+                    </View>
+                  </View>
+                </Card.Content>
+              </Card>
+            </View>
+
+            {/* Quick Actions */}
+            <View style={styles.actionsSection}>
+              <Text style={styles.sectionTitle}>Quick Actions</Text>
+
+              <ActionCard
+                title="Smart Bins"
+                description="Monitor bin status and fill levels"
+                icon="🗑️"
+                color={COLORS.primary}
+                onPress={() => router.push("/coordinator/bins")}
+              />
+
+              <ActionCard
+                title="Bin Management"
+                description="Advanced bin monitoring and management"
+                icon="⚙️"
+                color="#9C27B0"
+                onPress={() => router.push("/coordinator/bin-management")}
+              />
+
+              <ActionCard
+                title="Manage Requests"
+                description="Review pending waste collection requests"
+                icon="✅"
+                color="#FFA500"
+                onPress={() => router.push("/coordinator/requests")}
+              />
+
+              <ActionCard
+                title="Collection Routes"
+                description="View and manage collection routes"
+                icon="🗺️"
+                color="#4CAF50"
+                onPress={() => router.push("/coordinator/routes")}
+              />
+
+              <ActionCard
+                title="Create Route"
+                description="Generate optimized collection route"
+                icon="➕"
+                color={COLORS.primary}
+                onPress={() => router.push("/coordinator/create-route")}
+              />
+            </View>
+
+            {/* Analytics Section */}
+            <View style={styles.analyticsSection}>
+              <Text style={styles.sectionTitle}>Analytics & Reports</Text>
+
+              <View style={styles.analyticsGrid}>
+                <TouchableOpacity
+                  style={styles.analyticsCard}
+                  onPress={() => router.push("/coordinator/analytics")}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.analyticsIcon}>📊</Text>
+                  <Text style={styles.analyticsLabel}>Analytics</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.analyticsCard}
+                  onPress={() => router.push("/coordinator/collection-history")}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.analyticsIcon}>📜</Text>
+                  <Text style={styles.analyticsLabel}>History</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.analyticsCard}
+                  onPress={() => router.push("/coordinator/schedule")}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.analyticsIcon}>📅</Text>
+                  <Text style={styles.analyticsLabel}>Schedule</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.analyticsCard}
+                  onPress={() => router.push("/coordinator/all-requests")}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.analyticsIcon}>📝</Text>
+                  <Text style={styles.analyticsLabel}>All Requests</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </>
         )}
-
-        {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.buttonContainer}>
-          <Button 
-            title="Smart Bins" 
-            onPress={() => router.push('/coordinator/bins')}
-          />
-          
-          <Button 
-            title="Manage Requests" 
-            onPress={() => router.push('/coordinator/requests')}
-          />
-          
-          <Button 
-            title="Collection Routes" 
-            onPress={() => router.push('/coordinator/routes')}
-          />
-          
-          <Button 
-            title="Create Route" 
-            onPress={() => router.push('/coordinator/create-route')}
-          />
-        </View>
       </ScrollView>
     </View>
   );
@@ -165,82 +374,292 @@ const CoordinatorDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: "#F5F7FA",
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F7FA",
   },
   content: {
     flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: SPACING.large,
+    paddingBottom: SPACING.medium,
+    backgroundColor: COLORS.white,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  greeting: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    marginBottom: 4,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
-    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textLight,
-    marginBottom: SPACING.large,
+  refreshButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary + "15",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  refreshIcon: {
+    fontSize: 20,
   },
   loadingText: {
     marginTop: SPACING.medium,
     color: COLORS.textLight,
   },
   errorContainer: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: "#FFEBEE",
     padding: SPACING.medium,
-    borderRadius: 8,
-    marginBottom: SPACING.medium,
+    borderRadius: 12,
+    marginHorizontal: SPACING.large,
+    marginTop: SPACING.medium,
   },
   errorText: {
     color: COLORS.error,
-    textAlign: 'center',
+    textAlign: "center",
+  },
+
+  // Stats Grid
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: SPACING.large,
+    justifyContent: "space-between",
+  },
+  statBox: {
+    width: "48%",
+    backgroundColor: COLORS.white,
+    padding: SPACING.medium,
+    borderRadius: 16,
+    borderLeftWidth: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    marginBottom: SPACING.medium,
+  },
+  statBoxHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: SPACING.small,
+  },
+  statBoxIcon: {
+    fontSize: 24,
+  },
+  trendText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  statBoxValue: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  statBoxLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+
+  // Overview Section
+  overviewSection: {
+    paddingHorizontal: SPACING.large,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
     marginBottom: SPACING.medium,
     marginTop: SPACING.small,
   },
-  statCard: {
+  overviewCard: {
     marginBottom: SPACING.medium,
     backgroundColor: COLORS.white,
+    borderRadius: 16,
     elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  statTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text,
+  overviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.medium,
   },
-  statGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  overviewTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 2,
   },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  statLabel: {
+  overviewSubtitle: {
     fontSize: 12,
     color: COLORS.textLight,
-    marginTop: 4,
-    textAlign: 'center',
   },
-  buttonContainer: {
+  viewAllButton: {
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 8,
+    backgroundColor: COLORS.primary + "10",
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: "600",
+  },
+  progressContainer: {
+    gap: SPACING.small,
+  },
+  progressRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: SPACING.small,
+  },
+  progressLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.small,
+  },
+  progressDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  progressText: {
+    fontSize: 14,
+    color: COLORS.text,
+  },
+  progressValue: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.text,
+  },
+  requestStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.large,
+  },
+  requestStatItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  requestStatValue: {
+    fontSize: 36,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  requestStatLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  requestStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "#E0E0E0",
+  },
+
+  // Actions Section
+  actionsSection: {
+    paddingHorizontal: SPACING.large,
+    marginTop: SPACING.small,
+  },
+  actionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+    padding: SPACING.medium,
+    borderRadius: 16,
+    marginBottom: SPACING.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: SPACING.medium,
+  },
+  actionIcon: {
+    fontSize: 24,
+  },
+  actionContent: {
+    flex: 1,
+  },
+  actionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  actionDescription: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  actionArrow: {
+    fontSize: 32,
+    fontWeight: "300",
+  },
+
+  // Analytics Section
+  analyticsSection: {
+    paddingHorizontal: SPACING.large,
+    marginTop: SPACING.small,
+    paddingBottom: SPACING.large,
+  },
+  analyticsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.medium,
-    marginBottom: SPACING.large,
+  },
+  analyticsCard: {
+    flex: 1,
+    minWidth: "45%",
+    aspectRatio: 1,
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  analyticsIcon: {
+    fontSize: 36,
+    marginBottom: SPACING.small,
+  },
+  analyticsLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.text,
   },
 });
 

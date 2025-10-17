@@ -59,6 +59,39 @@ export const getPendingRequests = async () => {
 };
 
 /**
+ * Get all waste requests with optional filters
+ * @param {object} filters - Optional filters (status, page, limit)
+ */
+export const getAllRequests = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (filters.status && filters.status !== 'all') {
+      queryParams.append('status', filters.status);
+    }
+    if (filters.page) {
+      queryParams.append('page', filters.page);
+    }
+    if (filters.limit) {
+      queryParams.append('limit', filters.limit);
+    }
+    
+    // For now, use pending endpoint if no filter, or simulate with pending
+    // In future, backend should provide /coordinator/requests endpoint
+    const endpoint = filters.status === 'pending' || !filters.status 
+      ? '/coordinator/requests/pending'
+      : '/coordinator/requests/pending'; // TODO: Update backend to support all statuses
+    
+    const finalEndpoint = `${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await client.get(finalEndpoint);
+    return response;
+  } catch (error) {
+    console.error('Error fetching requests:', error);
+    throw error;
+  }
+};
+
+/**
  * Approve a waste request
  * @param {string} requestId - Request ID
  */

@@ -33,8 +33,12 @@ const RouteCard = ({ route, onPress }) => {
             <Text style={styles.routeName} numberOfLines={1}>
               {route.routeName}
             </Text>
-            <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-              <Text style={styles.statusText}>{route.status?.toUpperCase()}</Text>
+            <View
+              style={[styles.statusBadge, { backgroundColor: statusColor }]}
+            >
+              <Text style={styles.statusText}>
+                {route.status?.toUpperCase()}
+              </Text>
             </View>
           </View>
 
@@ -46,7 +50,9 @@ const RouteCard = ({ route, onPress }) => {
 
           <View style={styles.details}>
             {route.totalDistance && (
-              <Text style={styles.detailText}>
+              <Text
+                style={[styles.detailText, { marginRight: SPACING.medium }]}
+              >
                 🚗 {route.totalDistance.toFixed(1)} km
               </Text>
             )}
@@ -58,9 +64,7 @@ const RouteCard = ({ route, onPress }) => {
           </View>
 
           {route.crewId && (
-            <Text style={styles.assignmentText}>
-              Crew ID: {route.crewId}
-            </Text>
+            <Text style={styles.assignmentText}>Crew ID: {route.crewId}</Text>
           )}
 
           {route.vehicleId && (
@@ -70,13 +74,13 @@ const RouteCard = ({ route, onPress }) => {
           )}
 
           {/* Progress Bar for active routes */}
-          {(route.status === 'in-progress' || route.status === 'assigned') && (
+          {(route.status === "in-progress" || route.status === "assigned") && (
             <View style={styles.progressContainer}>
               <Text style={styles.progressLabel}>
                 Progress: {completionPercentage}%
               </Text>
-              <ProgressBar 
-                progress={completionPercentage / 100} 
+              <ProgressBar
+                progress={completionPercentage / 100}
                 color={COLORS.primary}
                 style={styles.progressBar}
               />
@@ -101,14 +105,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.small,
   },
   routeName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
     flex: 1,
     marginRight: SPACING.small,
@@ -120,18 +124,17 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.white,
   },
   stopsCount: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.text,
     marginBottom: SPACING.small,
   },
   details: {
-    flexDirection: 'row',
-    gap: SPACING.medium,
+    flexDirection: "row",
     marginBottom: SPACING.small,
   },
   detailText: {
@@ -151,7 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.text,
     marginBottom: 4,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   progressBar: {
     height: 6,

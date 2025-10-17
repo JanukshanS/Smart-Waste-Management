@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
-import { Chip, Card, Searchbar } from 'react-native-paper';
+import { Chip, Card, Searchbar, Menu, Button as PaperButton } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { coordinatorApi } from '../../api';
 import { BinCard } from '../../components/Coordinator';
 
 const BinsScreen = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [bins, setBins] = useState([]);
@@ -13,6 +15,9 @@ const BinsScreen = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('fillLevel');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortMenuVisible, setSortMenuVisible] = useState(false);
 
   // Statistics
   const [stats, setStats] = useState({
@@ -57,7 +62,7 @@ const BinsScreen = () => {
     setStats({ total, full, filling, normal });
   };
 
-  const applyFilter = (binsData, filter, search) => {
+  const applyFilter = (binsData, filter, search, sort = sortBy, order = sortOrder) => {
     let filtered = [...binsData];
 
     // Apply filter
@@ -78,6 +83,40 @@ const BinsScreen = () => {
       );
     }
 
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sort) {
+        case 'fillLevel':
+          aValue = a.fillLevel || 0;
+          bValue = b.fillLevel || 0;
+          break;
+        case 'binId':
+          aValue = a.binId || '';
+          bValue = b.binId || '';
+          break;
+        case 'location':
+          aValue = a.location?.area || a.location?.address || '';
+          bValue = b.location?.area || b.location?.address || '';
+          break;
+        case 'lastCollection':
+          aValue = new Date(a.lastCollection || 0).getTime();
+          bValue = new Date(b.lastCollection || 0).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === 'string') {
+        return order === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return order === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+    });
+
     setFilteredBins(filtered);
   };
 
@@ -91,14 +130,43 @@ const BinsScreen = () => {
     applyFilter(bins, activeFilter, query);
   };
 
+  const handleSortChange = (newSort) => {
+    if (newSort === sortBy) {
+      // Toggle order
+      const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      setSortOrder(newOrder);
+      applyFilter(bins, activeFilter, searchQuery, sortBy, newOrder);
+    } else {
+      setSortBy(newSort);
+      setSortOrder('desc'); // Default to descending for new sort
+      applyFilter(bins, activeFilter, searchQuery, newSort, 'desc');
+    }
+    setSortMenuVisible(false);
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchBins();
   };
 
+  const handleBinPress = (bin) => {
+    router.push(`/coordinator/bin-details?id=${bin._id || bin.binId}`);
+  };
+
   const renderBin = ({ item }) => (
-    <BinCard bin={item} onPress={(bin) => console.log('Bin pressed:', bin.binId)} />
+    <BinCard bin={item} onPress={handleBinPress} />
   );
+
+  const getSortLabel = () => {
+    const labels = {
+      fillLevel: 'Fill Level',
+      binId: 'Bin ID',
+      location: 'Location',
+      lastCollection: 'Last Collection'
+    };
+    const orderIcon = sortOrder === 'asc' ? '↑' : '↓';
+    return `Sort: ${labels[sortBy]} ${orderIcon}`;
+  };
 
   if (loading) {
     return (
@@ -140,13 +208,34 @@ const BinsScreen = () => {
         </Card.Content>
       </Card>
 
-      {/* Search Bar */}
-      <Searchbar
-        placeholder="Search bins..."
-        onChangeText={handleSearch}
-        value={searchQuery}
-        style={styles.searchBar}
-      />
+      {/* Search Bar and Sort Button Row */}
+      <View style={styles.searchRow}>
+        <Searchbar
+          placeholder="Search bins..."
+          onChangeText={handleSearch}
+          value={searchQuery}
+          style={styles.searchBar}
+        />
+        <Menu
+          visible={sortMenuVisible}
+          onDismiss={() => setSortMenuVisible(false)}
+          anchor={
+            <PaperButton
+              mode="outlined"
+              onPress={() => setSortMenuVisible(true)}
+              style={styles.sortButton}
+              compact
+            >
+              {getSortLabel()}
+            </PaperButton>
+          }
+        >
+          <Menu.Item onPress={() => handleSortChange('fillLevel')} title="Fill Level" />
+          <Menu.Item onPress={() => handleSortChange('binId')} title="Bin ID" />
+          <Menu.Item onPress={() => handleSortChange('location')} title="Location" />
+          <Menu.Item onPress={() => handleSortChange('lastCollection')} title="Last Collection" />
+        </Menu>
+      </View>
 
       {/* Filter Chips */}
       <View style={styles.filterContainer}>
@@ -258,10 +347,20 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginTop: 4,
   },
-  searchBar: {
-    marginHorizontal: SPACING.large,
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.large,
     marginBottom: SPACING.medium,
+    gap: SPACING.small,
+  },
+  searchBar: {
+    flex: 1,
     backgroundColor: COLORS.white,
+  },
+  sortButton: {
+    borderColor: COLORS.primary,
+    minWidth: 100,
   },
   filterContainer: {
     flexDirection: 'row',
