@@ -13,6 +13,8 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api';
+import LocationPicker from '../components/LocationPicker';
+import { getRoleDashboardRoute } from '../utils/navigation';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -30,11 +32,21 @@ export default function SignupScreen() {
     lat: '',
     lng: '',
   });
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  };
+
+  const handleLocationSelect = (location) => {
+    setSelectedLocation(location);
+    setFormData((prev) => ({
+      ...prev,
+      lat: location.latitude.toString(),
+      lng: location.longitude.toString(),
     }));
   };
 
@@ -124,7 +136,10 @@ export default function SignupScreen() {
                     lat: '',
                     lng: '',
                   });
-                  router.replace('/');
+                  setSelectedLocation(null);
+                  // Navigate to role-specific dashboard
+                  const dashboardRoute = getRoleDashboardRoute(result.data.user?.role || result.data?.role);
+                  router.replace(dashboardRoute);
                 },
               },
             ]
@@ -266,31 +281,11 @@ export default function SignupScreen() {
             </View>
           </View>
 
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, styles.flex1]}>
-              <Text style={styles.label}>Latitude (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="6.9271"
-                value={formData.lat}
-                onChangeText={(value) => handleInputChange('lat', value)}
-                keyboardType="decimal-pad"
-                editable={!loading}
-              />
-            </View>
-
-            <View style={[styles.inputGroup, styles.flex1]}>
-              <Text style={styles.label}>Longitude (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="79.8612"
-                value={formData.lng}
-                onChangeText={(value) => handleInputChange('lng', value)}
-                keyboardType="decimal-pad"
-                editable={!loading}
-              />
-            </View>
-          </View>
+          <LocationPicker
+            label="Select Your Location"
+            onLocationSelect={handleLocationSelect}
+            selectedLocation={selectedLocation}
+          />
         </View>
 
         {/* Sign Up Button */}
