@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { RequestCard } from '../../components/Citizen';
 import { citizenApi } from '../../api';
+import { CITIZEN_ID } from '../../constants/devConfig';
 
 const MyRequestsScreen = () => {
   const router = useRouter();
@@ -14,8 +15,8 @@ const MyRequestsScreen = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Hardcoded user ID for now (will be from AuthContext later)
-  const userId = '68f17571b188a4a7463c1c27';
+  // User ID imported from devConfig.js (will be from AuthContext after login implementation)
+  const userId = CITIZEN_ID;
 
   const statuses = [
     { value: 'all', label: 'All', icon: '📋', color: COLORS.primary },
