@@ -11,7 +11,7 @@ import client from './client';
  */
 export const getDashboard = async (crewId) => {
   try {
-    const response = await client.get(`/crew/dashboard?crewId=${crewId}`);
+    const response = await client.get(`/coordinator/crews/${crewId}`);
     return response;
   } catch (error) {
     console.error('Error fetching crew dashboard:', error);
@@ -25,8 +25,18 @@ export const getDashboard = async (crewId) => {
  */
 export const getActiveRoute = async (crewId) => {
   try {
-    const response = await client.get(`/crew/routes/active?crewId=${crewId}`);
-    return response;
+    // Get crew details which includes current route
+    const response = await client.get(`/coordinator/crews/${crewId}`);
+    if (response.success && response.data?.currentRoute) {
+      return {
+        success: true,
+        data: response.data.currentRoute
+      };
+    }
+    return {
+      success: true,
+      data: null
+    };
   } catch (error) {
     console.error('Error fetching active route:', error);
     throw error;
@@ -40,6 +50,7 @@ export const getActiveRoute = async (crewId) => {
  */
 export const getMyRoutes = async (crewId, filters = {}) => {
   try {
+    // First try the dedicated crew routes endpoint
     const queryParams = new URLSearchParams({ crewId });
     
     if (filters.status) {
@@ -53,8 +64,41 @@ export const getMyRoutes = async (crewId, filters = {}) => {
     }
     
     const endpoint = `/crew/routes?${queryParams.toString()}`;
-    const response = await client.get(endpoint);
-    return response;
+    
+    try {
+      const response = await client.get(endpoint);
+      return response;
+    } catch (routesError) {
+      // If crew routes endpoint fails, try to get routes from crew details
+      console.log('Crew routes endpoint failed, trying crew details...');
+      const crewResponse = await client.get(`/coordinator/crews/${crewId}`);
+      
+      if (crewResponse.success && crewResponse.data) {
+        const { currentRoute, routeHistory } = crewResponse.data;
+        const routes = [];
+        
+        if (currentRoute) {
+          routes.push(currentRoute);
+        }
+        
+        if (routeHistory && Array.isArray(routeHistory)) {
+          routes.push(...routeHistory);
+        }
+        
+        // Apply filters if needed
+        let filteredRoutes = routes;
+        if (filters.status && filters.status !== 'all') {
+          filteredRoutes = routes.filter(route => route.status === filters.status);
+        }
+        
+        return {
+          success: true,
+          data: filteredRoutes
+        };
+      }
+      
+      throw routesError;
+    }
   } catch (error) {
     console.error('Error fetching crew routes:', error);
     throw error;
@@ -114,7 +158,18 @@ export const reportIssue = async (issueData) => {
  */
 export const getProfile = async (crewId) => {
   try {
-    const response = await client.get(`/crew/profile?crewId=${crewId}`);
+    // Get crew details which includes profile information
+    const response = await client.get(`/coordinator/crews/${crewId}`);
+    if (response.success && response.data) {
+      const { crew, profile } = response.data;
+      return {
+        success: true,
+        data: {
+          ...crew,
+          profile: profile
+        }
+      };
+    }
     return response;
   } catch (error) {
     console.error('Error fetching crew profile:', error);

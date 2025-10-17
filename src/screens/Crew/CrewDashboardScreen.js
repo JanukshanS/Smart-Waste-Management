@@ -34,17 +34,25 @@ const CrewDashboardScreen = () => {
         throw new Error('User ID not found');
       }
 
-      const [dashResponse, routeResponse] = await Promise.all([
-        crewApi.getDashboard(userId),
-        crewApi.getActiveRoute(userId),
-      ]);
+      // Get crew details which includes dashboard data and current route
+      const dashResponse = await crewApi.getDashboard(userId);
 
-      if (dashResponse.success) {
-        setDashboardData(dashResponse.data);
-      }
+      if (dashResponse.success && dashResponse.data) {
+        const { crew, profile, currentRoute, routeHistory } = dashResponse.data;
+        
+        // Set dashboard data from profile performance metrics
+        setDashboardData({
+          totalRoutes: profile?.performanceMetrics?.totalRoutesCompleted || 0,
+          completedStops: profile?.performanceMetrics?.totalStopsCompleted || 0,
+          averageCompletionTime: profile?.performanceMetrics?.averageCompletionTime || 0,
+          onTimeRate: profile?.performanceMetrics?.onTimeCompletionRate || 0,
+          routeHistory: routeHistory || []
+        });
 
-      if (routeResponse.success) {
-        setActiveRoute(routeResponse.data);
+        // Set active route if exists
+        if (currentRoute) {
+          setActiveRoute(currentRoute);
+        }
       }
 
       setError(null);
@@ -183,13 +191,17 @@ const CrewDashboardScreen = () => {
 
                 <View style={styles.routeStats}>
                   <View style={styles.routeStatItem}>
-                    <Text style={styles.routeStatValue}>{activeRoute.stops?.length || 0}</Text>
+                    <Text style={styles.routeStatValue}>
+                      {(activeRoute.stops && Array.isArray(activeRoute.stops)) ? activeRoute.stops.length : 0}
+                    </Text>
                     <Text style={styles.routeStatLabel}>Total Stops</Text>
                   </View>
                   <View style={styles.routeStatDivider} />
                   <View style={styles.routeStatItem}>
                     <Text style={styles.routeStatValue}>
-                      {activeRoute.stops?.filter((s) => s.status === 'completed').length || 0}
+                      {(activeRoute.stops && Array.isArray(activeRoute.stops)) 
+                        ? activeRoute.stops.filter((s) => s.status === 'completed').length 
+                        : 0}
                     </Text>
                     <Text style={styles.routeStatLabel}>Completed</Text>
                   </View>
