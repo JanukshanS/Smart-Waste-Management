@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
 import DashboardHeader from '../../components/DashboardHeader';
 import { StatCard, ExpandableCard, MiniStat, RoleBadge } from '../../components/Admin';
 import { adminApi } from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboardScreen = () => {
   const router = useRouter();
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -39,6 +41,31 @@ const AdminDashboardScreen = () => {
     fetchDashboardData();
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await logout();
+            if (result.success) {
+              router.replace('/auth-landing');
+            } else {
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -55,6 +82,11 @@ const AdminDashboardScreen = () => {
       <DashboardHeader 
         title="Admin Dashboard"
         subtitle="System Overview & Management"
+        rightComponent={
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        }
       />
       
       <ScrollView 
@@ -429,6 +461,17 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     color: COLORS.textLight,
+  },
+  logoutButton: {
+    backgroundColor: COLORS.error,
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 8,
+  },
+  logoutButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
