@@ -36,21 +36,54 @@ const CreateRouteScreen = () => {
       });
 
       if (response.success) {
+        const stops = response.data.stops?.length || response.data.totalStops || 0;
+        const distance = response.data.totalDistance || 0;
+        const duration = response.data.estimatedDuration || 0;
+
+        if (stops === 0) {
+          Alert.alert(
+            "No Route Generated",
+            `No bins or requests found matching your criteria.\n\n` +
+            `Try lowering the fill level threshold (currently ${fillLevelThreshold}%) ` +
+            `or check if there are any active bins in the system.`,
+            [{ text: "OK" }]
+          );
+        } else {
+          Alert.alert(
+            "Route Optimized Successfully! ✅",
+            `Generated route with:\n` +
+            `• ${stops} stops\n` +
+            `• ${distance.toFixed(1)} km total distance\n` +
+            `• ${Math.round(duration)} minutes estimated duration`,
+            [
+              {
+                text: "View Routes",
+                onPress: () => router.push("/coordinator/routes"),
+              },
+              { text: "OK", style: "cancel" },
+            ]
+          );
+        }
+      } else {
         Alert.alert(
-          "Route Optimized",
-          `Generated route with ${response.data.stops?.length || 0} stops`,
-          [
-            {
-              text: "View Routes",
-              onPress: () => router.push("/coordinator/routes"),
-            },
-            { text: "OK", style: "cancel" },
-          ]
+          "Optimization Failed",
+          response.message || "Failed to optimize route"
         );
       }
     } catch (err) {
       console.error("Error optimizing route:", err);
-      Alert.alert("Error", err.message || "Failed to optimize route");
+      
+      // Detailed error handling
+      let errorMessage = "Failed to optimize route";
+      if (err.status === 408) {
+        errorMessage = "Request timeout. Please check your connection and try again.";
+      } else if (err.status === 500) {
+        errorMessage = "Server error. Please contact support if this persists.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }

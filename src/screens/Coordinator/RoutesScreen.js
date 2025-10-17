@@ -76,9 +76,8 @@ const RoutesScreen = () => {
   };
 
   const handleRoutePress = (route) => {
-    // Navigate to route details (to be implemented)
-    console.log('Route pressed:', route.routeName);
-    // router.push(`/coordinator/route-details?id=${route._id}`);
+    // Navigate to route details
+    router.push(`/coordinator/route-details?id=${route._id}`);
   };
 
   const renderRoute = ({ item }) => (
