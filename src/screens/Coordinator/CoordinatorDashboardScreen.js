@@ -7,14 +7,17 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
 import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
+import { useAuth } from "../../contexts/AuthContext";
 
 const CoordinatorDashboardScreen = () => {
   const router = useRouter();
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -47,6 +50,31 @@ const CoordinatorDashboardScreen = () => {
   const onRefresh = () => {
     setRefreshing(true);
     fetchDashboardData();
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await logout();
+            if (result.success) {
+              router.replace('/auth-landing');
+            } else {
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -121,12 +149,17 @@ const CoordinatorDashboardScreen = () => {
             <Text style={styles.greeting}>Welcome back! 👋</Text>
             <Text style={styles.title}>Coordinator Dashboard</Text>
           </View>
-          <TouchableOpacity
-            style={styles.refreshButton}
-            onPress={fetchDashboardData}
-          >
-            <Text style={styles.refreshIcon}>🔄</Text>
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={fetchDashboardData}
+            >
+              <Text style={styles.refreshIcon}>🔄</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {error && (
@@ -660,6 +693,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: COLORS.text,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.small,
+  },
+  logoutButton: {
+    backgroundColor: COLORS.error,
+    paddingHorizontal: SPACING.medium,
+    paddingVertical: SPACING.small,
+    borderRadius: 8,
+  },
+  logoutButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
