@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
@@ -14,6 +14,11 @@ const WorkOrderDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [workOrder, setWorkOrder] = useState(null);
   const [updating, setUpdating] = useState(false);
+  
+  // Resolution form state
+  const [showResolutionModal, setShowResolutionModal] = useState(false);
+  const [resolutionNotes, setResolutionNotes] = useState('');
+  const [newDeviceId, setNewDeviceId] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -102,6 +107,49 @@ const WorkOrderDetailsScreen = () => {
     } catch (error) {
       console.error('Start work order error:', error);
       Alert.alert('Error', 'Failed to start work order. Please try again.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleMarkAsCompleted = () => {
+    setShowResolutionModal(true);
+  };
+
+  const handleResolveWorkOrder = async () => {
+    // Validate resolution notes
+    if (!resolutionNotes.trim()) {
+      Alert.alert('Required', 'Please enter resolution notes');
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setShowResolutionModal(false);
+
+      const resolutionData = {
+        actionTaken: 'repaired',
+        resolutionNotes: resolutionNotes.trim(),
+      };
+
+      // Add new device ID only if provided
+      if (newDeviceId.trim()) {
+        resolutionData.newDeviceId = newDeviceId.trim();
+      }
+
+      const response = await technicianApi.resolveWorkOrder(id, resolutionData);
+      
+      if (response.success) {
+        Alert.alert('Success', 'Work order completed successfully');
+        setResolutionNotes('');
+        setNewDeviceId('');
+        fetchWorkOrderDetails(); // Refresh data
+      } else {
+        Alert.alert('Error', response.message || 'Failed to resolve work order');
+      }
+    } catch (error) {
+      console.error('Resolve work order error:', error);
+      Alert.alert('Error', 'Failed to resolve work order. Please try again.');
     } finally {
       setUpdating(false);
     }
@@ -207,6 +255,11 @@ const WorkOrderDetailsScreen = () => {
   const priorityConfig = priorityColors[workOrder.priority] || priorityColors.medium;
   const issueIcon = issueTypeIcons[workOrder.issueType] || '🛠️';
 
+  // Override status if work order is repaired
+  const displayStatusConfig = workOrder.actionTaken === 'repaired' 
+    ? { bg: COLORS.successBg, text: COLORS.successText, label: 'Resolved', icon: '✅' }
+    : statusConfig;
+
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
@@ -217,10 +270,10 @@ const WorkOrderDetailsScreen = () => {
         <Text style={styles.workOrderId}>#{workOrder.workOrderId}</Text>
         
         <View style={styles.badgesContainer}>
-          <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg, borderColor: statusConfig.text }]}>
-            <Text style={styles.badgeIcon}>{statusConfig.icon}</Text>
-            <Text style={[styles.badgeText, { color: statusConfig.text }]}>
-              {statusConfig.label}
+          <View style={[styles.statusBadge, { backgroundColor: displayStatusConfig.bg, borderColor: displayStatusConfig.text }]}>
+            <Text style={styles.badgeIcon}>{displayStatusConfig.icon}</Text>
+            <Text style={[styles.badgeText, { color: displayStatusConfig.text }]}>
+              {displayStatusConfig.label}
             </Text>
           </View>
           
@@ -430,52 +483,71 @@ const WorkOrderDetailsScreen = () => {
       <View style={styles.actionsSection}>
         <Text style={styles.actionsSectionTitle}>Actions</Text>
         
-        {/* Pending status - check if assigned */}
-        {workOrder.status === 'pending' && !workOrder.technicianId && (
-          <Button
-            title="👤 Assign to Me"
-            onPress={handleAssignWorkOrder}
-            style={styles.actionButton}
-            disabled={updating}
-          />
-        )}
-
-        {/* Start Work button - available for all work orders */}
-        {workOrder.status !== 'in-progress' && workOrder.status !== 'completed' && (
-          <Button
-            title="🔧 Start Work"
-            onPress={handleStartWorkOrder}
-            style={styles.actionButton}
-            disabled={updating}
-          />
-        )}
-
-        {/* In-progress status */}
-        {workOrder.status === 'in-progress' && (
+        {/* Hide action buttons if work order is already repaired */}
+        {workOrder.actionTaken !== 'repaired' && (
           <>
+            {/* Pending status - check if assigned */}
+            {workOrder.status === 'pending' && !workOrder.technicianId && (
+              <Button
+                title="👤 Assign to Me"
+                onPress={handleAssignWorkOrder}
+                style={styles.actionButton}
+                disabled={updating}
+              />
+            )}
+
+            {/* Start Work button - available for assigned work orders */}
+            {workOrder.status !== 'in-progress' && workOrder.status !== 'completed' && (
+              <Button
+                title="🔧 Start Work"
+                onPress={handleStartWorkOrder}
+                style={[
+                  styles.actionButton,
+                  (workOrder.status === 'pending' && !workOrder.technicianId) && styles.disabledButton
+                ]}
+                disabled={updating || (workOrder.status === 'pending' && !workOrder.technicianId)}
+              />
+            )}
+
+            {/* In-progress status */}
+            {workOrder.status === 'in-progress' && (
+              <>
+                <Button
+                  title="✅ Mark as Completed"
+                  onPress={handleMarkAsCompleted}
+                  style={styles.actionButton}
+                  disabled={updating}
+                />
+                <Button
+                  title="⚠️ Escalate Issue"
+                  onPress={() => handleUpdateStatus('escalated')}
+                  style={[styles.actionButton, styles.escalateButton]}
+                  disabled={updating}
+                />
+              </>
+            )}
+
+            {/* Additional actions */}
             <Button
-              title="✅ Mark as Completed"
-              onPress={() => handleUpdateStatus('completed')}
+              title="📝 Add Notes"
+              onPress={() => Alert.alert('Coming Soon', 'Add notes functionality will be implemented')}
+              variant="outline"
               style={styles.actionButton}
-              disabled={updating}
-            />
-            <Button
-              title="⚠️ Escalate Issue"
-              onPress={() => handleUpdateStatus('escalated')}
-              style={[styles.actionButton, styles.escalateButton]}
               disabled={updating}
             />
           </>
         )}
 
-        {/* Additional actions */}
-        <Button
-          title="📝 Add Notes"
-          onPress={() => Alert.alert('Coming Soon', 'Add notes functionality will be implemented')}
-          variant="outline"
-          style={styles.actionButton}
-          disabled={updating}
-        />
+        {/* Show completion message if repaired */}
+        {workOrder.actionTaken === 'repaired' && (
+          <View style={styles.completedContainer}>
+            <Text style={styles.completedIcon}>✅</Text>
+            <Text style={styles.completedTitle}>Work Order Completed</Text>
+            <Text style={styles.completedMessage}>
+              This work order has been successfully resolved and marked as repaired.
+            </Text>
+          </View>
+        )}
 
         <TouchableOpacity 
           style={styles.backButton}
@@ -483,7 +555,80 @@ const WorkOrderDetailsScreen = () => {
         >
           <Text style={styles.backButtonText}>← Back to Work Orders</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Resolution Modal */}
+      <Modal
+        visible={showResolutionModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowResolutionModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Complete Work Order</Text>
+              <TouchableOpacity 
+                onPress={() => setShowResolutionModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.modalSubtitle}>
+                Action Taken: <Text style={styles.actionTakenText}>Repaired</Text>
+              </Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>
+                  Resolution Notes <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={styles.textArea}
+                  placeholder="Describe the work done and resolution details..."
+                  placeholderTextColor={COLORS.textLight}
+                  value={resolutionNotes}
+                  onChangeText={setResolutionNotes}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>New Device ID (Optional)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new device ID if replaced"
+                  placeholderTextColor={COLORS.textLight}
+                  value={newDeviceId}
+                  onChangeText={setNewDeviceId}
+                />
+                <Text style={styles.inputHint}>
+                  Only fill this if you replaced the device
+                </Text>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowResolutionModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.submitButton]}
+                onPress={handleResolveWorkOrder}
+              >
+                <Text style={styles.submitButtonText}>✅ Complete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
     </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -645,6 +790,10 @@ const styles = StyleSheet.create({
   escalateButton: {
     backgroundColor: COLORS.warning,
   },
+  disabledButton: {
+    backgroundColor: COLORS.border,
+    opacity: 0.6,
+  },
   backButton: {
     marginTop: SPACING.medium,
     padding: SPACING.medium,
@@ -654,6 +803,148 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.roleTechnician,
     fontWeight: '600',
+  },
+  completedContainer: {
+    backgroundColor: COLORS.successBg,
+    borderRadius: 12,
+    padding: SPACING.large,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.success,
+    marginBottom: SPACING.medium,
+  },
+  completedIcon: {
+    fontSize: 48,
+    marginBottom: SPACING.small,
+  },
+  completedTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.successText,
+    marginBottom: SPACING.small,
+  },
+  completedMessage: {
+    fontSize: 14,
+    color: COLORS.text,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.large,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: COLORS.textLight,
+  },
+  modalBody: {
+    padding: SPACING.large,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginBottom: SPACING.large,
+  },
+  actionTakenText: {
+    fontWeight: 'bold',
+    color: COLORS.success,
+  },
+  inputGroup: {
+    marginBottom: SPACING.large,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.small,
+  },
+  required: {
+    color: COLORS.error,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: SPACING.medium,
+    fontSize: 15,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+  },
+  textArea: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: SPACING.medium,
+    fontSize: 15,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+    minHeight: 100,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: SPACING.small / 2,
+    fontStyle: 'italic',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    padding: SPACING.large,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    gap: SPACING.medium,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: SPACING.medium,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  submitButton: {
+    backgroundColor: COLORS.success,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.white,
   },
 });
 

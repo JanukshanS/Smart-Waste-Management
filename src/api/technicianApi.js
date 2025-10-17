@@ -75,3 +75,63 @@ export const startWorkOrder = async (workOrderId) => {
   return client.put(`/technician/work-orders/${workOrderId}/start`);
 };
 
+/**
+ * Resolve/complete a work order
+ * @param {string} workOrderId - Work order ID
+ * @param {Object} resolutionData - Resolution details
+ * @param {string} resolutionData.actionTaken - Action taken (e.g., "repaired")
+ * @param {string} resolutionData.resolutionNotes - Resolution notes
+ * @param {string} resolutionData.newDeviceId - New device ID (optional)
+ */
+export const resolveWorkOrder = async (workOrderId, resolutionData) => {
+  return client.put(`/technician/work-orders/${workOrderId}/resolve`, resolutionData);
+};
+
+/**
+ * Get all bins
+ * @param {Object} params - Query parameters
+ * @param {number} params.page - Page number
+ * @param {number} params.limit - Items per page
+ */
+export const getBins = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  
+  if (params.page) {
+    queryParams.append('page', params.page);
+  }
+  if (params.limit) {
+    queryParams.append('limit', params.limit);
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = `/bins${queryString ? `?${queryString}` : ''}`;
+  
+  return client.get(endpoint);
+};
+
+/**
+ * Get all devices
+ * @param {Object} params - Query parameters
+ * @param {string} params.binId - Filter by bin ID
+ * @param {number} params.page - Page number
+ * @param {number} params.limit - Items per page
+ */
+export const getDevices = async (params = {}) => {
+  const queryParams = new URLSearchParams();
+  
+  if (params.binId) {
+    queryParams.append('binId', params.binId);
+  }
+  if (params.page) {
+    queryParams.append('page', params.page);
+  }
+  if (params.limit) {
+    queryParams.append('limit', params.limit);
+  }
+
+  const queryString = queryParams.toString();
+  const endpoint = `/devices${queryString ? `?${queryString}` : ''}`;
+  
+  return client.get(endpoint);
+};
+

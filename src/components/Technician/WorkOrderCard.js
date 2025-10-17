@@ -28,7 +28,18 @@ const WorkOrderCard = ({ workOrder, onPress }) => {
     'other': '🛠️',
   };
 
-  const statusConfig = statusColors[workOrder.status] || statusColors.pending;
+  let statusConfig = statusColors[workOrder.status] || statusColors.pending;
+  
+  // Override status to "Resolved" if action taken is "repaired"
+  if (workOrder.actionTaken === 'repaired') {
+    statusConfig = {
+      bg: COLORS.successBg,
+      text: COLORS.successText,
+      label: 'Resolved',
+      icon: '✅'
+    };
+  }
+  
   const priorityConfig = priorityColors[workOrder.priority] || priorityColors.medium;
   const issueIcon = issueTypeIcons[workOrder.issueType] || '🛠️';
 
@@ -115,13 +126,26 @@ const WorkOrderCard = ({ workOrder, onPress }) => {
             <Text style={styles.detailValue}>{workOrder.daysSinceCreated} days</Text>
           </View>
         )}
+
+        {/* Action Taken */}
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>⚙️ Action:</Text>
+          <View style={[
+            styles.actionBadge,
+            { backgroundColor: workOrder.actionTaken === 'none' ? '#FFF3E0' : '#E8F5E9' }
+          ]}>
+            <Text style={[
+              styles.actionBadgeText,
+              { color: workOrder.actionTaken === 'none' ? '#F57C00' : '#388E3C' }
+            ]}>
+              {workOrder.actionTaken === 'none' ? 'Pending' : workOrder.actionTaken.charAt(0).toUpperCase() + workOrder.actionTaken.slice(1)}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.actionTaken}>
-          Action: {workOrder.actionTaken === 'none' ? 'Pending' : workOrder.actionTaken}
-        </Text>
         <Text style={styles.viewDetails}>View Details →</Text>
       </View>
     </TouchableOpacity>
@@ -230,20 +254,24 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     paddingTop: SPACING.small,
   },
-  actionTaken: {
-    fontSize: 12,
-    color: COLORS.textLight,
-    fontStyle: 'italic',
-  },
   viewDetails: {
     fontSize: 14,
     color: COLORS.roleTechnician,
+    fontWeight: '600',
+  },
+  actionBadge: {
+    paddingHorizontal: SPACING.small,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  actionBadgeText: {
+    fontSize: 12,
     fontWeight: '600',
   },
 });

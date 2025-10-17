@@ -27,6 +27,12 @@ const TechnicianDashboardScreen = () => {
           title="Register Device" 
           onPress={() => router.push('/technician/register-device')}
         />
+
+        <Button 
+          title="Work Order Details" 
+          onPress={() => router.push('/technician/work-order-details')}
+        />
+
       </View>
     </ScrollView>
   );

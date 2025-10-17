@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { WorkOrderCard } from '../../components/Technician';
 import * as technicianApi from '../../api/technicianApi';
@@ -31,6 +31,13 @@ const WorkOrdersScreen = () => {
     { value: 'medium', label: 'Medium', icon: '🟡', color: '#F57C00' },
     { value: 'high', label: 'High', icon: '🔴', color: '#C62828' },
   ];
+
+  // Auto-refresh when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchWorkOrders();
+    }, [selectedStatus, selectedPriority, currentPage])
+  );
 
   useEffect(() => {
     fetchWorkOrders();
