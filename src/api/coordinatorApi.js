@@ -46,6 +46,50 @@ export const getBins = async (filters = {}) => {
 };
 
 /**
+ * Get bin by ID
+ * @param {string} binId - Bin ID
+ */
+export const getBinById = async (binId) => {
+  try {
+    const response = await client.get(`/bins/${binId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching bin details:', error);
+    throw error;
+  }
+};
+
+/**
+ * Request bin maintenance
+ * @param {string} binId - Bin ID
+ * @param {boolean} isMaintenance - Set to maintenance mode
+ */
+export const requestBinMaintenance = async (binId, isMaintenance = true) => {
+  try {
+    const response = await client.put(`/bins/${binId}/maintenance`, { isMaintenance });
+    return response;
+  } catch (error) {
+    console.error('Error requesting bin maintenance:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update bin status
+ * @param {string} binId - Bin ID
+ * @param {string} status - New status (active, offline, maintenance, full)
+ */
+export const updateBinStatus = async (binId, status) => {
+  try {
+    const response = await client.put(`/bins/${binId}`, { status });
+    return response;
+  } catch (error) {
+    console.error('Error updating bin status:', error);
+    throw error;
+  }
+};
+
+/**
  * Get pending waste requests
  */
 export const getPendingRequests = async () => {
@@ -429,6 +473,107 @@ export const addVehicleMaintenanceRecord = async (vehicleId, maintenanceData) =>
     return response;
   } catch (error) {
     console.error('Error adding maintenance record:', error);
+    throw error;
+  }
+};
+
+// =====================================
+// ISSUE MANAGEMENT
+// =====================================
+
+/**
+ * Get all issues with filters
+ * @param {Object} filters - Filter options (status, priority, issueType, crewId, page, limit, sort)
+ */
+export const getIssues = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (filters.status) queryParams.append('status', filters.status);
+    if (filters.priority) queryParams.append('priority', filters.priority);
+    if (filters.issueType) queryParams.append('issueType', filters.issueType);
+    if (filters.crewId) queryParams.append('crewId', filters.crewId);
+    if (filters.page) queryParams.append('page', filters.page);
+    if (filters.limit) queryParams.append('limit', filters.limit);
+    if (filters.sort) queryParams.append('sort', filters.sort);
+    
+    const endpoint = `/issues${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await client.get(endpoint);
+    return response;
+  } catch (error) {
+    console.error('Error fetching issues:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get issue by ID
+ * @param {string} issueId - Issue ID
+ */
+export const getIssueById = async (issueId) => {
+  try {
+    const response = await client.get(`/issues/${issueId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching issue:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update issue status
+ * @param {string} issueId - Issue ID
+ * @param {Object} statusData - Status update data (status, resolvedBy, resolution)
+ */
+export const updateIssueStatus = async (issueId, statusData) => {
+  try {
+    const response = await client.put(`/issues/${issueId}/status`, statusData);
+    return response;
+  } catch (error) {
+    console.error('Error updating issue status:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update issue priority
+ * @param {string} issueId - Issue ID
+ * @param {string} priority - New priority (low, medium, high, critical)
+ */
+export const updateIssuePriority = async (issueId, priority) => {
+  try {
+    const response = await client.put(`/issues/${issueId}/priority`, { priority });
+    return response;
+  } catch (error) {
+    console.error('Error updating issue priority:', error);
+    throw error;
+  }
+};
+
+/**
+ * Add comment to issue
+ * @param {string} issueId - Issue ID
+ * @param {Object} commentData - Comment data (userId, comment)
+ */
+export const addIssueComment = async (issueId, commentData) => {
+  try {
+    const response = await client.post(`/issues/${issueId}/comments`, commentData);
+    return response;
+  } catch (error) {
+    console.error('Error adding comment to issue:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get issue statistics
+ */
+export const getIssueStats = async () => {
+  try {
+    const response = await client.get('/issues/stats');
+    return response;
+  } catch (error) {
+    console.error('Error fetching issue stats:', error);
     throw error;
   }
 };

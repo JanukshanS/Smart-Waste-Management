@@ -5,7 +5,11 @@ import { COLORS, SPACING } from '../constants/theme';
 const Button = ({ title, onPress, style }) => {
   return (
     <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
+      {typeof title === "string" ? (
+        <Text style={styles.text}>{title}</Text>
+      ) : (
+        title
+      )}
     </TouchableOpacity>
   );
 };

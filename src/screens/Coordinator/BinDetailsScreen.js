@@ -1,10 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { Card, ProgressBar } from 'react-native-paper';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { COLORS, SPACING } from '../../constants/theme';
-import { coordinatorApi } from '../../api';
-import Button from '../../components/Button';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Platform,
+} from "react-native";
+import { Card } from "react-native-paper";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { COLORS, SPACING } from "../../constants/theme";
+import { coordinatorApi } from "../../api";
+import {
+  BinFillLevelCard,
+  BinLocationCard,
+  BinStatusCard,
+  BinCollectionCard,
+  BinDeviceCard,
+  BinMaintenanceCard,
+  BinActionButtons,
+} from "../../components/Coordinator";
 
 const BinDetailsScreen = () => {
   const router = useRouter();
@@ -13,23 +31,19 @@ const BinDetailsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [bin, setBin] = useState(null);
   const [error, setError] = useState(null);
+  const [statusMenuVisible, setStatusMenuVisible] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const fetchBinDetails = async () => {
     try {
       setError(null);
-      const response = await coordinatorApi.getBins();
+      const response = await coordinatorApi.getBinById(id);
       if (response.success) {
-        // Find the specific bin
-        const foundBin = response.data.find(b => b._id === id || b.binId === id);
-        if (foundBin) {
-          setBin(foundBin);
-        } else {
-          setError('Bin not found');
-        }
+        setBin(response.message);
       }
     } catch (err) {
-      console.error('Error fetching bin details:', err);
-      setError('Failed to load bin details');
+      console.error("Error fetching bin details:", err);
+      setError("Failed to load bin details");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -38,7 +52,7 @@ const BinDetailsScreen = () => {
 
   useEffect(() => {
     fetchBinDetails();
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchBinDetails, 30 * 1000);
     return () => clearInterval(interval);
@@ -49,36 +63,95 @@ const BinDetailsScreen = () => {
     fetchBinDetails();
   };
 
-  const getFillLevelColor = (fillLevel) => {
-    if (fillLevel >= 90) return COLORS.error;
-    if (fillLevel >= 70) return '#FFA500';
-    return '#4CAF50';
+  const handleViewOnMap = () => {
+    if (!bin?.location?.coordinates) {
+      Alert.alert("Error", "Location coordinates not available for this bin");
+      return;
+    }
+
+    const { lat, lng } = bin.location.coordinates;
+    const label = encodeURIComponent(bin.binId || "Smart Bin");
+
+    // Create map URLs for different platforms
+    const scheme = Platform.select({
+      ios: "maps:",
+      android: "geo:",
+      default: "https:",
+    });
+
+    const url = Platform.select({
+      ios: `${scheme}?q=${lat},${lng}&ll=${lat},${lng}&label=${label}`,
+      android: `${scheme}${lat},${lng}?q=${lat},${lng}(${label})`,
+      default: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+    });
+
+    Linking.openURL(url).catch((err) => {
+      console.error("Error opening map:", err);
+      Alert.alert("Error", "Failed to open map application");
+    });
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'active':
-        return '#4CAF50';
-      case 'offline':
-        return '#757575';
-      case 'maintenance':
-        return '#FFA500';
-      case 'full':
-        return COLORS.error;
-      default:
-        return COLORS.textLight;
+  const handleRequestMaintenance = () => {
+    Alert.alert(
+      "Request Maintenance",
+      `Do you want to mark bin ${bin.binId} for maintenance?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Confirm",
+          onPress: async () => {
+            try {
+              const response = await coordinatorApi.requestBinMaintenance(
+                id,
+                true
+              );
+              if (response.success) {
+                Alert.alert("Success", "Bin marked for maintenance");
+                fetchBinDetails(); // Refresh to show updated status
+              }
+            } catch (err) {
+              console.error("Error requesting maintenance:", err);
+              Alert.alert(
+                "Error",
+                err.message || "Failed to request maintenance"
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      setUpdatingStatus(true);
+      const response = await coordinatorApi.updateBinStatus(id, newStatus);
+      if (response.success) {
+        Alert.alert("Success", `Bin status updated to ${newStatus}`);
+        fetchBinDetails(); // Refresh to show updated status
+      }
+    } catch (err) {
+      console.error("Error updating bin status:", err);
+      Alert.alert("Error", err.message || "Failed to update bin status");
+    } finally {
+      setUpdatingStatus(false);
+      setStatusMenuVisible(false);
     }
   };
 
+  const handleStatusMenuToggle = (visible) => {
+    setStatusMenuVisible(visible);
+  };
+
   const formatDate = (dateString) => {
-    if (!dateString) return 'Never';
+    if (!dateString) return "Never";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -94,146 +167,56 @@ const BinDetailsScreen = () => {
   if (error || !bin) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || 'Bin not found'}</Text>
+        <Text style={styles.errorText}>{error || "Bin not found"}</Text>
         <Button title="Go Back" onPress={() => router.back()} />
       </View>
     );
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Bin Details</Text>
-        <Text style={styles.subtitle}>{bin.binId}</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Bin Details</Text>
+          <Text style={styles.subtitle}>{bin.binId}</Text>
+        </View>
 
         {/* Fill Level Card */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.cardTitle}>Current Fill Level</Text>
-            <View style={styles.fillLevelContainer}>
-              <Text style={[styles.fillLevelText, { color: getFillLevelColor(bin.fillLevel) }]}>
-                {bin.fillLevel}%
-              </Text>
-              <ProgressBar 
-                progress={bin.fillLevel / 100} 
-                color={getFillLevelColor(bin.fillLevel)}
-                style={styles.progressBar}
-              />
-              <Text style={styles.fillLevelLabel}>
-                {bin.fillLevel >= 90 ? 'Full - Needs Collection' : 
-                 bin.fillLevel >= 70 ? 'Filling - Monitor Closely' : 
-                 'Normal Level'}
-              </Text>
-            </View>
-          </Card.Content>
-        </Card>
-
-        {/* Location Card */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.cardTitle}>Location</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Area:</Text>
-              <Text style={styles.infoValue}>{bin.location?.area || 'N/A'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Address:</Text>
-              <Text style={styles.infoValue}>{bin.location?.address || 'N/A'}</Text>
-            </View>
-            {bin.location?.coordinates && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Coordinates:</Text>
-                <Text style={styles.infoValue}>
-                  {bin.location.coordinates.lat?.toFixed(6)}, {bin.location.coordinates.lng?.toFixed(6)}
-                </Text>
-              </View>
-            )}
-          </Card.Content>
-        </Card>
+        <BinFillLevelCard bin={bin} />
 
         {/* Status and Information Card */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.cardTitle}>Bin Information</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Status:</Text>
-              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(bin.status) }]}>
-                <Text style={styles.statusText}>{bin.status || 'Unknown'}</Text>
-              </View>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Bin Type:</Text>
-              <Text style={styles.infoValue}>{bin.binType || 'Standard'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Capacity:</Text>
-              <Text style={styles.infoValue}>{bin.capacity || 'N/A'} L</Text>
-            </View>
-          </Card.Content>
-        </Card>
+        <BinStatusCard
+          bin={bin}
+          statusMenuVisible={statusMenuVisible}
+          updatingStatus={updatingStatus}
+          onStatusMenuToggle={handleStatusMenuToggle}
+          onStatusUpdate={handleUpdateStatus}
+        />
+
+        {/* Location Card */}
+        <BinLocationCard bin={bin} />
+
+        {/* Device Information Card */}
+        <BinDeviceCard bin={bin} />
 
         {/* Collection History Card */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.cardTitle}>Collection History</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Last Collection:</Text>
-              <Text style={styles.infoValue}>{formatDate(bin.lastCollection)}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Total Collections:</Text>
-              <Text style={styles.infoValue}>{bin.totalCollections || 0}</Text>
-            </View>
-            {bin.lastEmptiedBy && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Last Emptied By:</Text>
-                <Text style={styles.infoValue}>{bin.lastEmptiedBy}</Text>
-              </View>
-            )}
-          </Card.Content>
-        </Card>
+        <BinCollectionCard bin={bin} />
 
         {/* Maintenance Card */}
-        {bin.maintenanceStatus && (
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.cardTitle}>Maintenance</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Status:</Text>
-                <Text style={styles.infoValue}>{bin.maintenanceStatus}</Text>
-              </View>
-              {bin.lastMaintenance && (
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Last Maintenance:</Text>
-                  <Text style={styles.infoValue}>{formatDate(bin.lastMaintenance)}</Text>
-                </View>
-              )}
-            </Card.Content>
-          </Card>
-        )}
+        <BinMaintenanceCard bin={bin} />
 
         {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <Button 
-            title="View on Map" 
-            onPress={() => {/* Future: Open map view */}}
-            disabled
-          />
-          <Button 
-            title="Request Maintenance" 
-            onPress={() => {/* Future: Create maintenance request */}}
-            disabled
-          />
-          <Button 
-            title="Collection History" 
-            onPress={() => router.push(`/coordinator/collection-history?binId=${bin.binId}`)}
-          />
-        </View>
+        <BinActionButtons
+          bin={bin}
+          onViewOnMap={handleViewOnMap}
+          onRequestMaintenance={handleRequestMaintenance}
+        />
       </View>
     </ScrollView>
   );
@@ -246,24 +229,26 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.background,
     padding: SPACING.large,
   },
   content: {
     padding: SPACING.large,
   },
+  header: {
+    marginBottom: SPACING.large,
+  },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
     color: COLORS.textLight,
-    marginBottom: SPACING.large,
   },
   loadingText: {
     marginTop: SPACING.medium,
@@ -272,7 +257,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: COLORS.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.large,
   },
   card: {
@@ -282,62 +267,28 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
     marginBottom: SPACING.medium,
   },
-  fillLevelContainer: {
-    alignItems: 'center',
-  },
-  fillLevelText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    marginBottom: SPACING.small,
-  },
-  progressBar: {
-    height: 12,
-    borderRadius: 6,
-    width: '100%',
-    marginBottom: SPACING.small,
-  },
-  fillLevelLabel: {
-    fontSize: 14,
-    color: COLORS.textLight,
-  },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.small,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   infoLabel: {
     fontSize: 14,
     color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: "600",
     flex: 1,
   },
   infoValue: {
     fontSize: 14,
     color: COLORS.text,
     flex: 2,
-    textAlign: 'right',
-  },
-  statusBadge: {
-    paddingHorizontal: SPACING.medium,
-    paddingVertical: SPACING.small / 2,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  buttonContainer: {
-    gap: SPACING.medium,
-    marginTop: SPACING.large,
-    marginBottom: SPACING.large,
+    textAlign: "right",
   },
 });
 

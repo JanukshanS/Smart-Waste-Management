@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Card } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SPACING } from "../../constants/theme";
 import { coordinatorApi } from "../../api";
 import { BinMapView } from "../../components/Coordinator";
@@ -24,6 +25,7 @@ const CoordinatorDashboardScreen = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState(null);
   const [urgentBins, setUrgentBins] = useState([]);
+  const [issueStats, setIssueStats] = useState(null);
 
   const fetchDashboardData = async () => {
     try {
@@ -41,6 +43,15 @@ const CoordinatorDashboardScreen = () => {
       });
       if (binsResponse.success) {
         setUrgentBins(binsResponse.data);
+      }
+
+      // Fetch issue statistics
+      const issueStatsResponse = await coordinatorApi.getIssueStats();
+      if (issueStatsResponse.success) {
+        console.log("Issue Stats Response:", issueStatsResponse.data);
+        setIssueStats(issueStatsResponse.data);
+      } else {
+        console.log("Issue Stats Error:", issueStatsResponse);
       }
     } catch (err) {
       console.error("Error fetching dashboard:", err);
@@ -65,28 +76,24 @@ const CoordinatorDashboardScreen = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          const result = await logout();
+          if (result.success) {
+            router.replace("/auth-landing");
+          } else {
+            Alert.alert("Error", "Failed to logout. Please try again.");
+          }
         },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await logout();
-            if (result.success) {
-              router.replace('/auth-landing');
-            } else {
-              Alert.alert('Error', 'Failed to logout. Please try again.');
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   if (loading) {
@@ -113,7 +120,7 @@ const CoordinatorDashboardScreen = () => {
       <View
         style={[styles.actionIconContainer, { backgroundColor: color + "15" }]}
       >
-        <Text style={[styles.actionIcon, { color }]}>{icon}</Text>
+        <MaterialCommunityIcons name={icon} size={24} color={color} />
       </View>
       <View style={styles.actionContent}>
         <Text style={styles.actionTitle}>{title}</Text>
@@ -126,7 +133,7 @@ const CoordinatorDashboardScreen = () => {
   const StatBox = ({ value, label, icon, color = COLORS.primary, trend }) => (
     <View style={[styles.statBox, { borderLeftColor: color }]}>
       <View style={styles.statBoxHeader}>
-        <Text style={styles.statBoxIcon}>{icon}</Text>
+        <MaterialCommunityIcons name={icon} size={24} color={color} />
         {trend && (
           <Text
             style={[
@@ -158,7 +165,14 @@ const CoordinatorDashboardScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Welcome back! 👋</Text>
+            <View style={styles.greetingContainer}>
+              <MaterialCommunityIcons
+                name="hand-wave"
+                size={20}
+                color={COLORS.primary}
+              />
+              <Text style={styles.greeting}>Welcome back!</Text>
+            </View>
             <Text style={styles.title}>Coordinator Dash</Text>
           </View>
           <View style={styles.headerButtons}>
@@ -166,7 +180,11 @@ const CoordinatorDashboardScreen = () => {
               style={styles.refreshButton}
               onPress={fetchDashboardData}
             >
-              <Text style={styles.refreshIcon}>🔄</Text>
+              <MaterialCommunityIcons
+                name="refresh"
+                size={20}
+                color={COLORS.primary}
+              />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.logoutButton}
@@ -190,25 +208,25 @@ const CoordinatorDashboardScreen = () => {
               <StatBox
                 value={dashboardData.bins?.total || 0}
                 label="Total Bins"
-                icon="🗑️"
+                icon="delete"
                 color={COLORS.primary}
               />
               <StatBox
                 value={dashboardData.bins?.full || 0}
                 label="Full Bins"
-                icon="🔴"
+                icon="alert-circle"
                 color={COLORS.error}
               />
               <StatBox
                 value={dashboardData.requests?.pending || 0}
                 label="Pending Requests"
-                icon="⏳"
+                icon="clock-outline"
                 color="#FFA500"
               />
               <StatBox
                 value={dashboardData.routes?.active || 0}
                 label="Active Routes"
-                icon="🚛"
+                icon="truck"
                 color="#4CAF50"
               />
             </View>
@@ -222,7 +240,14 @@ const CoordinatorDashboardScreen = () => {
                 <Card.Content>
                   <View style={styles.overviewHeader}>
                     <View>
-                      <Text style={styles.overviewTitle}>🗑️ Smart Bins</Text>
+                      <View style={styles.overviewTitleContainer}>
+                        <MaterialCommunityIcons
+                          name="delete"
+                          size={20}
+                          color={COLORS.primary}
+                        />
+                        <Text style={styles.overviewTitle}>Smart Bins</Text>
+                      </View>
                       <Text style={styles.overviewSubtitle}>
                         Real-time monitoring
                       </Text>
@@ -288,9 +313,14 @@ const CoordinatorDashboardScreen = () => {
                 <Card.Content>
                   <View style={styles.overviewHeader}>
                     <View>
-                      <Text style={styles.overviewTitle}>
-                        📋 Waste Requests
-                      </Text>
+                      <View style={styles.overviewTitleContainer}>
+                        <MaterialCommunityIcons
+                          name="clipboard-list"
+                          size={20}
+                          color={COLORS.primary}
+                        />
+                        <Text style={styles.overviewTitle}>Waste Requests</Text>
+                      </View>
                       <Text style={styles.overviewSubtitle}>
                         Manage collection requests
                       </Text>
@@ -323,6 +353,75 @@ const CoordinatorDashboardScreen = () => {
                   </View>
                 </Card.Content>
               </Card>
+
+              {/* Issues Overview Card */}
+              {issueStats &&
+                (console.log("Rendering Issue Stats:", issueStats) || true) && (
+                  <Card style={styles.overviewCard}>
+                    <Card.Content>
+                      <View style={styles.overviewHeader}>
+                        <View>
+                          <View style={styles.overviewTitleContainer}>
+                            <MaterialCommunityIcons
+                              name="alert"
+                              size={20}
+                              color={COLORS.primary}
+                            />
+                            <Text style={styles.overviewTitle}>
+                              Reported Issues
+                            </Text>
+                          </View>
+                          <Text style={styles.overviewSubtitle}>
+                            Track and manage crew-reported issues
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          style={styles.viewAllButton}
+                          onPress={() => router.push("/coordinator/issues")}
+                        >
+                          <Text style={styles.viewAllText}>View All ›</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.issueStatsContainer}>
+                        <View style={styles.issueStatItem}>
+                          <Text
+                            style={[
+                              styles.issueStatValue,
+                              { color: "#FFA500" },
+                            ]}
+                          >
+                            {issueStats.byStatus?.reported || 0}
+                          </Text>
+                          <Text style={styles.issueStatLabel}>Reported</Text>
+                        </View>
+                        <View style={styles.issueStatDivider} />
+                        <View style={styles.issueStatItem}>
+                          <Text
+                            style={[
+                              styles.issueStatValue,
+                              { color: "#9C27B0" },
+                            ]}
+                          >
+                            {issueStats.byStatus?.inProgress || 0}
+                          </Text>
+                          <Text style={styles.issueStatLabel}>In Progress</Text>
+                        </View>
+                        <View style={styles.issueStatDivider} />
+                        <View style={styles.issueStatItem}>
+                          <Text
+                            style={[
+                              styles.issueStatValue,
+                              { color: "#D32F2F" },
+                            ]}
+                          >
+                            {issueStats.byPriority?.critical || 0}
+                          </Text>
+                          <Text style={styles.issueStatLabel}>Critical</Text>
+                        </View>
+                      </View>
+                    </Card.Content>
+                  </Card>
+                )}
             </View>
 
             {/* Quick Actions */}
@@ -332,7 +431,7 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Smart Bins"
                 description="Monitor bin status and fill levels"
-                icon="🗑️"
+                icon="delete"
                 color={COLORS.primary}
                 onPress={() => router.push("/coordinator/bins")}
               />
@@ -340,7 +439,7 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Bin Management"
                 description="Advanced bin monitoring and management"
-                icon="⚙️"
+                icon="cog"
                 color="#9C27B0"
                 onPress={() => router.push("/coordinator/bin-management")}
               />
@@ -348,7 +447,7 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Manage Requests"
                 description="Review pending waste collection requests"
-                icon="✅"
+                icon="check-circle"
                 color="#FFA500"
                 onPress={() => router.push("/coordinator/requests")}
               />
@@ -356,7 +455,7 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Collection Routes"
                 description="View and manage collection routes"
-                icon="🗺️"
+                icon="map"
                 color="#4CAF50"
                 onPress={() => router.push("/coordinator/routes")}
               />
@@ -364,7 +463,7 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Create Route"
                 description="Generate optimized collection route"
-                icon="➕"
+                icon="plus"
                 color={COLORS.primary}
                 onPress={() => router.push("/coordinator/create-route")}
               />
@@ -372,7 +471,7 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Manage Crews"
                 description="View and manage collection crews"
-                icon="👥"
+                icon="account-group"
                 color="#2196F3"
                 onPress={() => router.push("/coordinator/crews")}
               />
@@ -380,9 +479,17 @@ const CoordinatorDashboardScreen = () => {
               <ActionCard
                 title="Manage Vehicles"
                 description="View and manage collection vehicles"
-                icon="🚛"
+                icon="truck"
                 color="#FF5722"
                 onPress={() => router.push("/coordinator/vehicles")}
+              />
+
+              <ActionCard
+                title="Reported Issues"
+                description="View and manage crew-reported issues"
+                icon="alert"
+                color="#E91E63"
+                onPress={() => router.push("/coordinator/issues")}
               />
             </View>
 
@@ -390,7 +497,14 @@ const CoordinatorDashboardScreen = () => {
             {urgentBins.length > 0 && (
               <View style={styles.mapSection}>
                 <View style={styles.mapHeader}>
-                  <Text style={styles.sectionTitle}>🚨 Urgent Bins Map</Text>
+                  <View style={styles.sectionTitleContainer}>
+                    <MaterialCommunityIcons
+                      name="alert-octagon"
+                      size={20}
+                      color={COLORS.error}
+                    />
+                    <Text style={styles.sectionTitle}>Urgent Bins Map</Text>
+                  </View>
                   <TouchableOpacity
                     style={styles.viewAllButton}
                     onPress={() => router.push("/coordinator/bin-management")}
@@ -423,8 +537,14 @@ const CoordinatorDashboardScreen = () => {
                   onPress={() => router.push("/coordinator/analytics")}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.analyticsIcon}>📊</Text>
-                  <Text style={styles.analyticsLabel}>Analytics</Text>
+                  <View style={styles.analyticsContent}>
+                    <MaterialCommunityIcons
+                      name="chart-bar"
+                      size={36}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.analyticsLabel}>Analytics</Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -432,8 +552,14 @@ const CoordinatorDashboardScreen = () => {
                   onPress={() => router.push("/coordinator/collection-history")}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.analyticsIcon}>📜</Text>
-                  <Text style={styles.analyticsLabel}>History</Text>
+                  <View style={styles.analyticsContent}>
+                    <MaterialCommunityIcons
+                      name="history"
+                      size={36}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.analyticsLabel}>History</Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -441,8 +567,14 @@ const CoordinatorDashboardScreen = () => {
                   onPress={() => router.push("/coordinator/schedule")}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.analyticsIcon}>📅</Text>
-                  <Text style={styles.analyticsLabel}>Schedule</Text>
+                  <View style={styles.analyticsContent}>
+                    <MaterialCommunityIcons
+                      name="calendar"
+                      size={36}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.analyticsLabel}>Schedule</Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -450,8 +582,14 @@ const CoordinatorDashboardScreen = () => {
                   onPress={() => router.push("/coordinator/all-requests")}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.analyticsIcon}>📝</Text>
-                  <Text style={styles.analyticsLabel}>All Requests</Text>
+                  <View style={styles.analyticsContent}>
+                    <MaterialCommunityIcons
+                      name="file-document"
+                      size={36}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.analyticsLabel}>All Requests</Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -491,10 +629,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  greetingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.small,
+    marginBottom: 4,
+  },
   greeting: {
     fontSize: 16,
     color: COLORS.textLight,
-    marginBottom: 4,
   },
   title: {
     fontSize: 28,
@@ -508,9 +651,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary + "15",
     justifyContent: "center",
     alignItems: "center",
-  },
-  refreshIcon: {
-    fontSize: 20,
   },
   loadingText: {
     marginTop: SPACING.medium,
@@ -575,12 +715,18 @@ const styles = StyleSheet.create({
   overviewSection: {
     paddingHorizontal: SPACING.large,
   },
+  sectionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.small,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: COLORS.text,
     marginBottom: SPACING.medium,
     marginTop: SPACING.small,
+    flex: 1,
   },
   overviewCard: {
     marginBottom: SPACING.medium,
@@ -598,11 +744,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: SPACING.medium,
   },
+  overviewTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.small,
+    marginBottom: 2,
+  },
   overviewTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: COLORS.text,
-    marginBottom: 2,
+    flex: 1,
   },
   overviewSubtitle: {
     fontSize: 12,
@@ -666,6 +818,29 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
   requestStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "#E0E0E0",
+  },
+  issueStatsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.medium,
+  },
+  issueStatItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  issueStatValue: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  issueStatLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  issueStatDivider: {
     width: 1,
     height: 40,
     backgroundColor: "#E0E0E0",
@@ -747,26 +922,27 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: SPACING.medium,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
-  analyticsIcon: {
-    fontSize: 36,
-    marginBottom: SPACING.small,
+  analyticsContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   analyticsLabel: {
     fontSize: 14,
     fontWeight: "600",
     color: COLORS.text,
+    marginTop: SPACING.small,
   },
   headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.small,
   },
   logoutButton: {
@@ -778,7 +954,7 @@ const styles = StyleSheet.create({
   logoutButtonText: {
     color: COLORS.white,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

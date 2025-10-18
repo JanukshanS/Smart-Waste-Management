@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { Chip, FAB } from 'react-native-paper';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import { coordinatorApi } from '../../api';
@@ -131,7 +132,14 @@ const BinManagementScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>🗑️ Bin Management</Text>
+        <View style={styles.titleContainer}>
+          <MaterialCommunityIcons
+            name="delete"
+            size={24}
+            color={COLORS.primary}
+          />
+          <Text style={styles.title}>Bin Management</Text>
+        </View>
         <Text style={styles.subtitle}>
           {`${filteredBins.length} of ${bins.length} bins`}
         </Text>
@@ -144,21 +152,42 @@ const BinManagementScreen = () => {
           onPress={() => setViewMode("stats")}
           style={styles.viewModeChip}
         >
-          📊 Overview
+          <View style={styles.chipContent}>
+            <MaterialCommunityIcons
+              name="chart-bar"
+              size={16}
+              color={COLORS.primary}
+            />
+            <Text style={styles.chipText}>Overview</Text>
+          </View>
         </Chip>
         <Chip
           selected={viewMode === "map"}
           onPress={() => setViewMode("map")}
           style={styles.viewModeChip}
         >
-          🗺️ Map
+          <View style={styles.chipContent}>
+            <MaterialCommunityIcons
+              name="map"
+              size={16}
+              color={COLORS.primary}
+            />
+            <Text style={styles.chipText}>Map</Text>
+          </View>
         </Chip>
         <Chip
           selected={viewMode === "list"}
           onPress={() => setViewMode("list")}
           style={styles.viewModeChip}
         >
-          📋 List
+          <View style={styles.chipContent}>
+            <MaterialCommunityIcons
+              name="clipboard-list"
+              size={16}
+              color={COLORS.primary}
+            />
+            <Text style={styles.chipText}>List</Text>
+          </View>
         </Chip>
       </View>
 
@@ -197,28 +226,64 @@ const BinManagementScreen = () => {
                 onPress={() => handleFilterChange("urgent")}
                 style={styles.filterChip}
               >
-                🚨 Urgent ({getFilterCount("urgent")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="alert-octagon"
+                    size={16}
+                    color={COLORS.error}
+                  />
+                  <Text style={styles.chipText}>
+                    Urgent ({getFilterCount("urgent")})
+                  </Text>
+                </View>
               </Chip>
               <Chip
                 selected={activeFilter === "filling"}
                 onPress={() => handleFilterChange("filling")}
                 style={styles.filterChip}
               >
-                ⚠️ Filling ({getFilterCount("filling")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="alert"
+                    size={16}
+                    color="#FFA500"
+                  />
+                  <Text style={styles.chipText}>
+                    Filling ({getFilterCount("filling")})
+                  </Text>
+                </View>
               </Chip>
               <Chip
                 selected={activeFilter === "normal"}
                 onPress={() => handleFilterChange("normal")}
                 style={styles.filterChip}
               >
-                ✅ Normal ({getFilterCount("normal")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={16}
+                    color="#4CAF50"
+                  />
+                  <Text style={styles.chipText}>
+                    Normal ({getFilterCount("normal")})
+                  </Text>
+                </View>
               </Chip>
               <Chip
                 selected={activeFilter === "offline"}
                 onPress={() => handleFilterChange("offline")}
                 style={styles.filterChip}
               >
-                📴 Offline ({getFilterCount("offline")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="wifi-off"
+                    size={16}
+                    color={COLORS.textLight}
+                  />
+                  <Text style={styles.chipText}>
+                    Offline ({getFilterCount("offline")})
+                  </Text>
+                </View>
               </Chip>
             </View>
 
@@ -251,28 +316,64 @@ const BinManagementScreen = () => {
                 onPress={() => handleFilterChange("urgent")}
                 style={styles.filterChip}
               >
-                🚨 Urgent ({getFilterCount("urgent")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="alert-octagon"
+                    size={16}
+                    color={COLORS.error}
+                  />
+                  <Text style={styles.chipText}>
+                    Urgent ({getFilterCount("urgent")})
+                  </Text>
+                </View>
               </Chip>
               <Chip
                 selected={activeFilter === "filling"}
                 onPress={() => handleFilterChange("filling")}
                 style={styles.filterChip}
               >
-                ⚠️ Filling ({getFilterCount("filling")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="alert"
+                    size={16}
+                    color="#FFA500"
+                  />
+                  <Text style={styles.chipText}>
+                    Filling ({getFilterCount("filling")})
+                  </Text>
+                </View>
               </Chip>
               <Chip
                 selected={activeFilter === "normal"}
                 onPress={() => handleFilterChange("normal")}
                 style={styles.filterChip}
               >
-                ✅ Normal ({getFilterCount("normal")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={16}
+                    color="#4CAF50"
+                  />
+                  <Text style={styles.chipText}>
+                    Normal ({getFilterCount("normal")})
+                  </Text>
+                </View>
               </Chip>
               <Chip
                 selected={activeFilter === "offline"}
                 onPress={() => handleFilterChange("offline")}
                 style={styles.filterChip}
               >
-                📴 Offline ({getFilterCount("offline")})
+                <View style={styles.chipContent}>
+                  <MaterialCommunityIcons
+                    name="wifi-off"
+                    size={16}
+                    color={COLORS.textLight}
+                  />
+                  <Text style={styles.chipText}>
+                    Offline ({getFilterCount("offline")})
+                  </Text>
+                </View>
               </Chip>
             </View>
 
@@ -319,13 +420,13 @@ const BinManagementScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: "#F5F7FA",
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F7FA',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F7FA",
   },
   header: {
     padding: SPACING.large,
@@ -333,17 +434,22 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.small,
+    marginBottom: 4,
+  },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
@@ -354,7 +460,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
   viewModeContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: SPACING.large,
     paddingVertical: SPACING.medium,
     gap: SPACING.small,
@@ -367,45 +473,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.large,
   },
   errorContainer: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: "#FFEBEE",
     padding: SPACING.medium,
     borderRadius: 12,
     marginBottom: SPACING.medium,
   },
   errorText: {
     color: COLORS.error,
-    textAlign: 'center',
+    textAlign: "center",
   },
   filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.small,
     marginBottom: SPACING.medium,
   },
   filterChip: {
     marginBottom: SPACING.small,
   },
+  chipContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
   binsList: {
     paddingBottom: 100, // Space for FAB
   },
   emptyContainer: {
     padding: SPACING.large,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.text,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
     color: COLORS.textLight,
-    textAlign: 'center',
+    textAlign: "center",
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     margin: 16,
     right: 0,
     bottom: 0,

@@ -144,7 +144,7 @@ export const updateStopStatus = async (routeId, stopIndex, stopData) => {
  */
 export const reportIssue = async (issueData) => {
   try {
-    const response = await client.post('/crew/issues', issueData);
+    const response = await client.post('/issues', issueData);
     return response;
   } catch (error) {
     console.error('Error reporting issue:', error);
