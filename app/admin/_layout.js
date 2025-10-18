@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Slot } from 'expo-router';
-import { LayoutDashboard, Users, FileText, Settings, ShieldCheck } from 'lucide-react-native';
+import { LayoutDashboard, Users, FileText, Trash } from "lucide-react-native";
 import { BottomTabNavigator } from '../../src/components/Navigation';
 import { COLORS } from '../../src/constants/theme';
 
@@ -15,28 +15,28 @@ const AdminLayout = () => {
   // Define admin navigation tabs
   const adminTabs = [
     {
-      key: 'dashboard',
-      title: 'Dashboard',
+      key: "dashboard",
+      title: "Dashboard",
       icon: LayoutDashboard,
-      route: '/admin',
+      route: "/admin",
     },
     {
-      key: 'users',
-      title: 'Users',
+      key: "users",
+      title: "Users",
       icon: Users,
-      route: '/admin/users',
+      route: "/admin/users",
     },
     {
-      key: 'reports',
-      title: 'Reports',
+      key: "reports",
+      title: "Reports",
       icon: FileText,
-      route: '/admin/reports',
+      route: "/admin/reports",
     },
     {
-      key: 'security',
-      title: 'Security',
-      icon: ShieldCheck,
-      route: '/admin/security-monitoring',
+      key: "bins",
+      title: "Bins",
+      icon: Trash,
+      route: "/admin/bins",
     },
     // {
     //   key: 'settings',
