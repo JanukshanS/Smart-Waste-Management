@@ -43,5 +43,5 @@ export const getRoleDashboardTitle = (role) => {
  */
 export const isValidRole = (role) => {
   const validRoles = ["admin", "citizen", "coordinator", "technician", "crew"];
-  return validRoles.includes(role?.toLowerCase());
+  return typeof role === 'string' && validRoles.includes(role.toLowerCase());
 };
