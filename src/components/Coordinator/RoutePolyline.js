@@ -72,35 +72,37 @@ const RoutePolyline = ({ route, showStops = true, showProgress = false }) => {
       )}
 
       {/* Stop markers */}
-      {showStops && route.stops.map((stop, index) => {
-        if (!stop.location?.coordinates) return null;
+      {showStops && route.stops
+        .filter(stop => stop.location?.coordinates)
+        .map((stop, index) => {
+          const markerColor = getStopMarkerColor(stop);
+          const isStart = index === 0;
+          const isEnd = index === route.stops.filter(s => s.location?.coordinates).length - 1;
+          const stopId = stop._id || stop.binId || stop.requestId || index;
 
-        const markerColor = getStopMarkerColor(stop);
-        const isStart = index === 0;
-        const isEnd = index === route.stops.length - 1;
-
-        return (
-          <Marker
-            key={`${route._id}-stop-${index}`}
-            coordinate={{
-              latitude: stop.location.coordinates.lat,
-              longitude: stop.location.coordinates.lng,
-            }}
-            anchor={{ x: 0.5, y: 0.5 }}
-          >
-            <View style={[
-              styles.stopMarker,
-              { backgroundColor: markerColor },
-              isStart && styles.startMarker,
-              isEnd && styles.endMarker,
-            ]}>
-              <Text style={styles.stopNumber}>
-                {isStart ? 'S' : isEnd ? 'E' : index + 1}
-              </Text>
-            </View>
-          </Marker>
-        );
-      })}
+          return (
+            <Marker
+              key={`${route._id || 'route'}-stop-${stopId}`}
+              coordinate={{
+                latitude: stop.location.coordinates.lat,
+                longitude: stop.location.coordinates.lng,
+              }}
+              anchor={{ x: 0.5, y: 0.5 }}
+            >
+              <View style={[
+                styles.stopMarker,
+                { backgroundColor: markerColor },
+                isStart && styles.startMarker,
+                isEnd && styles.endMarker,
+              ]}>
+                <Text style={styles.stopNumber}>
+                  {isStart ? 'S' : isEnd ? 'E' : index + 1}
+                </Text>
+              </View>
+            </Marker>
+          );
+        })
+      }
     </>
   );
 };

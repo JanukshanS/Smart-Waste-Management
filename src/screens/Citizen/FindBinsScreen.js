@@ -4,8 +4,8 @@ import MapView, { Marker, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { MapPin, RefreshCw } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
-import { BinDetailsBottomSheet, CitizenBottomNav } from '../../components/Citizen';
-import { citizenApi } from '../../api';
+import { BinDetailsBottomSheet } from "../../components/Citizen";
+import { citizenApi } from "../../api";
 
 const FindBinsScreen = () => {
   const [location, setLocation] = useState(null);
@@ -30,12 +30,12 @@ const FindBinsScreen = () => {
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
-      if (status !== 'granted') {
+
+      if (status !== "granted") {
         Alert.alert(
-          'Permission Required',
-          'Location permission is required to find nearby bins. Please enable it in settings.',
-          [{ text: 'OK' }]
+          "Permission Required",
+          "Location permission is required to find nearby bins. Please enable it in settings.",
+          [{ text: "OK" }]
         );
         setLoading(false);
         return;
@@ -43,8 +43,8 @@ const FindBinsScreen = () => {
 
       await getCurrentLocation();
     } catch (error) {
-      console.error('Error requesting location permission:', error);
-      Alert.alert('Error', 'Failed to request location permission');
+      console.error("Error requesting location permission:", error);
+      Alert.alert("Error", "Failed to request location permission");
       setLoading(false);
     }
   };
@@ -57,7 +57,7 @@ const FindBinsScreen = () => {
       });
 
       const { latitude, longitude } = currentLocation.coords;
-      
+
       setLocation({
         lat: latitude,
         lng: longitude,
@@ -72,8 +72,8 @@ const FindBinsScreen = () => {
 
       setLoading(false);
     } catch (error) {
-      console.error('Error getting location:', error);
-      Alert.alert('Error', 'Failed to get your current location');
+      console.error("Error getting location:", error);
+      Alert.alert("Error", "Failed to get your current location");
       setLoading(false);
     }
   };
@@ -93,8 +93,8 @@ const FindBinsScreen = () => {
         setBins(response.data);
       }
     } catch (error) {
-      console.error('Error fetching nearby bins:', error);
-      Alert.alert('Error', 'Failed to fetch nearby bins');
+      console.error("Error fetching nearby bins:", error);
+      Alert.alert("Error", "Failed to fetch nearby bins");
     } finally {
       setRefreshing(false);
     }
@@ -115,11 +115,11 @@ const FindBinsScreen = () => {
 
   const getMarkerColor = (fillStatusColor) => {
     switch (fillStatusColor) {
-      case 'green':
+      case "green":
         return COLORS.success;
-      case 'yellow':
+      case "yellow":
         return COLORS.warning;
-      case 'red':
+      case "red":
         return COLORS.error;
       default:
         return COLORS.gray;
@@ -171,8 +171,8 @@ const FindBinsScreen = () => {
               longitude: location.lng,
             }}
             radius={searchRadius}
-            strokeColor={COLORS.primary + '40'}
-            fillColor={COLORS.primary + '10'}
+            strokeColor={COLORS.primary + "40"}
+            fillColor={COLORS.primary + "10"}
             strokeWidth={2}
           />
         )}
@@ -188,7 +188,12 @@ const FindBinsScreen = () => {
             pinColor={getMarkerColor(bin.fillStatusColor)}
             onPress={() => handleBinMarkerPress(bin)}
           >
-            <View style={[styles.markerContainer, { borderColor: getMarkerColor(bin.fillStatusColor) }]}>
+            <View
+              style={[
+                styles.markerContainer,
+                { borderColor: getMarkerColor(bin.fillStatusColor) },
+              ]}
+            >
               <Text style={styles.markerText}>{bin.fillLevel}%</Text>
             </View>
           </Marker>
@@ -204,14 +209,14 @@ const FindBinsScreen = () => {
             onPress={handleRefresh}
             disabled={refreshing}
           >
-            <RefreshCw 
-              size={20} 
-              color={COLORS.primary} 
-              style={refreshing ? { transform: [{ rotate: '360deg' }] } : {}}
+            <RefreshCw
+              size={20}
+              color={COLORS.primary}
+              style={refreshing ? { transform: [{ rotate: "360deg" }] } : {}}
             />
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{bins.length}</Text>
@@ -219,7 +224,7 @@ const FindBinsScreen = () => {
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>
-              {bins.filter((b) => b.fillStatusColor === 'green').length}
+              {bins.filter((b) => b.fillStatusColor === "green").length}
             </Text>
             <Text style={styles.statLabel}>Available</Text>
           </View>
@@ -262,15 +267,21 @@ const FindBinsScreen = () => {
           <Text style={styles.legendTitle}>Status:</Text>
           <View style={styles.legendItems}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.success }]} />
+              <View
+                style={[styles.legendDot, { backgroundColor: COLORS.success }]}
+              />
               <Text style={styles.legendText}>Available</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.warning }]} />
+              <View
+                style={[styles.legendDot, { backgroundColor: COLORS.warning }]}
+              />
               <Text style={styles.legendText}>Filling</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.error }]} />
+              <View
+                style={[styles.legendDot, { backgroundColor: COLORS.error }]}
+              />
               <Text style={styles.legendText}>Full</Text>
             </View>
           </View>
@@ -283,9 +294,6 @@ const FindBinsScreen = () => {
         onClose={() => setShowBottomSheet(false)}
         bin={selectedBin}
       />
-      
-      {/* Bottom Navigation */}
-      <CitizenBottomNav />
     </View>
   );
 };

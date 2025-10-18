@@ -120,7 +120,7 @@ const CollectionHistoryScreen = () => {
           <Text style={styles.routeName}>{item.routeName}</Text>
           <View style={styles.completionBadge}>
             <Text style={styles.completionText}>
-              {item.completionPercentage || 100}% Complete
+              {`${item.completionPercentage || 100}% Complete`}
             </Text>
           </View>
         </View>
@@ -158,8 +158,7 @@ const CollectionHistoryScreen = () => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Stops Completed:</Text>
             <Text style={styles.infoValue}>
-              {item.stops?.filter((s) => s.status === "completed").length || 0}{" "}
-              / {item.stops?.length || 0}
+              {`${item.stops?.filter((s) => s.status === "completed").length || 0} / ${item.stops?.length || 0}`}
             </Text>
           </View>
 

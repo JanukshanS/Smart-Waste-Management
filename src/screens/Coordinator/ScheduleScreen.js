@@ -143,7 +143,7 @@ const ScheduleScreen = () => {
           <View style={styles.routeHeaderLeft}>
             <Text style={styles.routeName}>{item.routeName}</Text>
             <Text style={styles.routeDate}>
-              {formatDate(item.scheduledDate)} {formatTime(item.scheduledDate)}
+              {`${formatDate(item.scheduledDate)} ${formatTime(item.scheduledDate)}`}
             </Text>
           </View>
           <Chip
@@ -181,7 +181,7 @@ const ScheduleScreen = () => {
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Stops:</Text>
             <Text style={styles.detailValue}>
-              {item.stops?.length || 0} stops
+              {`${item.stops?.length || 0} stops`}
             </Text>
           </View>
           {item.status === "in-progress" && (
@@ -193,7 +193,7 @@ const ScheduleScreen = () => {
                   { color: COLORS.primary, fontWeight: "bold" },
                 ]}
               >
-                {item.completionPercentage || 0}%
+                {`${item.completionPercentage || 0}%`}
               </Text>
             </View>
           )}
@@ -216,7 +216,7 @@ const ScheduleScreen = () => {
       <View style={styles.header}>
         <Text style={styles.title}>Collection Schedule</Text>
         <Text style={styles.subtitle}>
-          {filteredRoutes.length} scheduled route{filteredRoutes.length !== 1 ? 's' : ''}
+          {`${filteredRoutes.length} scheduled route${filteredRoutes.length !== 1 ? 's' : ''}`}
         </Text>
       </View>
 

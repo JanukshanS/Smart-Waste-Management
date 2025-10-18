@@ -4,18 +4,28 @@ import { Card, ProgressBar } from 'react-native-paper';
 import { COLORS, SPACING } from '../../constants/theme';
 
 const RouteCard = ({ route, onPress }) => {
+  // Guard clause to ensure route exists
+  if (!route) {
+    return null;
+  }
+
+  // Debug logging to check route structure
+  if (__DEV__) {
+    console.log("RouteCard received route:", JSON.stringify(route, null, 2));
+  }
+
   // Determine status color
   const getStatusColor = (status) => {
     switch (status) {
-      case 'draft':
-        return '#9E9E9E';
-      case 'assigned':
-        return '#2196F3';
-      case 'in-progress':
-        return '#FFA500';
-      case 'completed':
-        return '#4CAF50';
-      case 'cancelled':
+      case "draft":
+        return "#9E9E9E";
+      case "assigned":
+        return "#2196F3";
+      case "in-progress":
+        return "#FFA500";
+      case "completed":
+        return "#4CAF50";
+      case "cancelled":
         return COLORS.error;
       default:
         return COLORS.textLight;
@@ -23,7 +33,20 @@ const RouteCard = ({ route, onPress }) => {
   };
 
   const statusColor = getStatusColor(route.status);
-  const completionPercentage = route.completionPercentage || 0;
+  const completionPercentage = Number(route.completionPercentage) || 0;
+
+  // Ensure all required properties exist
+  const safeRoute = {
+    routeName: route.routeName || "Unnamed Route",
+    status: route.status || "unknown",
+    stops: route.stops || [],
+    totalDistance: route.totalDistance || 0,
+    estimatedDuration: route.estimatedDuration || 0,
+    crewId: route.crewId || null,
+    vehicleId: route.vehicleId || null,
+    createdAt: route.createdAt || null,
+    completionPercentage: completionPercentage,
+  };
 
   return (
     <TouchableOpacity onPress={() => onPress?.(route)} activeOpacity={0.7}>
@@ -31,61 +54,65 @@ const RouteCard = ({ route, onPress }) => {
         <Card.Content>
           <View style={styles.header}>
             <Text style={styles.routeName} numberOfLines={1}>
-              {route.routeName}
+              {safeRoute.routeName}
             </Text>
             <View
               style={[styles.statusBadge, { backgroundColor: statusColor }]}
             >
               <Text style={styles.statusText}>
-                {route.status?.toUpperCase() || 'UNKNOWN'}
+                {safeRoute.status.toUpperCase()}
               </Text>
             </View>
           </View>
 
-          {route.stops && route.stops.length > 0 && (
+          {safeRoute.stops.length > 0 && (
             <Text style={styles.stopsCount}>
-              Stops: {route.stops.length} locations
+              {`Stops: ${safeRoute.stops.length} locations`}
             </Text>
           )}
 
           <View style={styles.details}>
-            {route.totalDistance && !isNaN(route.totalDistance) && (
+            {safeRoute.totalDistance > 0 && (
               <Text
                 style={[styles.detailText, { marginRight: SPACING.medium }]}
               >
-                🚗 {Number(route.totalDistance).toFixed(1)} km
+                {`🚗 ${Number(safeRoute.totalDistance).toFixed(1)} km`}
               </Text>
             )}
-            {route.estimatedDuration && !isNaN(route.estimatedDuration) && (
+            {safeRoute.estimatedDuration > 0 && (
               <Text style={styles.detailText}>
-                ⏱️ {Math.round(Number(route.estimatedDuration))} min
+                {`⏱️ ${Math.round(Number(safeRoute.estimatedDuration))} min`}
               </Text>
             )}
           </View>
 
-          {route.crewId && (
+          {safeRoute.crewId && (
             <Text style={styles.assignmentText}>
-              Crew:{" "}
-              {typeof route.crewId === "object"
-                ? route.crewId.name
-                : route.crewId}
+              {`Crew: ${
+                typeof safeRoute.crewId === "object" && safeRoute.crewId.name
+                  ? safeRoute.crewId.name
+                  : safeRoute.crewId || "Unknown"
+              }`}
             </Text>
           )}
 
-          {route.vehicleId && (
+          {safeRoute.vehicleId && (
             <Text style={styles.assignmentText}>
-              Vehicle ID:{" "}
-              {typeof route.vehicleId === "object"
-                ? route.vehicleId._id
-                : route.vehicleId}
+              {`Vehicle ID: ${
+                typeof safeRoute.vehicleId === "object" &&
+                safeRoute.vehicleId._id
+                  ? safeRoute.vehicleId._id
+                  : safeRoute.vehicleId || "Unknown"
+              }`}
             </Text>
           )}
 
           {/* Progress Bar for active routes */}
-          {(route.status === "in-progress" || route.status === "assigned") && (
+          {(safeRoute.status === "in-progress" ||
+            safeRoute.status === "assigned") && (
             <View style={styles.progressContainer}>
               <Text style={styles.progressLabel}>
-                Progress: {completionPercentage}%
+                {`Progress: ${completionPercentage}%`}
               </Text>
               <ProgressBar
                 progress={completionPercentage / 100}
@@ -95,9 +122,15 @@ const RouteCard = ({ route, onPress }) => {
             </View>
           )}
 
-          {route.createdAt && (
+          {safeRoute.createdAt && (
             <Text style={styles.dateText}>
-              Created: {new Date(route.createdAt).toLocaleDateString()}
+              {`Created: ${(() => {
+                try {
+                  return new Date(safeRoute.createdAt).toLocaleDateString();
+                } catch (error) {
+                  return "Invalid Date";
+                }
+              })()}`}
             </Text>
           )}
         </Card.Content>

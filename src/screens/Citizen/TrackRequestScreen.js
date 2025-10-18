@@ -29,9 +29,8 @@ import {
   ClipboardList, 
   RefreshCw 
 } from 'lucide-react-native';
-import { COLORS, SPACING } from '../../constants/theme';
-import { CitizenBottomNav } from '../../components/Citizen';
-import { citizenApi } from '../../api';
+import { COLORS, SPACING } from "../../constants/theme";
+import { citizenApi } from "../../api";
 
 const TrackRequestScreen = () => {
   const router = useRouter();
@@ -48,7 +47,7 @@ const TrackRequestScreen = () => {
 
   const fetchTrackingData = async (isRefreshing = false) => {
     if (!id) {
-      Alert.alert('Error', 'No request ID provided');
+      Alert.alert("Error", "No request ID provided");
       router.back();
       return;
     }
@@ -60,11 +59,14 @@ const TrackRequestScreen = () => {
       if (response.success) {
         setRequest(response.data);
       } else {
-        Alert.alert('Error', response.message || 'Failed to fetch tracking data');
+        Alert.alert(
+          "Error",
+          response.message || "Failed to fetch tracking data"
+        );
       }
     } catch (error) {
-      console.error('Track request error:', error);
-      Alert.alert('Error', 'Failed to fetch tracking data. Please try again.');
+      console.error("Track request error:", error);
+      Alert.alert("Error", "Failed to fetch tracking data. Please try again.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -77,65 +79,113 @@ const TrackRequestScreen = () => {
 
   const getStatusConfig = (status) => {
     switch (status) {
-      case 'pending':
-        return { color: COLORS.warning, bgColor: '#FFF3E0', icon: Clock, iconName: 'Clock' };
-      case 'approved':
-        return { color: COLORS.info, bgColor: '#E3F2FD', icon: Check, iconName: 'Check' };
-      case 'scheduled':
-        return { color: '#1976D2', bgColor: '#E1F5FE', icon: Calendar, iconName: 'Calendar' };
-      case 'in-progress':
-        return { color: '#F57C00', bgColor: '#FFF3E0', icon: Truck, iconName: 'Truck' };
-      case 'completed':
-        return { color: COLORS.success, bgColor: '#E8F5E9', icon: CheckCircle, iconName: 'CheckCircle' };
-      case 'cancelled':
-        return { color: COLORS.danger, bgColor: '#FFEBEE', icon: XCircle, iconName: 'XCircle' };
+      case "pending":
+        return {
+          color: COLORS.warning,
+          bgColor: "#FFF3E0",
+          icon: Clock,
+          iconName: "Clock",
+        };
+      case "approved":
+        return {
+          color: COLORS.info,
+          bgColor: "#E3F2FD",
+          icon: Check,
+          iconName: "Check",
+        };
+      case "scheduled":
+        return {
+          color: "#1976D2",
+          bgColor: "#E1F5FE",
+          icon: Calendar,
+          iconName: "Calendar",
+        };
+      case "in-progress":
+        return {
+          color: "#F57C00",
+          bgColor: "#FFF3E0",
+          icon: Truck,
+          iconName: "Truck",
+        };
+      case "completed":
+        return {
+          color: COLORS.success,
+          bgColor: "#E8F5E9",
+          icon: CheckCircle,
+          iconName: "CheckCircle",
+        };
+      case "cancelled":
+        return {
+          color: COLORS.danger,
+          bgColor: "#FFEBEE",
+          icon: XCircle,
+          iconName: "XCircle",
+        };
       default:
-        return { color: COLORS.gray, bgColor: COLORS.background, icon: null, iconName: '?' };
+        return {
+          color: COLORS.gray,
+          bgColor: COLORS.background,
+          icon: null,
+          iconName: "?",
+        };
     }
   };
 
   const getWasteTypeIcon = (wasteType) => {
     switch (wasteType) {
-      case 'household': return { icon: Home, iconName: 'Home' };
-      case 'recyclable': return { icon: Recycle, iconName: 'Recycle' };
-      case 'organic': return { icon: Leaf, iconName: 'Leaf' };
-      case 'electronic': return { icon: Smartphone, iconName: 'Smartphone' };
-      case 'hazardous': return { icon: AlertTriangle, iconName: 'AlertTriangle' };
-      default: return { icon: Trash2, iconName: 'Trash2' };
+      case "household":
+        return { icon: Home, iconName: "Home" };
+      case "recyclable":
+        return { icon: Recycle, iconName: "Recycle" };
+      case "organic":
+        return { icon: Leaf, iconName: "Leaf" };
+      case "electronic":
+        return { icon: Smartphone, iconName: "Smartphone" };
+      case "hazardous":
+        return { icon: AlertTriangle, iconName: "AlertTriangle" };
+      default:
+        return { icon: Trash2, iconName: "Trash2" };
     }
   };
 
   const getTimelineIcon = (iconName) => {
     switch (iconName) {
-      case 'check': return { icon: Check, iconName: 'Check' };
-      case 'clock': return { icon: Clock, iconName: 'Clock' };
-      case 'calendar': return { icon: Calendar, iconName: 'Calendar' };
-      case 'truck': return { icon: Truck, iconName: 'Truck' };
-      case 'checkmark': return { icon: CheckCircle, iconName: 'CheckCircle' };
-      case 'close': return { icon: XCircle, iconName: 'XCircle' };
-      default: return { icon: null, iconName: '•' };
+      case "check":
+        return { icon: Check, iconName: "Check" };
+      case "clock":
+        return { icon: Clock, iconName: "Clock" };
+      case "calendar":
+        return { icon: Calendar, iconName: "Calendar" };
+      case "truck":
+        return { icon: Truck, iconName: "Truck" };
+      case "checkmark":
+        return { icon: CheckCircle, iconName: "CheckCircle" };
+      case "close":
+        return { icon: XCircle, iconName: "XCircle" };
+      default:
+        return { icon: null, iconName: "•" };
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -152,7 +202,10 @@ const TrackRequestScreen = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.emptyText}>No tracking data available</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -175,231 +228,253 @@ const TrackRequestScreen = () => {
           />
         }
       >
-      {/* Header Card */}
-      <View style={styles.headerCard}>
-        <View style={styles.headerTop}>
-          <View style={styles.wasteTypeContainer}>
-            {(() => {
-              const WasteTypeIcon = wasteTypeIcon.icon;
-              return <WasteTypeIcon size={28} color={COLORS.primary} />;
-            })()}
-            <Text style={styles.wasteType}>{request.wasteType}</Text>
+        {/* Header Card */}
+        <View style={styles.headerCard}>
+          <View style={styles.headerTop}>
+            <View style={styles.wasteTypeContainer}>
+              {(() => {
+                const WasteTypeIcon = wasteTypeIcon.icon;
+                return <WasteTypeIcon size={28} color={COLORS.primary} />;
+              })()}
+              <Text style={styles.wasteType}>{request.wasteType}</Text>
+            </View>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: statusConfig.bgColor },
+              ]}
+            >
+              <Text style={[styles.statusText, { color: statusConfig.color }]}>
+                {request.status.toUpperCase()}
+              </Text>
+            </View>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusConfig.bgColor }]}>
-            <Text style={[styles.statusText, { color: statusConfig.color }]}>
-              {request.status.toUpperCase()}
+
+          <Text style={styles.trackingId}>#{request.trackingId}</Text>
+
+          <View style={styles.headerDetails}>
+            <View style={styles.headerDetailItem}>
+              <Text style={styles.headerDetailLabel}>Quantity</Text>
+              <Text style={styles.headerDetailValue}>{request.quantity}</Text>
+            </View>
+            <View style={styles.headerDetailDivider} />
+            <View style={styles.headerDetailItem}>
+              <Text style={styles.headerDetailLabel}>Preferred Date</Text>
+              <Text style={styles.headerDetailValue}>
+                {formatDate(request.preferredDate)}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Timeline Card */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>
+            <MapPin size={18} color={COLORS.primary} /> Request Timeline
+          </Text>
+          <View style={styles.timelineContainer}>
+            {request.timeline && request.timeline.length > 0 ? (
+              request.timeline.map((item, index) => {
+                const timelineIcon = getTimelineIcon(item.icon);
+                const TimelineIcon = timelineIcon.icon;
+                return (
+                  <View key={index} style={styles.timelineItem}>
+                    <View style={styles.timelineLeft}>
+                      <View
+                        style={[
+                          styles.timelineIconContainer,
+                          item.completed
+                            ? styles.timelineIconCompleted
+                            : styles.timelineIconPending,
+                        ]}
+                      >
+                        {TimelineIcon ? (
+                          <TimelineIcon
+                            size={16}
+                            color={
+                              item.completed ? COLORS.white : COLORS.textLight
+                            }
+                          />
+                        ) : (
+                          <Text
+                            style={[
+                              styles.timelineIconText,
+                              item.completed
+                                ? styles.timelineIconTextCompleted
+                                : styles.timelineIconTextPending,
+                            ]}
+                          >
+                            {timelineIcon.iconName}
+                          </Text>
+                        )}
+                      </View>
+                      {index < request.timeline.length - 1 && (
+                        <View
+                          style={[
+                            styles.timelineLine,
+                            item.completed
+                              ? styles.timelineLineCompleted
+                              : styles.timelineLinePending,
+                          ]}
+                        />
+                      )}
+                    </View>
+                    <View style={styles.timelineRight}>
+                      <Text
+                        style={[
+                          styles.timelineLabel,
+                          item.completed && styles.timelineLabelCompleted,
+                        ]}
+                      >
+                        {item.label}
+                      </Text>
+                      <Text style={styles.timelineDate}>
+                        {formatDateTime(item.date)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            ) : (
+              <Text style={styles.noTimelineText}>
+                No timeline data available
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Map Card */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>
+            <MapPin size={18} color={COLORS.primary} /> Pickup Location
+          </Text>
+          <View style={styles.addressInfo}>
+            <Text style={styles.addressText}>
+              <Text style={styles.addressLabel}>Street: </Text>
+              {request.address.street}
+            </Text>
+            <Text style={styles.addressText}>
+              <Text style={styles.addressLabel}>City: </Text>
+              {request.address.city}
+            </Text>
+            <Text style={styles.addressText}>
+              <Text style={styles.addressLabel}>Coordinates: </Text>
+              {request.address.coordinates.lat.toFixed(6)},{" "}
+              {request.address.coordinates.lng.toFixed(6)}
+            </Text>
+          </View>
+
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: request.address.coordinates.lat,
+                longitude: request.address.coordinates.lng,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              scrollEnabled={true}
+              zoomEnabled={true}
+              pitchEnabled={false}
+              rotateEnabled={false}
+            >
+              <Marker
+                coordinate={{
+                  latitude: request.address.coordinates.lat,
+                  longitude: request.address.coordinates.lng,
+                }}
+                title="Pickup Location"
+                description={`${request.address.street}, ${request.address.city}`}
+                pinColor={COLORS.primary}
+              />
+            </MapView>
+          </View>
+        </View>
+
+        {/* Requester Info Card */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>
+            <User size={18} color={COLORS.primary} /> Requester Information
+          </Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Name:</Text>
+            <Text style={styles.infoValue}>
+              {request.userId?.name || "N/A"}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Email:</Text>
+            <Text style={styles.infoValue}>
+              {request.userId?.email || "N/A"}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Phone:</Text>
+            <Text style={styles.infoValue}>
+              {request.userId?.phone || "N/A"}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.trackingId}>#{request.trackingId}</Text>
-
-        <View style={styles.headerDetails}>
-          <View style={styles.headerDetailItem}>
-            <Text style={styles.headerDetailLabel}>Quantity</Text>
-            <Text style={styles.headerDetailValue}>{request.quantity}</Text>
-          </View>
-          <View style={styles.headerDetailDivider} />
-          <View style={styles.headerDetailItem}>
-            <Text style={styles.headerDetailLabel}>Preferred Date</Text>
-            <Text style={styles.headerDetailValue}>{formatDate(request.preferredDate)}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Timeline Card */}
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>
-          <MapPin size={18} color={COLORS.primary} /> Request Timeline
-        </Text>
-        <View style={styles.timelineContainer}>
-          {request.timeline && request.timeline.length > 0 ? (
-            request.timeline.map((item, index) => {
-              const timelineIcon = getTimelineIcon(item.icon);
-              const TimelineIcon = timelineIcon.icon;
-              return (
-                <View key={index} style={styles.timelineItem}>
-                  <View style={styles.timelineLeft}>
-                    <View
-                      style={[
-                        styles.timelineIconContainer,
-                        item.completed
-                          ? styles.timelineIconCompleted
-                          : styles.timelineIconPending,
-                      ]}
-                    >
-                      {TimelineIcon ? (
-                        <TimelineIcon
-                          size={16}
-                          color={item.completed ? COLORS.white : COLORS.textLight}
-                        />
-                      ) : (
-                        <Text
-                          style={[
-                            styles.timelineIconText,
-                            item.completed
-                              ? styles.timelineIconTextCompleted
-                              : styles.timelineIconTextPending,
-                          ]}
-                        >
-                          {timelineIcon.iconName}
-                        </Text>
-                      )}
-                    </View>
-                  {index < request.timeline.length - 1 && (
-                    <View
-                      style={[
-                        styles.timelineLine,
-                        item.completed
-                          ? styles.timelineLineCompleted
-                          : styles.timelineLinePending,
-                      ]}
-                    />
-                  )}
-                </View>
-                <View style={styles.timelineRight}>
-                  <Text
-                    style={[
-                      styles.timelineLabel,
-                      item.completed && styles.timelineLabelCompleted,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  <Text style={styles.timelineDate}>{formatDateTime(item.date)}</Text>
-                </View>
-              </View>
-            );
-            })
-          ) : (
-            <Text style={styles.noTimelineText}>No timeline data available</Text>
+        {/* Additional Details Card */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>
+            <ClipboardList size={18} color={COLORS.primary} /> Additional
+            Details
+          </Text>
+          {request.description && request.description.trim() !== "" && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Description:</Text>
+              <Text style={styles.infoValue}>{request.description}</Text>
+            </View>
           )}
-        </View>
-      </View>
-
-      {/* Map Card */}
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>
-          <MapPin size={18} color={COLORS.primary} /> Pickup Location
-        </Text>
-        <View style={styles.addressInfo}>
-          <Text style={styles.addressText}>
-            <Text style={styles.addressLabel}>Street: </Text>
-            {request.address.street}
-          </Text>
-          <Text style={styles.addressText}>
-            <Text style={styles.addressLabel}>City: </Text>
-            {request.address.city}
-          </Text>
-          <Text style={styles.addressText}>
-            <Text style={styles.addressLabel}>Coordinates: </Text>
-            {request.address.coordinates.lat.toFixed(6)}, {request.address.coordinates.lng.toFixed(6)}
-          </Text>
-        </View>
-
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: request.address.coordinates.lat,
-              longitude: request.address.coordinates.lng,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-            scrollEnabled={true}
-            zoomEnabled={true}
-            pitchEnabled={false}
-            rotateEnabled={false}
-          >
-            <Marker
-              coordinate={{
-                latitude: request.address.coordinates.lat,
-                longitude: request.address.coordinates.lng,
-              }}
-              title="Pickup Location"
-              description={`${request.address.street}, ${request.address.city}`}
-              pinColor={COLORS.primary}
-            />
-          </MapView>
-        </View>
-      </View>
-
-      {/* Requester Info Card */}
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>
-          <User size={18} color={COLORS.primary} /> Requester Information
-        </Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Name:</Text>
-          <Text style={styles.infoValue}>{request.userId?.name || 'N/A'}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Email:</Text>
-          <Text style={styles.infoValue}>{request.userId?.email || 'N/A'}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Phone:</Text>
-          <Text style={styles.infoValue}>{request.userId?.phone || 'N/A'}</Text>
-        </View>
-      </View>
-
-      {/* Additional Details Card */}
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>
-          <ClipboardList size={18} color={COLORS.primary} /> Additional Details
-        </Text>
-        {request.description && request.description.trim() !== '' && (
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Description:</Text>
-            <Text style={styles.infoValue}>{request.description}</Text>
+            <Text style={styles.infoLabel}>Estimated Cost:</Text>
+            <Text style={styles.infoValue}>
+              ${request.estimatedCost?.toFixed(2) || "0.00"}
+            </Text>
           </View>
-        )}
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Estimated Cost:</Text>
-          <Text style={styles.infoValue}>
-            ${request.estimatedCost?.toFixed(2) || '0.00'}
-          </Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Payment Status:</Text>
+            <Text style={[styles.infoValue, styles.paymentStatus]}>
+              {request.paymentStatus || "N/A"}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Created At:</Text>
+            <Text style={styles.infoValue}>
+              {formatDateTime(request.createdAt)}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Last Updated:</Text>
+            <Text style={styles.infoValue}>
+              {formatDateTime(request.updatedAt)}
+            </Text>
+          </View>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Payment Status:</Text>
-          <Text style={[styles.infoValue, styles.paymentStatus]}>
-            {request.paymentStatus || 'N/A'}
-          </Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Created At:</Text>
-          <Text style={styles.infoValue}>{formatDateTime(request.createdAt)}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Last Updated:</Text>
-          <Text style={styles.infoValue}>{formatDateTime(request.updatedAt)}</Text>
-        </View>
-      </View>
 
-      {/* Action Buttons */}
-      <View style={styles.actionButtons}>
-        <TouchableOpacity
-          style={styles.refreshButton}
-          onPress={handleRefresh}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.refreshButtonText}>
-            <RefreshCw size={16} color={COLORS.white} /> Refresh Status
-          </Text>
-        </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={handleRefresh}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.refreshButtonText}>
+              <RefreshCw size={16} color={COLORS.white} /> Refresh Status
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.backButtonText}>← Back to Requests</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.backButtonText}>← Back to Requests</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-      
-      {/* Bottom Navigation */}
-      <CitizenBottomNav />
     </View>
   );
 };

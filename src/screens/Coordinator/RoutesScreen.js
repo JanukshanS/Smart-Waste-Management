@@ -87,17 +87,18 @@ const RoutesScreen = () => {
     router.push(`/coordinator/route-details?id=${route._id}`);
   };
 
-  const renderRoute = ({ item }) => (
-    <RouteCard route={item} onPress={handleRoutePress} />
-  );
+  const renderRoute = ({ item }) => {
+    if (!item) return null;
+    return <RouteCard route={item} onPress={handleRoutePress} />;
+  };
 
   // Count routes by status
   const statusCounts = {
     all: routes.length,
-    draft: routes.filter(r => r.status === 'draft').length,
-    assigned: routes.filter(r => r.status === 'assigned').length,
-    'in-progress': routes.filter(r => r.status === 'in-progress').length,
-    completed: routes.filter(r => r.status === 'completed').length,
+    draft: routes.filter((r) => r.status === "draft").length,
+    assigned: routes.filter((r) => r.status === "assigned").length,
+    "in-progress": routes.filter((r) => r.status === "in-progress").length,
+    completed: routes.filter((r) => r.status === "completed").length,
   };
 
   if (loading) {
@@ -114,7 +115,9 @@ const RoutesScreen = () => {
       <View style={styles.header}>
         <Text style={styles.title}>Collection Routes</Text>
         <Text style={styles.subtitle}>
-          {filteredRoutes.length} route{filteredRoutes.length !== 1 ? 's' : ''}
+          {`${filteredRoutes.length} route${
+            filteredRoutes.length !== 1 ? "s" : ""
+          }`}
         </Text>
       </View>
 
@@ -129,36 +132,36 @@ const RoutesScreen = () => {
       {/* Filter Chips */}
       <View style={styles.filterContainer}>
         <Chip
-          selected={activeFilter === 'all'}
-          onPress={() => handleFilterChange('all')}
+          selected={activeFilter === "all"}
+          onPress={() => handleFilterChange("all")}
           style={styles.filterChip}
         >
           All ({statusCounts.all})
         </Chip>
         <Chip
-          selected={activeFilter === 'draft'}
-          onPress={() => handleFilterChange('draft')}
+          selected={activeFilter === "draft"}
+          onPress={() => handleFilterChange("draft")}
           style={styles.filterChip}
         >
           Draft ({statusCounts.draft})
         </Chip>
         <Chip
-          selected={activeFilter === 'assigned'}
-          onPress={() => handleFilterChange('assigned')}
+          selected={activeFilter === "assigned"}
+          onPress={() => handleFilterChange("assigned")}
           style={styles.filterChip}
         >
           Assigned ({statusCounts.assigned})
         </Chip>
         <Chip
-          selected={activeFilter === 'in-progress'}
-          onPress={() => handleFilterChange('in-progress')}
+          selected={activeFilter === "in-progress"}
+          onPress={() => handleFilterChange("in-progress")}
           style={styles.filterChip}
         >
-          In Progress ({statusCounts['in-progress']})
+          In Progress ({statusCounts["in-progress"]})
         </Chip>
         <Chip
-          selected={activeFilter === 'completed'}
-          onPress={() => handleFilterChange('completed')}
+          selected={activeFilter === "completed"}
+          onPress={() => handleFilterChange("completed")}
           style={styles.filterChip}
         >
           Completed ({statusCounts.completed})
@@ -196,7 +199,7 @@ const RoutesScreen = () => {
         style={styles.fab}
         icon="plus"
         label="Create Route"
-        onPress={() => router.push('/coordinator/create-route')}
+        onPress={() => router.push("/coordinator/create-route")}
       />
     </View>
   );

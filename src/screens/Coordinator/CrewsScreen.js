@@ -149,13 +149,13 @@ const CrewsScreen = () => {
               <View style={styles.currentRouteSection}>
                 <Text style={styles.currentRouteLabel}>Current Route:</Text>
                 <Text style={styles.currentRouteName}>{currentRoute.routeName}</Text>
-                <Text style={styles.currentRouteStatus}>Status: {currentRoute.status}</Text>
+                <Text style={styles.currentRouteStatus}>{`Status: ${currentRoute.status}`}</Text>
               </View>
             )}
 
             {item.profile?.vehicleId && (
               <View style={styles.vehicleInfo}>
-                <Text style={styles.vehicleLabel}>🚛 Vehicle: {item.profile.vehicleId}</Text>
+                <Text style={styles.vehicleLabel}>{`🚛 Vehicle: ${item.profile.vehicleId}`}</Text>
               </View>
             )}
           </Card.Content>

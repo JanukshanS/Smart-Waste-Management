@@ -21,7 +21,6 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
-import { CitizenBottomNav } from '../../components/Citizen';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserDetails } from '../../contexts/UserDetailsContext';
 
@@ -103,6 +102,7 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -266,8 +266,7 @@ const ProfileScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <CitizenBottomNav />
+      {/* Bottom Navigation removed - now handled by _layout.js */}
     </View>
   );
 };

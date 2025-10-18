@@ -133,7 +133,7 @@ const BinManagementScreen = () => {
       <View style={styles.header}>
         <Text style={styles.title}>🗑️ Bin Management</Text>
         <Text style={styles.subtitle}>
-          {filteredBins.length} of {bins.length} bins
+          {`${filteredBins.length} of ${bins.length} bins`}
         </Text>
       </View>
 
