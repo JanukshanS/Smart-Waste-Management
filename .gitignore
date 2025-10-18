@@ -238,3 +238,6 @@ storybook-static/
 
 # Sentry
 .sentryclirc
+
+# Gradle 
+android/.gradle/*
