@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
 import * as technicianApi from '../../api/technicianApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 // TODO: Get technician ID from AuthContext after login implementation
 // For now, using hardcoded ID from technicianApi.TECHNICIAN_ID
@@ -11,6 +12,7 @@ import * as technicianApi from '../../api/technicianApi';
 const WorkOrderDetailsScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [workOrder, setWorkOrder] = useState(null);
   const [updating, setUpdating] = useState(false);
@@ -70,7 +72,13 @@ const WorkOrderDetailsScreen = () => {
   const assignWorkOrder = async () => {
     try {
       setUpdating(true);
-      const response = await technicianApi.assignWorkOrder(id);
+      const technicianId = user?._id || user?.id;
+      if (!technicianId) {
+        Alert.alert('Error', 'Technician ID not found. Please login again.');
+        return;
+      }
+      
+      const response = await technicianApi.assignWorkOrder(id, technicianId);
       
       if (response.success) {
         Alert.alert('Success', 'Work order assigned successfully');
