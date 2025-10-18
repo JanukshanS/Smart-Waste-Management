@@ -11,10 +11,13 @@ import {
   XCircle 
 } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
-import { RequestCard, RequestDetailsBottomSheet, CitizenBottomNav } from '../../components/Citizen';
-import { citizenApi } from '../../api';
-import { useAuth } from '../../contexts/AuthContext';
-import { useUserDetails } from '../../contexts/UserDetailsContext';
+import {
+  RequestCard,
+  RequestDetailsBottomSheet,
+} from "../../components/Citizen";
+import { citizenApi } from "../../api";
+import { useAuth } from "../../contexts/AuthContext";
+import { useUserDetails } from "../../contexts/UserDetailsContext";
 
 const MyRequestsScreen = () => {
   const router = useRouter();
@@ -24,20 +27,55 @@ const MyRequestsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [requests, setRequests] = useState([]);
   const [pagination, setPagination] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   const statuses = [
-    { value: 'all', label: 'All', icon: ClipboardList, color: COLORS.citizenPrimary },
-    { value: 'pending', label: 'Pending', icon: Clock, color: COLORS.citizenWarning },
-    { value: 'approved', label: 'Approved', icon: Check, color: COLORS.citizenInfo },
-    { value: 'scheduled', label: 'Scheduled', icon: Calendar, color: '#1976D2' },
-    { value: 'in-progress', label: 'In Progress', icon: Truck, color: '#F57C00' },
-    { value: 'completed', label: 'Completed', icon: CheckCircle, color: COLORS.citizenSuccess },
-    { value: 'cancelled', label: 'Cancelled', icon: XCircle, color: COLORS.citizenDanger },
+    {
+      value: "all",
+      label: "All",
+      icon: ClipboardList,
+      color: COLORS.citizenPrimary,
+    },
+    {
+      value: "pending",
+      label: "Pending",
+      icon: Clock,
+      color: COLORS.citizenWarning,
+    },
+    {
+      value: "approved",
+      label: "Approved",
+      icon: Check,
+      color: COLORS.citizenInfo,
+    },
+    {
+      value: "scheduled",
+      label: "Scheduled",
+      icon: Calendar,
+      color: "#1976D2",
+    },
+    {
+      value: "in-progress",
+      label: "In Progress",
+      icon: Truck,
+      color: "#F57C00",
+    },
+    {
+      value: "completed",
+      label: "Completed",
+      icon: CheckCircle,
+      color: COLORS.citizenSuccess,
+    },
+    {
+      value: "cancelled",
+      label: "Cancelled",
+      icon: XCircle,
+      color: COLORS.citizenDanger,
+    },
   ];
 
   useEffect(() => {
@@ -63,11 +101,11 @@ const MyRequestsScreen = () => {
         }
         setPagination(response.pagination);
       } else {
-        Alert.alert('Error', response.message || 'Failed to fetch requests');
+        Alert.alert("Error", response.message || "Failed to fetch requests");
       }
     } catch (error) {
-      console.error('Fetch requests error:', error);
-      Alert.alert('Error', 'Failed to load requests. Please try again.');
+      console.error("Fetch requests error:", error);
+      Alert.alert("Error", "Failed to load requests. Please try again.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -103,12 +141,15 @@ const MyRequestsScreen = () => {
       if (response.success) {
         setSelectedRequest(response.data);
       } else {
-        Alert.alert('Error', response.message || 'Failed to load request details');
+        Alert.alert(
+          "Error",
+          response.message || "Failed to load request details"
+        );
         setShowBottomSheet(false);
       }
     } catch (error) {
-      console.error('Fetch request details error:', error);
-      Alert.alert('Error', 'Failed to load request details. Please try again.');
+      console.error("Fetch request details error:", error);
+      Alert.alert("Error", "Failed to load request details. Please try again.");
       setShowBottomSheet(false);
     } finally {
       setLoadingDetails(false);
@@ -122,8 +163,8 @@ const MyRequestsScreen = () => {
 
   const handleRequestUpdate = (updatedRequest) => {
     // Update the request in the list
-    setRequests(prevRequests => 
-      prevRequests.map(req => 
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
         req._id === updatedRequest._id ? updatedRequest : req
       )
     );
@@ -149,16 +190,18 @@ const MyRequestsScreen = () => {
         <ClipboardList size={64} color={COLORS.citizenPrimary} />
         <Text style={styles.emptyTitle}>No Requests Found</Text>
         <Text style={styles.emptyText}>
-          {selectedStatus === 'all'
+          {selectedStatus === "all"
             ? "You haven't created any waste collection requests yet."
             : `No ${selectedStatus} requests found.`}
         </Text>
-        {selectedStatus === 'all' && (
+        {selectedStatus === "all" && (
           <TouchableOpacity
             style={styles.createButton}
-            onPress={() => router.push('/citizen/create-request')}
+            onPress={() => router.push("/citizen/create-request")}
           >
-            <Text style={styles.createButtonText}>Create Your First Request</Text>
+            <Text style={styles.createButtonText}>
+              Create Your First Request
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -171,14 +214,14 @@ const MyRequestsScreen = () => {
       <View style={styles.header}>
         <Text style={styles.title}>My Requests</Text>
         <Text style={styles.subtitle}>
-          {pagination ? `${pagination.total} total requests` : 'Loading...'}
+          {pagination ? `${pagination.total} total requests` : "Loading..."}
         </Text>
       </View>
 
       {/* Horizontal Scrollable Status Filters */}
       <View style={styles.filterSection}>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScrollContent}
         >
@@ -190,22 +233,29 @@ const MyRequestsScreen = () => {
                 style={[
                   styles.filterChip,
                   selectedStatus === status.value && styles.filterChipSelected,
-                  selectedStatus === status.value && { 
+                  selectedStatus === status.value && {
                     backgroundColor: status.color,
-                    borderColor: status.color 
-                  }
+                    borderColor: status.color,
+                  },
                 ]}
                 onPress={() => handleStatusFilter(status.value)}
                 activeOpacity={0.7}
               >
-                <IconComponent 
-                  size={16} 
-                  color={selectedStatus === status.value ? COLORS.white : COLORS.citizenTextDark} 
+                <IconComponent
+                  size={16}
+                  color={
+                    selectedStatus === status.value
+                      ? COLORS.white
+                      : COLORS.citizenTextDark
+                  }
                 />
-                <Text style={[
-                  styles.filterChipText,
-                  selectedStatus === status.value && styles.filterChipTextSelected
-                ]}>
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    selectedStatus === status.value &&
+                      styles.filterChipTextSelected,
+                  ]}
+                >
                   {status.label}
                 </Text>
               </TouchableOpacity>
@@ -219,7 +269,8 @@ const MyRequestsScreen = () => {
         <View style={styles.resultsInfo}>
           <Text style={styles.resultsText}>
             Showing {requests.length} of {pagination.total} requests
-            {currentPage > 1 && ` • Page ${currentPage}/${pagination.totalPages}`}
+            {currentPage > 1 &&
+              ` • Page ${currentPage}/${pagination.totalPages}`}
           </Text>
         </View>
       )}
@@ -237,7 +288,12 @@ const MyRequestsScreen = () => {
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.citizenAccent]} tintColor={COLORS.citizenAccent} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.citizenAccent]}
+              tintColor={COLORS.citizenAccent}
+            />
           }
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
@@ -254,9 +310,6 @@ const MyRequestsScreen = () => {
         loading={loadingDetails}
         onRequestUpdate={handleRequestUpdate}
       />
-      
-      {/* Bottom Navigation */}
-      <CitizenBottomNav />
     </View>
   );
 };

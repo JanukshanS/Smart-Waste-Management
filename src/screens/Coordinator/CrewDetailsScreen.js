@@ -198,10 +198,10 @@ const CrewDetailsScreen = () => {
               <View style={styles.routeInfo}>
                 <Text style={styles.routeName}>{currentRoute.routeName}</Text>
                 <Text style={styles.routeDetail}>
-                  Status: <Text style={styles.routeStatusText}>{currentRoute.status}</Text>
+                  {`Status: ${currentRoute.status}`}
                 </Text>
                 <Text style={styles.routeDetail}>
-                  Scheduled: {new Date(currentRoute.scheduledDate).toLocaleDateString()}
+                  {`Scheduled: ${new Date(currentRoute.scheduledDate).toLocaleDateString()}`}
                 </Text>
                 {currentRoute.coordinatorId && (
                   <Text style={styles.routeDetail}>
@@ -219,7 +219,7 @@ const CrewDetailsScreen = () => {
             <Card.Content>
               <Text style={styles.cardTitle}>📜 Route History</Text>
               {routeHistory.map((route, index) => (
-                <View key={index} style={styles.historyItem}>
+                <View key={route._id || `route-${index}`} style={styles.historyItem}>
                   <Text style={styles.historyRouteName}>{route.routeName}</Text>
                   <Text style={styles.historyDate}>
                     {new Date(route.completedAt).toLocaleDateString()}

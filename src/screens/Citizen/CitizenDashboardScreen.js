@@ -33,8 +33,7 @@ import { citizenApi } from '../../api';
 import Button from '../../components/Button';
 import DashboardHeader from '../../components/DashboardHeader';
 import { useAuth } from '../../contexts/AuthContext';
-import { useUserDetails } from '../../contexts/UserDetailsContext';
-import { CitizenBottomNav } from '../../components/Citizen';
+import { useUserDetails } from "../../contexts/UserDetailsContext";
 
 const CitizenDashboardScreen = () => {
   const router = useRouter();
@@ -51,7 +50,7 @@ const CitizenDashboardScreen = () => {
   const [recentRequests, setRecentRequests] = useState([]);
 
   // Use logged-in user's ID from user details context or auth context
-  const userId = userDetails?.id || user?.id || '68f17571b188a4a7463c1c27';
+  const userId = userDetails?.id || user?.id || "68f17571b188a4a7463c1c27";
 
   useEffect(() => {
     fetchDashboardData();
@@ -70,9 +69,9 @@ const CitizenDashboardScreen = () => {
         // Calculate statistics
         const statsData = {
           total: requests.length,
-          pending: requests.filter((r) => r.status === 'pending').length,
-          completed: requests.filter((r) => r.status === 'completed').length,
-          inProgress: requests.filter((r) => r.status === 'in-progress').length,
+          pending: requests.filter((r) => r.status === "pending").length,
+          completed: requests.filter((r) => r.status === "completed").length,
+          inProgress: requests.filter((r) => r.status === "in-progress").length,
         };
 
         setStats(statsData);
@@ -81,8 +80,8 @@ const CitizenDashboardScreen = () => {
         setRecentRequests(requests.slice(0, 3));
       }
     } catch (error) {
-      console.error('Dashboard fetch error:', error);
-      Alert.alert('Error', 'Failed to load dashboard data');
+      console.error("Dashboard fetch error:", error);
+      Alert.alert("Error", "Failed to load dashboard data");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -94,68 +93,74 @@ const CitizenDashboardScreen = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          // Clear both contexts
+          clearUserDetails();
+          clearUserData();
+
+          const result = await logout();
+          if (result.success) {
+            router.replace("/auth-landing");
+          } else {
+            Alert.alert("Error", "Failed to logout. Please try again.");
+          }
         },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            // Clear both contexts
-            clearUserDetails();
-            clearUserData();
-            
-            const result = await logout();
-            if (result.success) {
-              router.replace('/auth-landing');
-            } else {
-              Alert.alert('Error', 'Failed to logout. Please try again.');
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const getStatusConfig = (status) => {
     switch (status) {
-      case 'pending':
-        return { color: COLORS.warning, icon: Clock, iconName: 'Clock' };
-      case 'approved':
-        return { color: COLORS.info, icon: Check, iconName: 'Check' };
-      case 'scheduled':
-        return { color: '#1976D2', icon: Calendar, iconName: 'Calendar' };
-      case 'in-progress':
-        return { color: '#F57C00', icon: Truck, iconName: 'Truck' };
-      case 'completed':
-        return { color: COLORS.success, icon: CheckCircle, iconName: 'CheckCircle' };
-      case 'cancelled':
-        return { color: COLORS.danger, icon: XCircle, iconName: 'XCircle' };
+      case "pending":
+        return { color: COLORS.warning, icon: Clock, iconName: "Clock" };
+      case "approved":
+        return { color: COLORS.info, icon: Check, iconName: "Check" };
+      case "scheduled":
+        return { color: "#1976D2", icon: Calendar, iconName: "Calendar" };
+      case "in-progress":
+        return { color: "#F57C00", icon: Truck, iconName: "Truck" };
+      case "completed":
+        return {
+          color: COLORS.success,
+          icon: CheckCircle,
+          iconName: "CheckCircle",
+        };
+      case "cancelled":
+        return { color: COLORS.danger, icon: XCircle, iconName: "XCircle" };
       default:
-        return { color: COLORS.gray, icon: null, iconName: '?' };
+        return { color: COLORS.gray, icon: null, iconName: "?" };
     }
   };
 
   const getWasteTypeIcon = (wasteType) => {
     switch (wasteType) {
-      case 'household': return { icon: Home, iconName: 'Home' };
-      case 'recyclable': return { icon: Recycle, iconName: 'Recycle' };
-      case 'organic': return { icon: Leaf, iconName: 'Leaf' };
-      case 'electronic': return { icon: Smartphone, iconName: 'Smartphone' };
-      case 'hazardous': return { icon: AlertTriangle, iconName: 'AlertTriangle' };
-      default: return { icon: Trash2, iconName: 'Trash2' };
+      case "household":
+        return { icon: Home, iconName: "Home" };
+      case "recyclable":
+        return { icon: Recycle, iconName: "Recycle" };
+      case "organic":
+        return { icon: Leaf, iconName: "Leaf" };
+      case "electronic":
+        return { icon: Smartphone, iconName: "Smartphone" };
+      case "hazardous":
+        return { icon: AlertTriangle, iconName: "AlertTriangle" };
+      default:
+        return { icon: Trash2, iconName: "Trash2" };
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   if (loading) {
@@ -190,7 +195,10 @@ const CitizenDashboardScreen = () => {
                 Let's keep our environment clean
               </Text>
             </View>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
               <Text style={styles.logoutButtonText}>Logout</Text>
             </TouchableOpacity>
           </View>
@@ -319,7 +327,9 @@ const CitizenDashboardScreen = () => {
                         { backgroundColor: statusConfig.color },
                       ]}
                     >
-                      {StatusIcon && <StatusIcon size={16} color={COLORS.white} />}
+                      {StatusIcon && (
+                        <StatusIcon size={16} color={COLORS.white} />
+                      )}
                     </View>
                   </TouchableOpacity>
                 );
@@ -348,9 +358,6 @@ const CitizenDashboardScreen = () => {
           )}
         </View>
       </ScrollView>
-      
-      {/* Bottom Navigation */}
-      <CitizenBottomNav />
     </View>
   );
 };
