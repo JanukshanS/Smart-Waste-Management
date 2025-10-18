@@ -29,6 +29,7 @@ import {
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { COLORS, SPACING } from '../../constants/theme';
 import { adminApi } from '../../api';
+import { UpdateBinBottomSheet } from '../../components/Admin';
 
 const BinDetailsScreen = () => {
   const router = useRouter();
@@ -38,6 +39,7 @@ const BinDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [bin, setBin] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   useEffect(() => {
     if (binId) {
@@ -102,7 +104,28 @@ const BinDetailsScreen = () => {
   };
 
   const handleEdit = () => {
-    Alert.alert('Coming Soon', 'Edit bin functionality will be available soon.');
+    setShowUpdateModal(true);
+  };
+
+  const handleUpdateBin = async (updateData) => {
+    try {
+      console.log('Updating bin with data:', updateData);
+      const response = await adminApi.updateBin(bin._id, updateData);
+      
+      if (response.success) {
+        Alert.alert('Success', 'Bin updated successfully!');
+        setShowUpdateModal(false);
+        // Refresh bin details
+        fetchBinDetails();
+      } else {
+        Alert.alert('Error', response.message || 'Failed to update bin');
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error('Update bin error:', error);
+      Alert.alert('Error', 'Failed to update bin. Please try again.');
+      throw error;
+    }
   };
 
   const handleDelete = () => {
@@ -369,6 +392,14 @@ const BinDetailsScreen = () => {
 
         <View style={styles.bottomPadding} />
       </ScrollView>
+
+      {/* Update Bin Modal */}
+      <UpdateBinBottomSheet
+        visible={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        onSuccess={handleUpdateBin}
+        bin={bin}
+      />
     </View>
   );
 };
