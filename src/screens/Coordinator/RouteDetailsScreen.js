@@ -107,6 +107,7 @@ const RouteDetailsScreen = () => {
       }
     } catch (err) {
       console.error("Error fetching crews:", err);
+      setCrews([]);
       Alert.alert("Error", "Failed to load crews");
     } finally {
       setCrewsLoading(false);

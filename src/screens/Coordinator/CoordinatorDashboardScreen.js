@@ -159,7 +159,7 @@ const CoordinatorDashboardScreen = () => {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Welcome back! 👋</Text>
-            <Text style={styles.title}>Coordinator Dashboard</Text>
+            <Text style={styles.title}>Coordinator Dash</Text>
           </View>
           <View style={styles.headerButtons}>
             <TouchableOpacity

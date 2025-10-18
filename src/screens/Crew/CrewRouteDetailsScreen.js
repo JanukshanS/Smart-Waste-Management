@@ -148,12 +148,16 @@ const CrewRouteDetailsScreen = () => {
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {route.stops?.filter((s) => s.status === 'completed').length || 0}
+                  {(route.stops && Array.isArray(route.stops)) 
+                    ? route.stops.filter((s) => s.status === 'completed').length 
+                    : 0}
                 </Text>
                 <Text style={styles.statLabel}>Completed</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{route.stops?.length || 0}</Text>
+                <Text style={styles.statValue}>
+                  {(route.stops && Array.isArray(route.stops)) ? route.stops.length : 0}
+                </Text>
                 <Text style={styles.statLabel}>Total Stops</Text>
               </View>
               <View style={styles.statItem}>

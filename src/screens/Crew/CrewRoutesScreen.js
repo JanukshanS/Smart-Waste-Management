@@ -13,10 +13,12 @@ import { Card } from 'react-native-paper';
 import { COLORS, SPACING } from '../../constants/theme';
 import { crewApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUserDetails } from '../../contexts/UserDetailsContext';
 
 const CrewRoutesScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { userDetails } = useUserDetails();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [routes, setRoutes] = useState([]);
@@ -24,7 +26,7 @@ const CrewRoutesScreen = () => {
 
   const fetchRoutes = async () => {
     try {
-      const userId = user?._id || user?.id;
+      const userId = userDetails?.id || userDetails?._id || user?.id || user?._id;
       if (!userId) return;
 
       const response = await crewApi.getMyRoutes(userId);

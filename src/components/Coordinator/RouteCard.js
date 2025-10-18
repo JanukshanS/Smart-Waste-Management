@@ -37,7 +37,7 @@ const RouteCard = ({ route, onPress }) => {
               style={[styles.statusBadge, { backgroundColor: statusColor }]}
             >
               <Text style={styles.statusText}>
-                {route.status?.toUpperCase()}
+                {route.status?.toUpperCase() || 'UNKNOWN'}
               </Text>
             </View>
           </View>

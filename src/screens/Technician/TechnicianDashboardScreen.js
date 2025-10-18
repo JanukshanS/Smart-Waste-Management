@@ -14,6 +14,8 @@ import { Card } from "react-native-paper";
 import { COLORS, SPACING } from "../../constants/theme";
 import { technicianApi } from "../../api";
 import { useAuth } from "../../contexts/AuthContext";
+import DashboardHeader from "../../components/DashboardHeader";
+import Button from "../../components/Button";
 
 const TechnicianDashboardScreen = () => {
   const router = useRouter();
@@ -155,142 +157,31 @@ const TechnicianDashboardScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[COLORS.primary]}
-          />
+      <DashboardHeader 
+        title="Technician Dashboard"
+        subtitle="Device Maintenance & Repairs"
+        rightComponent={
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
         }
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Welcome back! 👋</Text>
-            <Text style={styles.title}>{user?.name || "Technician"}</Text>
-          </View>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity
-              style={styles.refreshButton}
-              onPress={fetchDashboardData}
-            >
-              <Text style={styles.refreshIcon}>🔄</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <Text style={styles.logoutButtonText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {error && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        {/* Quick Stats */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Overview</Text>
-          <View style={styles.statsGrid}>
-            <StatBox
-              value={stats.pending}
-              label="Pending"
-              icon="⏳"
-              color="#FFA500"
-            />
-            <StatBox
-              value={stats.inProgress}
-              label="In Progress"
-              icon="🔧"
-              color={COLORS.primary}
-            />
-            <StatBox
-              value={stats.urgent}
-              label="Urgent"
-              icon="🚨"
-              color={COLORS.error}
-            />
-            <StatBox
-              value={stats.resolved}
-              label="Resolved"
-              icon="✅"
-              color="#4CAF50"
-            />
-          </View>
-        </View>
-
-        {/* Urgent Work Orders */}
-        {urgentWorkOrders.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🚨 Urgent Work Orders</Text>
-            {urgentWorkOrders.map((wo) => (
-              <TouchableOpacity
-                key={wo._id}
-                onPress={() =>
-                  router.push(`/technician/work-order-details?id=${wo._id}`)
-                }
-              >
-                <Card style={styles.workOrderCard}>
-                  <Card.Content>
-                    <View style={styles.workOrderHeader}>
-                      <Text style={styles.workOrderTitle}>
-                        {wo.issueDescription || "Work Order"}
-                      </Text>
-                      <View
-                        style={[
-                          styles.priorityBadge,
-                          { backgroundColor: getPriorityColor(wo.priority) },
-                        ]}
-                      >
-                        <Text style={styles.priorityBadgeText}>
-                          {wo.priority}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={styles.workOrderDetail}>
-                      Device: {wo.deviceId || "N/A"}
-                    </Text>
-                    <Text style={styles.workOrderDetail}>
-                      Bin: {wo.binId || "N/A"}
-                    </Text>
-                  </Card.Content>
-                </Card>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-
-          <ActionCard
-            title="All Work Orders"
-            description="View and manage work orders"
-            icon="📋"
-            color={COLORS.primary}
-            onPress={() => router.push("/technician/work-orders")}
+      />
+      
+      <ScrollView style={styles.content}>
+        <View style={styles.buttonContainer}>
+          <Button 
+            title="Work Orders" 
+            onPress={() => router.push('/technician/work-orders')}
           />
-
-          <ActionCard
-            title="Register Device"
-            description="Register a new smart device"
-            icon="📱"
-            color={COLORS.secondary}
-            onPress={() => router.push("/technician/register-device")}
+          
+          <Button 
+            title="Device Management" 
+            onPress={() => router.push('/technician/devices')}
           />
-
-          <ActionCard
-            title="Scan QR Code"
-            description="Scan device or bin QR code"
-            icon="📷"
-            color="#9C27B0"
-            onPress={() => router.push("/technician/qr-scanner")}
+          
+          <Button 
+            title="Parts Availability" 
+            onPress={() => router.push('/technician/parts-availability')}
           />
         </View>
       </ScrollView>
@@ -301,57 +192,14 @@ const TechnicianDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F7FA",
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5F7FA",
+    backgroundColor: COLORS.background,
+    padding: SPACING.large,
   },
   content: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: SPACING.large,
-    paddingBottom: SPACING.medium,
-    backgroundColor: COLORS.white,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  greeting: {
-    fontSize: 16,
-    color: COLORS.textLight,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
-  headerButtons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: SPACING.small,
-  },
-  refreshButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.primary + "15",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  refreshIcon: {
-    fontSize: 20,
+  buttonContainer: {
+    marginTop: SPACING.medium,
   },
   logoutButton: {
     backgroundColor: COLORS.error,
