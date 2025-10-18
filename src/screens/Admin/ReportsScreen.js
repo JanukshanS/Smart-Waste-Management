@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { 
+  Package, 
+  Zap, 
+  ClipboardList, 
+  CheckCircle, 
+  Clock, 
+  Truck, 
+  BarChart3, 
+  MapPin, 
+  TrendingUp, 
+  Target, 
+  Car, 
+  Leaf 
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { DateRangeSelector, ReportStatCard, TabBar } from '../../components/Admin';
 import { adminApi } from '../../api';
@@ -14,8 +28,8 @@ const ReportsScreen = () => {
   const [endDate, setEndDate] = useState(getTodayDate());
 
   const tabs = [
-    { icon: '📦', label: 'Collections' },
-    { icon: '⚡', label: 'Efficiency' },
+    { icon: <Package size={20} color={COLORS.primary} />, label: 'Collections' },
+    { icon: <Zap size={20} color={COLORS.primary} />, label: 'Efficiency' },
   ];
 
   useEffect(() => {
@@ -137,7 +151,7 @@ const CollectionsReport = ({ data }) => {
         <View style={styles.statRow}>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="📦"
+              icon={<Package size={20} color={COLORS.primary} />}
               label="Total Collections"
               value={data.totalCollections || 0}
               color={COLORS.primary}
@@ -145,7 +159,7 @@ const CollectionsReport = ({ data }) => {
           </View>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="📋"
+              icon={<ClipboardList size={20} color={COLORS.info} />}
               label="Total Requests"
               value={data.totalRequests || 0}
               color={COLORS.info}
@@ -156,7 +170,7 @@ const CollectionsReport = ({ data }) => {
         <View style={styles.statRow}>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="✅"
+              icon={<CheckCircle size={20} color={COLORS.success} />}
               label="Completion Rate"
               value={data.completionRate || '0%'}
               color={COLORS.success}
@@ -164,7 +178,7 @@ const CollectionsReport = ({ data }) => {
           </View>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="⏱️"
+              icon={<Clock size={20} color={COLORS.warning} />}
               label="On-Time Rate"
               value={data.onTimeRate || '0%'}
               color={COLORS.warning}
@@ -173,7 +187,7 @@ const CollectionsReport = ({ data }) => {
         </View>
 
         <ReportStatCard
-          icon="⚡"
+          icon={<Zap size={20} color={COLORS.secondary} />}
           label="Average Response Time"
           value={data.avgResponseTime || 'N/A'}
           color={COLORS.secondary}
@@ -210,7 +224,7 @@ const CollectionsReport = ({ data }) => {
 
       {!hasCollections && (
         <View style={styles.emptySection}>
-          <Text style={styles.emptyIcon}>📊</Text>
+          <BarChart3 size={48} color={COLORS.textLight} style={styles.emptyIconComponent} />
           <Text style={styles.emptyTitle}>No Collection Data</Text>
           <Text style={styles.emptyText}>
             No collections have been recorded for this period
@@ -221,7 +235,7 @@ const CollectionsReport = ({ data }) => {
       {/* Summary Cards */}
       <View style={styles.summaryGrid}>
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>📊</Text>
+          <BarChart3 size={28} color={COLORS.primary} style={styles.summaryIconComponent} />
           <Text style={styles.summaryLabel}>Total Activities</Text>
           <Text style={styles.summaryValue}>
             {(data.totalCollections || 0) + (data.totalRequests || 0)}
@@ -229,7 +243,7 @@ const CollectionsReport = ({ data }) => {
         </View>
 
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>⏳</Text>
+          <Clock size={28} color={COLORS.warning} style={styles.summaryIconComponent} />
           <Text style={styles.summaryLabel}>Pending</Text>
           <Text style={[styles.summaryValue, { color: COLORS.warning }]}>
             {(data.totalRequests || 0) - (data.totalCollections || 0)}
@@ -273,7 +287,7 @@ const EfficiencyReport = ({ data }) => {
         <View style={styles.statRow}>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="🚛"
+              icon={<Truck size={20} color={COLORS.primary} />}
               label="Total Routes"
               value={data.totalRoutes || 0}
               color={COLORS.primary}
@@ -281,7 +295,7 @@ const EfficiencyReport = ({ data }) => {
           </View>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="✅"
+              icon={<CheckCircle size={20} color={COLORS.success} />}
               label="Avg Completion"
               value={data.avgCompletionRate || 'N/A'}
               color={COLORS.success}
@@ -292,7 +306,7 @@ const EfficiencyReport = ({ data }) => {
         <View style={styles.statRow}>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="📍"
+              icon={<MapPin size={20} color={COLORS.info} />}
               label="Total Distance"
               value={data.totalDistance || 'N/A'}
               color={COLORS.info}
@@ -300,7 +314,7 @@ const EfficiencyReport = ({ data }) => {
           </View>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="📏"
+              icon={<TrendingUp size={20} color={COLORS.secondary} />}
               label="Avg Distance/Route"
               value={data.avgDistancePerRoute || 'N/A'}
               color={COLORS.secondary}
@@ -311,7 +325,7 @@ const EfficiencyReport = ({ data }) => {
         <View style={styles.statRow}>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="🛑"
+              icon={<MapPin size={20} color={COLORS.warning} />}
               label="Avg Stops/Route"
               value={data.avgStopsPerRoute || 0}
               color={COLORS.warning}
@@ -319,7 +333,7 @@ const EfficiencyReport = ({ data }) => {
           </View>
           <View style={styles.statHalf}>
             <ReportStatCard
-              icon="🌱"
+              icon={<Leaf size={20} color={COLORS.success} />}
               label="Fuel Savings"
               value={data.estimatedFuelSavings || '0 km'}
               color={COLORS.success}
@@ -334,7 +348,7 @@ const EfficiencyReport = ({ data }) => {
         
         <View style={styles.highlightCard}>
           <View style={styles.highlightHeader}>
-            <Text style={styles.highlightIcon}>🎯</Text>
+            <Target size={24} color={COLORS.primary} style={styles.highlightIconComponent} />
             <Text style={styles.highlightTitle}>Route Optimization</Text>
           </View>
           <View style={styles.highlightContent}>
@@ -357,7 +371,7 @@ const EfficiencyReport = ({ data }) => {
 
         <View style={styles.highlightCard}>
           <View style={styles.highlightHeader}>
-            <Text style={styles.highlightIcon}>🚗</Text>
+            <Car size={24} color={COLORS.primary} style={styles.highlightIconComponent} />
             <Text style={styles.highlightTitle}>Distance Metrics</Text>
           </View>
           <View style={styles.highlightContent}>
@@ -382,7 +396,7 @@ const EfficiencyReport = ({ data }) => {
       {/* Environmental Impact */}
       <View style={styles.impactCard}>
         <View style={styles.impactHeader}>
-          <Text style={styles.impactIcon}>🌍</Text>
+          <Leaf size={32} color={COLORS.white} style={styles.impactIconComponent} />
           <View>
             <Text style={styles.impactTitle}>Environmental Impact</Text>
             <Text style={styles.impactSubtitle}>Fuel Efficiency Savings</Text>
@@ -397,7 +411,7 @@ const EfficiencyReport = ({ data }) => {
       {/* No Data State */}
       {data.totalRoutes === 0 && (
         <View style={styles.emptySection}>
-          <Text style={styles.emptyIcon}>🚛</Text>
+          <Truck size={48} color={COLORS.textLight} style={styles.emptyIconComponent} />
           <Text style={styles.emptyTitle}>No Route Data</Text>
           <Text style={styles.emptyText}>
             No routes have been completed in this period
@@ -511,6 +525,9 @@ const styles = StyleSheet.create({
     fontSize: 48,
     marginBottom: SPACING.medium,
   },
+  emptyIconComponent: {
+    marginBottom: SPACING.medium,
+  },
   emptyTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -543,6 +560,9 @@ const styles = StyleSheet.create({
   },
   summaryIcon: {
     fontSize: 28,
+    marginBottom: SPACING.small / 2,
+  },
+  summaryIconComponent: {
     marginBottom: SPACING.small / 2,
   },
   summaryLabel: {
@@ -619,6 +639,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginRight: SPACING.small,
   },
+  highlightIconComponent: {
+    marginRight: SPACING.small,
+  },
   highlightTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -660,6 +683,9 @@ const styles = StyleSheet.create({
   },
   impactIcon: {
     fontSize: 32,
+    marginRight: SPACING.medium,
+  },
+  impactIconComponent: {
     marginRight: SPACING.medium,
   },
   impactTitle: {

@@ -13,6 +13,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
+import { DollarSign, BarChart3, CreditCard, Settings } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { adminApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -87,7 +88,10 @@ const BillingConfigScreen = () => {
         {/* Waste Type Rates */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>💰 Waste Type Rates (LKR)</Text>
+            <View style={styles.cardTitleContainer}>
+              <DollarSign size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Waste Type Rates (LKR)</Text>
+            </View>
             {Object.entries(config?.wasteTypeRates || {}).map(([type, rate]) => (
               <View key={type} style={styles.rateRow}>
                 <Text style={styles.rateLabel}>{type}:</Text>
@@ -105,7 +109,10 @@ const BillingConfigScreen = () => {
         {/* Tax Configuration */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>📊 Tax Configuration</Text>
+            <View style={styles.cardTitleContainer}>
+              <BarChart3 size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Tax Configuration</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Enable Taxes</Text>
               <Switch
@@ -142,7 +149,10 @@ const BillingConfigScreen = () => {
         {/* Payment Gateway */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>💳 Payment Gateway</Text>
+            <View style={styles.cardTitleContainer}>
+              <CreditCard size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Payment Gateway</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Enable Gateway</Text>
               <Switch
@@ -180,7 +190,10 @@ const BillingConfigScreen = () => {
         {/* Billing Rules */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>⚙️ Billing Rules</Text>
+            <View style={styles.cardTitleContainer}>
+              <Settings size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Billing Rules</Text>
+            </View>
             <View style={styles.inputRow}>
               <Text style={styles.inputLabel}>Minimum Charge (LKR):</Text>
               <TextInput
@@ -286,11 +299,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     elevation: 2,
   },
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.medium,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.text,
-    marginBottom: SPACING.medium,
+    marginLeft: SPACING.small,
   },
   rateRow: {
     flexDirection: 'row',

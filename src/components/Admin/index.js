@@ -9,4 +9,7 @@ export { default as ReportStatCard } from './ReportStatCard';
 export { default as TabBar } from './TabBar';
 export { default as CreateUserBottomSheet } from './CreateUserBottomSheet';
 export { default as MapPicker } from './MapPicker';
+export { default as MapLocationPicker } from './MapLocationPicker';
+export { default as BinCard } from './BinCard';
+export { default as CreateBinBottomSheet } from './CreateBinBottomSheet';
 

@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { 
+  Users, 
+  ClipboardList, 
+  Trash2, 
+  Smartphone, 
+  Wrench, 
+  Truck, 
+  AlertTriangle, 
+  AlertCircle,
+  BarChart3
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
 import DashboardHeader from '../../components/DashboardHeader';
@@ -100,7 +111,7 @@ const AdminDashboardScreen = () => {
       <View style={styles.quickStatsContainer}>
         <View style={styles.row}>
           <StatCard
-            icon="👥"
+            icon={<Users size={24} color={COLORS.info} />}
             title="Total Users"
             value={data.users?.total || 0}
             subtitle={`${data.users?.active || 0} active`}
@@ -111,7 +122,7 @@ const AdminDashboardScreen = () => {
         <View style={styles.row}>
           <View style={styles.halfCard}>
             <StatCard
-              icon="📋"
+              icon={<ClipboardList size={24} color={COLORS.success} />}
               title="Requests"
               value={data.requests?.total || 0}
               subtitle={`${data.requests?.thisMonth || 0} this month`}
@@ -120,7 +131,7 @@ const AdminDashboardScreen = () => {
           </View>
           <View style={styles.halfCard}>
             <StatCard
-              icon="🗑️"
+              icon={<Trash2 size={24} color={data.bins?.full > 0 ? COLORS.danger : COLORS.warning} />}
               title="Smart Bins"
               value={data.bins?.total || 0}
               subtitle={`${data.bins?.full || 0} full`}
@@ -132,7 +143,7 @@ const AdminDashboardScreen = () => {
         <View style={styles.row}>
           <View style={styles.halfCard}>
             <StatCard
-              icon="📱"
+              icon={<Smartphone size={24} color={data.devices?.offline > 0 ? COLORS.danger : COLORS.purple} />}
               title="Devices"
               value={data.devices?.total || 0}
               subtitle={`${data.devices?.offline || 0} offline`}
@@ -141,7 +152,7 @@ const AdminDashboardScreen = () => {
           </View>
           <View style={styles.halfCard}>
             <StatCard
-              icon="🔧"
+              icon={<Wrench size={24} color={COLORS.roleAdmin} />}
               title="Work Orders"
               value={data.workOrders?.total || 0}
               subtitle={`${data.workOrders?.pending || 0} pending`}
@@ -154,7 +165,7 @@ const AdminDashboardScreen = () => {
       {/* Expandable Detailed Sections */}
       <View style={styles.detailsContainer}>
         {/* Users Section */}
-        <ExpandableCard title="User Management" icon="👥" defaultExpanded={true}>
+        <ExpandableCard title="User Management" icon={<Users size={24} color={COLORS.primary} />} defaultExpanded={true}>
           <View style={styles.statsRow}>
             <MiniStat label="Total" value={data.users?.total || 0} color={COLORS.info} />
             <MiniStat label="Active" value={data.users?.active || 0} color={COLORS.success} />
@@ -180,7 +191,7 @@ const AdminDashboardScreen = () => {
         </ExpandableCard>
 
         {/* Waste Requests Section */}
-        <ExpandableCard title="Waste Requests" icon="📋">
+        <ExpandableCard title="Waste Requests" icon={<ClipboardList size={24} color={COLORS.primary} />}>
           <View style={styles.statsRow}>
             <MiniStat label="Total" value={data.requests?.total || 0} color={COLORS.info} />
             <MiniStat label="Pending" value={data.requests?.pending || 0} color={COLORS.warning} />
@@ -194,7 +205,7 @@ const AdminDashboardScreen = () => {
 
           {data.requests?.pending > 0 && (
             <View style={styles.alertBox}>
-              <Text style={styles.alertIcon}>⚠️</Text>
+              <AlertTriangle size={20} color={COLORS.warning} style={styles.alertIconComponent} />
               <Text style={styles.alertText}>
                 {data.requests.pending} request{data.requests.pending > 1 ? 's' : ''} need attention
               </Text>
@@ -203,7 +214,7 @@ const AdminDashboardScreen = () => {
         </ExpandableCard>
 
         {/* Smart Bins Section */}
-        <ExpandableCard title="Smart Bins Status" icon="🗑️">
+        <ExpandableCard title="Smart Bins Status" icon={<Trash2 size={24} color={COLORS.primary} />}>
           <View style={styles.statsRow}>
             <MiniStat label="Total" value={data.bins?.total || 0} color={COLORS.info} />
             <MiniStat label="Active" value={data.bins?.active || 0} color={COLORS.success} />
@@ -212,7 +223,7 @@ const AdminDashboardScreen = () => {
 
           {data.bins?.full > 0 && (
             <View style={[styles.alertBox, styles.alertBoxDanger]}>
-              <Text style={styles.alertIcon}>🚨</Text>
+              <AlertCircle size={20} color={COLORS.danger} style={styles.alertIconComponent} />
               <Text style={[styles.alertText, styles.alertTextDanger]}>
                 {data.bins.full} bin{data.bins.full > 1 ? 's' : ''} require immediate attention!
               </Text>
@@ -238,7 +249,7 @@ const AdminDashboardScreen = () => {
         </ExpandableCard>
 
         {/* Collection Routes Section */}
-        <ExpandableCard title="Collection Routes" icon="🚛">
+        <ExpandableCard title="Collection Routes" icon={<Truck size={24} color={COLORS.primary} />}>
           <View style={styles.statsRow}>
             <MiniStat label="Total" value={data.routes?.total || 0} color={COLORS.info} />
             <MiniStat label="Active" value={data.routes?.active || 0} color={COLORS.success} />
@@ -247,7 +258,7 @@ const AdminDashboardScreen = () => {
         </ExpandableCard>
 
         {/* IoT Devices Section */}
-        <ExpandableCard title="IoT Devices" icon="📱">
+        <ExpandableCard title="IoT Devices" icon={<Smartphone size={24} color={COLORS.primary} />}>
           <View style={styles.statsRow}>
             <MiniStat label="Total" value={data.devices?.total || 0} color={COLORS.info} />
             <MiniStat label="Online" value={data.devices?.active || 0} color={COLORS.success} />
@@ -256,7 +267,7 @@ const AdminDashboardScreen = () => {
 
           {data.devices?.offline > 0 && (
             <View style={[styles.alertBox, styles.alertBoxWarning]}>
-              <Text style={styles.alertIcon}>🔴</Text>
+              <AlertCircle size={20} color={COLORS.warning} style={styles.alertIconComponent} />
               <Text style={[styles.alertText, styles.alertTextWarning]}>
                 {data.devices.offline} device{data.devices.offline > 1 ? 's' : ''} offline
               </Text>
@@ -282,7 +293,7 @@ const AdminDashboardScreen = () => {
         </ExpandableCard>
 
         {/* Work Orders Section */}
-        <ExpandableCard title="Work Orders" icon="🔧">
+        <ExpandableCard title="Work Orders" icon={<Wrench size={24} color={COLORS.primary} />}>
           <View style={styles.statsRow}>
             <MiniStat label="Total" value={data.workOrders?.total || 0} color={COLORS.info} />
             <MiniStat label="Pending" value={data.workOrders?.pending || 0} color={COLORS.warning} />
@@ -291,7 +302,7 @@ const AdminDashboardScreen = () => {
 
           {data.workOrders?.pending > 0 && (
             <View style={styles.alertBox}>
-              <Text style={styles.alertIcon}>⚠️</Text>
+              <AlertTriangle size={20} color={COLORS.warning} style={styles.alertIconComponent} />
               <Text style={styles.alertText}>
                 {data.workOrders.pending} work order{data.workOrders.pending > 1 ? 's' : ''} pending
               </Text>
@@ -305,8 +316,15 @@ const AdminDashboardScreen = () => {
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         
         <Button 
-          title="📊 View Reports" 
+          title="View Reports" 
           onPress={() => router.push('/admin/reports')}
+          style={styles.actionButtonSpacing}
+        />
+        
+        <Button 
+          title="Bin Management" 
+          onPress={() => router.push('/admin/bins')}
+          variant="secondary"
         />
       </View>
 
@@ -413,6 +431,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: SPACING.small,
   },
+  alertIconComponent: {
+    marginRight: SPACING.small,
+  },
   alertText: {
     flex: 1,
     fontSize: 14,
@@ -447,6 +468,9 @@ const styles = StyleSheet.create({
   actionsContainer: {
     padding: SPACING.medium,
     paddingTop: 0,
+  },
+  actionButtonSpacing: {
+    marginBottom: SPACING.medium,
   },
   sectionTitle: {
     fontSize: 18,

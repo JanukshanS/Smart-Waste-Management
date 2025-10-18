@@ -13,6 +13,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
+import { Lock, Calendar, Mask, FileText, Scale } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { adminApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -100,7 +101,10 @@ const PrivacySettingsScreen = () => {
         {/* Data Encryption */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>🔒 Data Encryption</Text>
+            <View style={styles.cardTitleContainer}>
+              <Lock size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Data Encryption</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Enable Encryption</Text>
               <Switch
@@ -118,7 +122,10 @@ const PrivacySettingsScreen = () => {
         {/* Data Retention */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>📅 Data Retention</Text>
+            <View style={styles.cardTitleContainer}>
+              <Calendar size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Data Retention</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Auto-delete Old Data</Text>
               <Switch
@@ -142,7 +149,10 @@ const PrivacySettingsScreen = () => {
         {/* Anonymization */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>🎭 Data Anonymization</Text>
+            <View style={styles.cardTitleContainer}>
+              <Mask size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Data Anonymization</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Enable Anonymization</Text>
               <Switch
@@ -158,7 +168,10 @@ const PrivacySettingsScreen = () => {
         {/* Audit Logging */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>📝 Audit Logging</Text>
+            <View style={styles.cardTitleContainer}>
+              <FileText size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Audit Logging</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Enable Logging</Text>
               <Switch
@@ -185,7 +198,10 @@ const PrivacySettingsScreen = () => {
         {/* Compliance */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.cardTitle}>⚖️ Compliance</Text>
+            <View style={styles.cardTitleContainer}>
+              <Scale size={20} color={COLORS.primary} />
+              <Text style={styles.cardTitle}>Compliance</Text>
+            </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>GDPR Compliance</Text>
               <Switch
@@ -283,11 +299,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     elevation: 2,
   },
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.medium,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.text,
-    marginBottom: SPACING.medium,
+    marginLeft: SPACING.small,
   },
   settingRow: {
     flexDirection: 'row',

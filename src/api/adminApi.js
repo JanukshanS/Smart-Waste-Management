@@ -272,6 +272,84 @@ export const getPaymentReports = async (startDate, endDate) => {
   }
 };
 
+/**
+ * BIN MANAGEMENT
+ */
+
+// Get all bins with pagination
+export const getBins = async (params = {}) => {
+  try {
+    const { page = 1, limit = 10 } = params;
+    
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    const response = await client.get(`/bins?${queryParams.toString()}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get all devices with pagination
+export const getDevices = async (params = {}) => {
+  try {
+    const { page = 1, limit = 100 } = params;
+    
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    const response = await client.get(`/devices?${queryParams.toString()}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get single bin by ID (using MongoDB _id)
+export const getBinById = async (binId) => {
+  try {
+    const response = await client.get(`/bins/${binId}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Create new bin
+export const createBin = async (binData) => {
+  try {
+    const response = await client.post('/bins', binData);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update bin
+export const updateBin = async (binId, binData) => {
+  try {
+    const response = await client.put(`/bins/${binId}`, binData);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete bin
+export const deleteBin = async (binId) => {
+  try {
+    const response = await client.delete(`/bins/${binId}`);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default {
   getDashboardStats,
   getUsers,
@@ -294,4 +372,12 @@ export default {
   getBillingConfig,
   updateBillingConfig,
   getPaymentReports,
+  // Bins
+  getBins,
+  getBinById,
+  createBin,
+  updateBin,
+  deleteBin,
+  // Devices
+  getDevices,
 };

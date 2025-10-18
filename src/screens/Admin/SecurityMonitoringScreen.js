@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
+import { Lock } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { adminApi } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -143,7 +144,7 @@ const SecurityMonitoringScreen = () => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🔒</Text>
+            <Lock size={48} color={COLORS.textLight} style={styles.emptyIconComponent} />
             <Text style={styles.emptyText}>No security logs found</Text>
           </View>
         }
@@ -274,6 +275,9 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 48,
+    marginBottom: SPACING.medium,
+  },
+  emptyIconComponent: {
     marginBottom: SPACING.medium,
   },
   emptyText: {

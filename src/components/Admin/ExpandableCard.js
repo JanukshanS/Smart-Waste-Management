@@ -17,6 +17,7 @@ if (
 
 const ExpandableCard = ({ title, icon, children, defaultExpanded = false }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const isIconComponent = typeof icon !== 'string';
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -27,7 +28,11 @@ const ExpandableCard = ({ title, icon, children, defaultExpanded = false }) => {
     <View style={styles.card}>
       <TouchableOpacity style={styles.header} onPress={toggleExpand} activeOpacity={0.7}>
         <View style={styles.headerLeft}>
-          <Text style={styles.icon}>{icon}</Text>
+          {isIconComponent ? (
+            <View style={styles.iconWrapper}>{icon}</View>
+          ) : (
+            <Text style={styles.icon}>{icon}</Text>
+          )}
           <Text style={styles.title}>{title}</Text>
         </View>
         <Text style={[styles.arrow, expanded && styles.arrowExpanded]}>
@@ -70,6 +75,9 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 24,
+    marginRight: SPACING.small,
+  },
+  iconWrapper: {
     marginRight: SPACING.small,
   },
   title: {
