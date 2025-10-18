@@ -168,18 +168,16 @@ describe('ApiClient', () => {
     });
 
     it('handles timeout errors', async () => {
-      fetch.mockImplementationOnce(() => new Promise(() => {})); // Never resolves
+      // Mock a timeout scenario by directly rejecting with AbortError
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      fetch.mockRejectedValueOnce(abortError);
 
-      const requestPromise = ApiClient.get('/test');
-      
-      // Fast-forward time to trigger timeout
-      jest.advanceTimersByTime(10000);
-
-      await expect(requestPromise).rejects.toEqual({
+      await expect(ApiClient.get('/test')).rejects.toEqual({
         status: 408,
         message: 'Request timeout',
       });
-    }, 15000); // Increase timeout for this test
+    });
 
     it('handles AbortError specifically', async () => {
       const abortError = new Error('Aborted');

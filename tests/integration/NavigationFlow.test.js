@@ -10,17 +10,15 @@ import { useAuth } from '../../src/contexts/AuthContext';
 jest.mock('../../src/contexts/AuthContext');
 
 describe('Navigation Flow Integration', () => {
-  const mockRouter = {
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
-  };
-
   const mockLogout = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    require('expo-router').useRouter.mockReturnValue(mockRouter);
+    
+    // Clear the global mock router
+    global.mockRouter.push.mockClear();
+    global.mockRouter.replace.mockClear();
+    global.mockRouter.back.mockClear();
     
     useAuth.mockReturnValue({
       user: { id: '1', name: 'John Doe', email: 'john@example.com' },
@@ -51,7 +49,7 @@ describe('Navigation Flow Integration', () => {
     const navigationButton = getByText('Go to citizen/create-request');
     fireEvent.press(navigationButton);
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/citizen/create-request');
+    expect(global.mockRouter.push).toHaveBeenCalledWith('/citizen/create-request');
   });
 
   it('handles back navigation', () => {
@@ -70,7 +68,7 @@ describe('Navigation Flow Integration', () => {
     const backButton = getByText('Go Back');
     fireEvent.press(backButton);
 
-    expect(mockRouter.back).toHaveBeenCalled();
+    expect(global.mockRouter.back).toHaveBeenCalled();
   });
 
   it('navigates to different role dashboards', () => {
@@ -95,7 +93,7 @@ describe('Navigation Flow Integration', () => {
       const roleButton = getByText(`Go to ${role} Dashboard`);
       fireEvent.press(roleButton);
 
-      expect(mockRouter.push).toHaveBeenCalledWith(`/${role}`);
+      expect(global.mockRouter.push).toHaveBeenCalledWith(`/${role}`);
     });
   });
 
@@ -131,7 +129,7 @@ describe('Navigation Flow Integration', () => {
       const navButton = getByText(`Navigate to ${path}`);
       fireEvent.press(navButton);
 
-      expect(mockRouter.push).toHaveBeenCalledWith(path);
+      expect(global.mockRouter.push).toHaveBeenCalledWith(path);
     });
   });
 
@@ -158,14 +156,14 @@ describe('Navigation Flow Integration', () => {
     // Test login success navigation
     const loginButton = getByText('Login Success');
     fireEvent.press(loginButton);
-    expect(mockRouter.replace).toHaveBeenCalledWith('/citizen');
+    expect(global.mockRouter.replace).toHaveBeenCalledWith('/citizen');
 
     jest.clearAllMocks();
 
     // Test logout navigation
     const logoutButton = getByText('Logout');
     fireEvent.press(logoutButton);
-    expect(mockRouter.replace).toHaveBeenCalledWith('/auth-landing');
+    expect(global.mockRouter.replace).toHaveBeenCalledWith('/auth-landing');
   });
 
   it('handles conditional navigation based on user state', () => {
@@ -192,7 +190,7 @@ describe('Navigation Flow Integration', () => {
     fireEvent.press(conditionalButton);
 
     // Should navigate to profile since user is mocked as logged in
-    expect(mockRouter.push).toHaveBeenCalledWith('/citizen/profile');
+    expect(global.mockRouter.push).toHaveBeenCalledWith('/citizen/profile');
   });
 
   it('handles navigation with parameters', () => {
@@ -218,17 +216,17 @@ describe('Navigation Flow Integration', () => {
     // Test navigation with query parameters
     const requestButton = getByText('View Request Details');
     fireEvent.press(requestButton);
-    expect(mockRouter.push).toHaveBeenCalledWith('/citizen/track-request?id=123');
+    expect(global.mockRouter.push).toHaveBeenCalledWith('/citizen/track-request?id=123');
 
     jest.clearAllMocks();
 
     const userButton = getByText('Edit User');
     fireEvent.press(userButton);
-    expect(mockRouter.push).toHaveBeenCalledWith('/admin/user-details?userId=456');
+    expect(global.mockRouter.push).toHaveBeenCalledWith('/admin/user-details?userId=456');
   });
 
   it('handles navigation errors gracefully', () => {
-    mockRouter.push.mockImplementation(() => {
+    global.mockRouter.push.mockImplementation(() => {
       throw new Error('Navigation failed');
     });
 
@@ -256,13 +254,13 @@ describe('Navigation Flow Integration', () => {
       fireEvent.press(errorButton);
     }).not.toThrow();
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/invalid-route');
+    expect(global.mockRouter.push).toHaveBeenCalledWith('/invalid-route');
   });
 
   it('maintains navigation state consistency', () => {
     let navigationHistory = [];
     
-    mockRouter.push.mockImplementation((route) => {
+    global.mockRouter.push.mockImplementation((route) => {
       navigationHistory.push(route);
     });
 

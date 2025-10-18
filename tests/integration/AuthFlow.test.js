@@ -15,14 +15,12 @@ jest.mock('../../src/contexts/UserDetailsContext', () => ({
 jest.spyOn(Alert, 'alert');
 
 describe('Authentication Flow Integration', () => {
-  const mockRouter = {
-    push: jest.fn(),
-    replace: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    require('expo-router').useRouter.mockReturnValue(mockRouter);
+    
+    // Clear the global mock router
+    global.mockRouter.push.mockClear();
+    global.mockRouter.replace.mockClear();
   });
 
   const renderLoginWithAuth = () => {
@@ -68,7 +66,7 @@ describe('Authentication Flow Integration', () => {
         email: 'john@example.com',
         password: 'password123'
       });
-      expect(mockRouter.replace).toHaveBeenCalledWith('/citizen');
+      expect(global.mockRouter.replace).toHaveBeenCalledWith('/citizen');
     });
   });
 
@@ -100,7 +98,7 @@ describe('Authentication Flow Integration', () => {
     });
 
     // Should not navigate on failure
-    expect(mockRouter.replace).not.toHaveBeenCalled();
+    expect(global.mockRouter.replace).not.toHaveBeenCalled();
   });
 
   it('navigates to different dashboards based on user role', async () => {
@@ -132,7 +130,7 @@ describe('Authentication Flow Integration', () => {
 
       // Wait for navigation
       await waitFor(() => {
-        expect(mockRouter.replace).toHaveBeenCalledWith(expectedRoute);
+        expect(global.mockRouter.replace).toHaveBeenCalledWith(expectedRoute);
       });
     }
   });
@@ -207,6 +205,6 @@ describe('Authentication Flow Integration', () => {
     const signupLink = getByText("Don't have an account? Sign Up");
     fireEvent.press(signupLink);
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/signup');
+    expect(global.mockRouter.push).toHaveBeenCalledWith('/signup');
   });
 });

@@ -37,17 +37,30 @@ jest.mock('expo-location', () => ({
 }));
 
 // Mock expo-router
+const mockRouter = {
+  push: jest.fn(),
+  back: jest.fn(),
+  replace: jest.fn(),
+};
+
 jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    back: jest.fn(),
-    replace: jest.fn(),
-  }),
-  useLocalSearchParams: () => ({}),
+  useRouter: jest.fn(() => mockRouter),
+  useLocalSearchParams: jest.fn(() => ({})),
+  useGlobalSearchParams: jest.fn(() => ({})),
+  usePathname: jest.fn(() => '/'),
+  useSegments: jest.fn(() => []),
   Stack: {
     Screen: ({ children }) => children,
   },
+  Tabs: {
+    Screen: ({ children }) => children,
+  },
+  Slot: ({ children }) => children,
+  router: mockRouter,
 }));
+
+// Export mock router for use in tests
+global.mockRouter = mockRouter;
 
 // Mock expo-notifications
 jest.mock('expo-notifications', () => ({
