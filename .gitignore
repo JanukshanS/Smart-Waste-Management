@@ -284,6 +284,7 @@ react-native.config.js
 
 # Additional generated files that may appear
 android/app/src/main/assets/
+android/app/src/main/res/
 android/app/src/main/res/values/
 android/app/src/main/res/xml/
 android/app/src/main/res/mipmap-*/
