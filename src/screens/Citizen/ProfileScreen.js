@@ -102,7 +102,6 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-<<<<<<< HEAD
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -204,7 +203,9 @@ const ProfileScreen = () => {
                     </View>
                     <View style={styles.infoContent}>
                       <Text style={styles.infoLabel}>Member Since</Text>
-                      <Text style={styles.infoValue}>{formatDate(createdAt)}</Text>
+                      <Text style={styles.infoValue}>
+                        {formatDate(createdAt)}
+                      </Text>
                     </View>
                   </View>
                 </>
@@ -218,7 +219,12 @@ const ProfileScreen = () => {
 
             <TouchableOpacity
               style={styles.settingItem}
-              onPress={() => Alert.alert('Coming Soon', 'Change password feature coming soon!')}
+              onPress={() =>
+                Alert.alert(
+                  "Coming Soon",
+                  "Change password feature coming soon!"
+                )
+              }
             >
               <View style={styles.settingLeft}>
                 <View style={styles.settingIconContainer}>
@@ -231,7 +237,9 @@ const ProfileScreen = () => {
 
             <TouchableOpacity
               style={styles.settingItem}
-              onPress={() => Alert.alert('Coming Soon', 'Notification settings coming soon!')}
+              onPress={() =>
+                Alert.alert("Coming Soon", "Notification settings coming soon!")
+              }
             >
               <View style={styles.settingLeft}>
                 <View style={styles.settingIconContainer}>
@@ -244,7 +252,9 @@ const ProfileScreen = () => {
 
             <TouchableOpacity
               style={styles.settingItem}
-              onPress={() => Alert.alert('Coming Soon', 'Privacy settings coming soon!')}
+              onPress={() =>
+                Alert.alert("Coming Soon", "Privacy settings coming soon!")
+              }
             >
               <View style={styles.settingLeft}>
                 <View style={styles.settingIconContainer}>
