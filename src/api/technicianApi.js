@@ -157,3 +157,61 @@ export const updateDeviceStatus = async (deviceId, status) => {
   }
 };
 
+/**
+ * Get all bins
+ * @param {object} filters - Optional filters (page, limit)
+ */
+export const getBins = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    if (filters.page) {
+      queryParams.append('page', filters.page);
+    }
+    if (filters.limit) {
+      queryParams.append('limit', filters.limit);
+    }
+
+    // Use the correct bins endpoint
+    const endpoint = `/bins${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await client.get(endpoint);
+    return response;
+  } catch (error) {
+    console.error('Error fetching bins:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all devices
+ * @param {object} filters - Optional filters (binId, page, limit)
+ */
+export const getDevices = async (filters = {}) => {
+  try {
+    console.log('getDevices called with filters:', filters);
+    
+    const queryParams = new URLSearchParams();
+
+    if (filters.binId) {
+      queryParams.append('binId', filters.binId);
+    }
+    if (filters.page) {
+      queryParams.append('page', filters.page);
+    }
+    if (filters.limit) {
+      queryParams.append('limit', filters.limit);
+    }
+
+    // Use the correct devices endpoint
+    const endpoint = `/devices${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    console.log('Making request to endpoint:', endpoint);
+    
+    const response = await client.get(endpoint);
+    console.log('getDevices API response:', response);
+    return response;
+  } catch (error) {
+    console.error('Error fetching devices:', error);
+    throw error;
+  }
+};
+

@@ -11,22 +11,20 @@ const WorkOrdersScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [workOrders, setWorkOrders] = useState([]);
   const [pagination, setPagination] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedPriority, setSelectedPriority] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('pending');
+  const [selectedPriority, setSelectedPriority] = useState('low');
   const [currentPage, setCurrentPage] = useState(1);
 
   // Status filters
   const statuses = [
-    { value: 'all', label: 'All', icon: '', color: COLORS.primary },
     { value: 'pending', label: 'Pending', icon: '', color: COLORS.warning },
     { value: 'in-progress', label: 'In Progress', icon: '', color: '#1976D2' },
-    { value: 'completed', label: 'Completed', icon: '', color: COLORS.success },
+    { value: 'resolved', label: 'Completed', icon: '', color: COLORS.success },
     { value: 'escalated', label: 'Escalated', icon: '', color: COLORS.danger },
   ];
 
   // Priority filters
   const priorities = [
-    { value: 'all', label: 'All Priority', icon: '', color: COLORS.primary },
     { value: 'low', label: 'Low', icon: '', color: '#388E3C' },
     { value: 'medium', label: 'Medium', icon: '', color: '#F57C00' },
     { value: 'high', label: 'High', icon: '', color: '#C62828' },
@@ -119,9 +117,7 @@ const WorkOrdersScreen = () => {
         <Text style={styles.emptyIcon}>🔧</Text>
         <Text style={styles.emptyTitle}>No Work Orders Found</Text>
         <Text style={styles.emptyText}>
-          {selectedStatus === 'all' && selectedPriority === 'all'
-            ? "You don't have any work orders assigned yet."
-            : `No work orders found with the selected filters.`}
+          
         </Text>
       </View>
     );
