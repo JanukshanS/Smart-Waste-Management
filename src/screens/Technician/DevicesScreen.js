@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, ScrollView, Alert, TextInput } from 'react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import * as technicianApi from '../../api/technicianApi';
 import Button from '../../components/Button';
@@ -14,6 +14,16 @@ const DevicesScreen = () => {
   const [showDeviceModal, setShowDeviceModal] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [loadingDevice, setLoadingDevice] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [selectedBinForRegistration, setSelectedBinForRegistration] = useState(null);
+  const [registeringDevice, setRegisteringDevice] = useState(false);
+  const [deviceForm, setDeviceForm] = useState({
+    deviceId: '',
+    deviceType: 'sensor',
+    status: 'active',
+    batteryLevel: '85',
+    firmwareVersion: 'v1.2.3'
+  });
 
   useEffect(() => {
     fetchBins();
@@ -207,7 +217,69 @@ const DevicesScreen = () => {
       setLoadingDevice(false);
     }
   };
-  
+
+  const handleRegisterDevice = (bin) => {
+    setSelectedBinForRegistration(bin);
+    setShowRegisterModal(true);
+    
+    // Generate a unique device ID based on bin ID
+    const binId = bin._id || bin.id;
+    const deviceId = `DEV-${binId.substring(0, 8).toUpperCase()}`;
+    
+    setDeviceForm({
+      deviceId: deviceId,
+      deviceType: 'sensor',
+      status: 'active',
+      batteryLevel: '85',
+      firmwareVersion: 'v1.2.3'
+    });
+  };
+
+  const handleSubmitRegistration = async () => {
+    try {
+      setRegisteringDevice(true);
+      
+      const binId = selectedBinForRegistration._id || selectedBinForRegistration.id;
+      
+      const deviceData = {
+        deviceId: deviceForm.deviceId,
+        deviceType: deviceForm.deviceType,
+        binId: binId,
+        status: deviceForm.status,
+        batteryLevel: parseInt(deviceForm.batteryLevel),
+        firmwareVersion: deviceForm.firmwareVersion
+      };
+      
+      console.log('Registering device with data:', deviceData);
+      
+      const response = await technicianApi.registerDevice(deviceData);
+      
+      if (response.success) {
+        Alert.alert('Success', 'Device registered successfully!');
+        setShowRegisterModal(false);
+        setSelectedBinForRegistration(null);
+        
+        // Reset form
+        setDeviceForm({
+          deviceId: '',
+          deviceType: 'sensor',
+          status: 'active',
+          batteryLevel: '85',
+          firmwareVersion: 'v1.2.3'
+        });
+        
+        // Refresh bins list
+        fetchBins();
+      } else {
+        Alert.alert('Error', response.message || 'Failed to register device');
+      }
+    } catch (error) {
+      console.error('Device registration error:', error);
+      Alert.alert('Error', 'Failed to register device. Please try again.');
+    } finally {
+      setRegisteringDevice(false);
+    }
+  };
 
   const renderBinCard = ({ item: bin }) => {
     const fillColor = bin.fillStatusColor || 'gray';
@@ -277,7 +349,7 @@ const DevicesScreen = () => {
 
           <TouchableOpacity
             style={styles.registerDeviceButton}
-            onPress={() => Alert.alert('Coming Soon', 'Device registration functionality will be implemented')}
+            onPress={() => handleRegisterDevice(bin)}
           >
             <Text style={styles.registerDeviceButtonText}>
               + Register Device
@@ -513,6 +585,109 @@ const DevicesScreen = () => {
                 onPress={() => setShowDeviceModal(false)}
                 variant="outline"
               />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Device Registration Modal */}
+      <Modal
+        visible={showRegisterModal}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowRegisterModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Register Device</Text>
+              <TouchableOpacity 
+                onPress={() => setShowRegisterModal(false)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} contentContainerStyle={styles.modalBodyContent}>
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Device Information</Text>
+                
+                <View style={styles.formRow}>
+                  <Text style={styles.formLabel}>Bin ID:</Text>
+                  <Text style={styles.formValue}>
+                    {selectedBinForRegistration?.binId || selectedBinForRegistration?._id || 'N/A'}
+                  </Text>
+                </View>
+
+                <View style={styles.formRow}>
+                  <Text style={styles.formLabel}>Device ID:</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={deviceForm.deviceId}
+                    onChangeText={(text) => setDeviceForm(prev => ({ ...prev, deviceId: text }))}
+                    placeholder="Enter device ID"
+                  />
+                </View>
+
+                <View style={styles.formRow}>
+                  <Text style={styles.formLabel}>Device Type:</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={deviceForm.deviceType}
+                    onChangeText={(text) => setDeviceForm(prev => ({ ...prev, deviceType: text }))}
+                    placeholder="Enter device type"
+                  />
+                </View>
+
+                <View style={styles.formRow}>
+                  <Text style={styles.formLabel}>Status:</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={deviceForm.status}
+                    onChangeText={(text) => setDeviceForm(prev => ({ ...prev, status: text }))}
+                    placeholder="Enter status"
+                  />
+                </View>
+
+                <View style={styles.formRow}>
+                  <Text style={styles.formLabel}>Battery Level:</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={deviceForm.batteryLevel}
+                    onChangeText={(text) => setDeviceForm(prev => ({ ...prev, batteryLevel: text }))}
+                    placeholder="Enter battery level (0-100)"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={styles.formRow}>
+                  <Text style={styles.formLabel}>Firmware Version:</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={deviceForm.firmwareVersion}
+                    onChangeText={(text) => setDeviceForm(prev => ({ ...prev, firmwareVersion: text }))}
+                    placeholder="Enter firmware version"
+                  />
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <View style={styles.footerButtons}>
+                <Button
+                  title="Cancel"
+                  onPress={() => setShowRegisterModal(false)}
+                  variant="outline"
+                  style={styles.footerButton}
+                />
+                <Button
+                  title={registeringDevice ? "Registering..." : "Register Device"}
+                  onPress={handleSubmitRegistration}
+                  disabled={registeringDevice}
+                  style={styles.footerButton}
+                />
+              </View>
             </View>
           </View>
         </View>
@@ -884,6 +1059,44 @@ const styles = StyleSheet.create({
     padding: SPACING.large,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+  },
+  // Registration modal styles
+  formSection: {
+    marginBottom: SPACING.large,
+  },
+  formRow: {
+    marginBottom: SPACING.medium,
+  },
+  formLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.small,
+  },
+  formValue: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    backgroundColor: COLORS.background,
+    padding: SPACING.small,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  formInput: {
+    fontSize: 16,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+    padding: SPACING.small,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  footerButtons: {
+    flexDirection: 'row',
+    gap: SPACING.medium,
+  },
+  footerButton: {
+    flex: 1,
   },
 });
 
