@@ -16,11 +16,13 @@
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": [
+          "remote-notification",
           "remote-notification"
         ],
         "NSLocationWhenInUseUsageDescription": "This app needs your location to find nearby waste collection bins.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs your location to find nearby waste collection bins."
-      }
+      },
+      "bundleIdentifier": "com.anonymous.frontend"
     },
     "android": {
       "adaptiveIcon": {
