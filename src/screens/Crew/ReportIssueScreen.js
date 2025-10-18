@@ -22,14 +22,16 @@ const ReportIssueScreen = () => {
   const [issueType, setIssueType] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
+  const [routeId, setRouteId] = useState('');
+  const [stopIndex, setStopIndex] = useState('');
   const [loading, setLoading] = useState(false);
 
   const issueTypes = [
+    { id: 'blocked-access', label: '🚧 Blocked Access', icon: '🚧' },
     { id: 'bin-damaged', label: '🗑️ Damaged Bin', icon: '🗑️' },
-    { id: 'bin-inaccessible', label: '🚧 Inaccessible Bin', icon: '🚧' },
-    { id: 'hazard', label: '⚠️ Safety Hazard', icon: '⚠️' },
+    { id: 'bin-overflow', label: '📦 Bin Overflow', icon: '📦' },
+    { id: 'safety-hazard', label: '⚠️ Safety Hazard', icon: '⚠️' },
     { id: 'vehicle-issue', label: '🚛 Vehicle Problem', icon: '🚛' },
-    { id: 'overflow', label: '📦 Overflow', icon: '📦' },
     { id: 'other', label: '❓ Other Issue', icon: '❓' },
   ];
 
@@ -54,8 +56,19 @@ const ReportIssueScreen = () => {
         issueType: issueType,
         description: description.trim(),
         location: location.trim() || 'Not specified',
-        reportedAt: new Date().toISOString(),
       };
+
+      // Add optional fields if provided
+      if (routeId.trim()) {
+        issueData.routeId = routeId.trim();
+      }
+      
+      if (stopIndex.trim()) {
+        const parsedIndex = parseInt(stopIndex.trim(), 10);
+        if (!isNaN(parsedIndex)) {
+          issueData.stopIndex = parsedIndex;
+        }
+      }
 
       const response = await crewApi.reportIssue(issueData);
 
@@ -137,6 +150,31 @@ const ReportIssueScreen = () => {
             onChangeText={setLocation}
           />
           <Text style={styles.hint}>e.g., "Main St & 5th Ave" or "Bin #123"</Text>
+        </View>
+
+        {/* Route ID */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Route ID (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter route ID if related to a specific route"
+            value={routeId}
+            onChangeText={setRouteId}
+          />
+          <Text style={styles.hint}>Leave blank if not related to a specific route</Text>
+        </View>
+
+        {/* Stop Index */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Stop Number (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter stop number (e.g., 1, 2, 3)"
+            value={stopIndex}
+            onChangeText={setStopIndex}
+            keyboardType="numeric"
+          />
+          <Text style={styles.hint}>Enter the stop number if issue is at a specific stop</Text>
         </View>
 
         {/* Submit Button */}

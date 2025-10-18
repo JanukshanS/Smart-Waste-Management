@@ -90,17 +90,23 @@ const RouteDetailsScreen = () => {
     try {
       setCrewsLoading(true);
       const response = await coordinatorApi.getCrews({ status: "active" });
-      if (response.success) {
+      if (response.success && response.data) {
+        // Ensure response.data is an array
+        const crewsData = Array.isArray(response.data) ? response.data : [];
+        
         // Filter to show only available or assigned crews
-        const availableCrews = response.data.filter(
+        const availableCrews = crewsData.filter(
           (crew) =>
             crew.availability === "available" ||
             crew.profile?.availability === "available"
         );
         setCrews(availableCrews);
+      } else {
+        setCrews([]);
       }
     } catch (err) {
       console.error("Error fetching crews:", err);
+      setCrews([]);
       Alert.alert("Error", "Failed to load crews");
     } finally {
       setCrewsLoading(false);
@@ -349,8 +355,8 @@ const RouteDetailsScreen = () => {
             {/* Assignment Info */}
             {route.crewId && (
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Crew ID: </Text>
-                {route.crewId}
+                <Text style={styles.infoLabel}>Crew: </Text>
+                {typeof route.crewId === 'object' ? route.crewId.name || route.crewId._id : route.crewId}
               </Text>
             )}
             {route.vehicleId && (

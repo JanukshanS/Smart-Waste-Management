@@ -157,7 +157,12 @@ const ScheduleScreen = () => {
         <View style={styles.routeDetails}>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Crew:</Text>
-            <Text style={styles.detailValue}>{item.crewId || 'Not assigned'}</Text>
+            <Text style={styles.detailValue}>
+              {item.crewId 
+                ? (typeof item.crewId === 'object' ? item.crewId.name || item.crewId._id : item.crewId)
+                : 'Not assigned'
+              }
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Vehicle:</Text>

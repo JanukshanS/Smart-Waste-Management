@@ -47,11 +47,15 @@ const RoutesScreen = () => {
 
     // Apply search
     if (search) {
-      filtered = filtered.filter(r => 
-        r.routeName?.toLowerCase().includes(search.toLowerCase()) ||
-        r.crewId?.toLowerCase().includes(search.toLowerCase()) ||
-        r.vehicleId?.toLowerCase().includes(search.toLowerCase())
-      );
+      filtered = filtered.filter(r => {
+        const routeName = r.routeName?.toLowerCase() || '';
+        const crewName = typeof r.crewId === 'object' ? (r.crewId.name?.toLowerCase() || '') : (r.crewId?.toLowerCase() || '');
+        const vehicleId = r.vehicleId?.toLowerCase() || '';
+        
+        return routeName.includes(search.toLowerCase()) ||
+               crewName.includes(search.toLowerCase()) ||
+               vehicleId.includes(search.toLowerCase());
+      });
     }
 
     // Sort by date (newest first)
