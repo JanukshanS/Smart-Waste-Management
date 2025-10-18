@@ -6,3 +6,5 @@ export { default as PrivacySettingsScreen } from "./PrivacySettingsScreen";
 export { default as SecurityMonitoringScreen } from "./SecurityMonitoringScreen";
 export { default as BillingConfigScreen } from "./BillingConfigScreen";
 export { default as PaymentReportsScreen } from "./PaymentReportsScreen";
+export { default as BinManagementScreen } from "./BinManagementScreen";
+export { default as BinDetailsScreen } from "./BinDetailsScreen";

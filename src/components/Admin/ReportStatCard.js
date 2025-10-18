@@ -3,10 +3,12 @@ import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 
 const ReportStatCard = ({ icon, label, value, trend, trendLabel, color = COLORS.primary }) => {
+  const isIconComponent = typeof icon !== 'string';
+  
   return (
     <View style={[styles.card, { borderLeftColor: color }]}>
       <View style={styles.header}>
-        <Text style={styles.icon}>{icon}</Text>
+        {isIconComponent ? icon : <Text style={styles.icon}>{icon}</Text>}
         <Text style={styles.label}>{label}</Text>
       </View>
       

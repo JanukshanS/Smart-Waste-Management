@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { 
+  Mail, 
+  Phone, 
+  Home, 
+  Building, 
+  MapPin as MapPinIcon, 
+  Calendar, 
+  RefreshCw, 
+  Hash,
+  Trash2
+} from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import Button from '../../components/Button';
 import { adminApi } from '../../api';
@@ -89,12 +100,7 @@ const UserDetailsScreen = () => {
     technician: COLORS.roleTechnician,
   };
 
-  const roleIcons = {
-    admin: '👨‍💼',
-    citizen: '👤',
-    coordinator: '🗺️',
-    technician: '🔧',
-  };
+  // Note: roleIcons are rendered inline now with lucide-react-native components
 
   const statusColors = {
     active: COLORS.success,
@@ -136,7 +142,6 @@ const UserDetailsScreen = () => {
         
         <View style={styles.badgesContainer}>
           <View style={[styles.roleBadge, { backgroundColor: `${roleColor}15`, borderColor: roleColor }]}>
-            <Text style={styles.roleIcon}>{roleIcons[user.role] || '👤'}</Text>
             <Text style={[styles.roleBadgeText, { color: roleColor }]}>
               {user.role}
             </Text>
@@ -156,12 +161,18 @@ const UserDetailsScreen = () => {
         <Text style={styles.sectionTitle}>Contact Information</Text>
         
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>📧 Email</Text>
+          <View style={styles.infoLabelContainer}>
+            <Mail size={16} color={COLORS.textLight} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Email</Text>
+          </View>
           <Text style={styles.infoValue}>{user.email}</Text>
         </View>
         
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>📱 Phone</Text>
+          <View style={styles.infoLabelContainer}>
+            <Phone size={16} color={COLORS.textLight} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Phone</Text>
+          </View>
           <Text style={styles.infoValue}>{user.phone}</Text>
         </View>
       </View>
@@ -172,23 +183,35 @@ const UserDetailsScreen = () => {
           <Text style={styles.sectionTitle}>Address</Text>
           
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>🏠 Street</Text>
+            <View style={styles.infoLabelContainer}>
+              <Home size={16} color={COLORS.textLight} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Street</Text>
+            </View>
             <Text style={styles.infoValue}>{user.address.street}</Text>
           </View>
           
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>🏙️ City</Text>
+            <View style={styles.infoLabelContainer}>
+              <Building size={16} color={COLORS.textLight} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>City</Text>
+            </View>
             <Text style={styles.infoValue}>{user.address.city}</Text>
           </View>
           
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>📮 Postal Code</Text>
+            <View style={styles.infoLabelContainer}>
+              <Mail size={16} color={COLORS.textLight} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Postal Code</Text>
+            </View>
             <Text style={styles.infoValue}>{user.address.postalCode}</Text>
           </View>
           
           {user.address.coordinates && (
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>📍 Coordinates</Text>
+              <View style={styles.infoLabelContainer}>
+                <MapPinIcon size={16} color={COLORS.textLight} style={styles.infoIcon} />
+                <Text style={styles.infoLabel}>Coordinates</Text>
+              </View>
               <Text style={styles.infoValue}>
                 {user.address.coordinates.lat}, {user.address.coordinates.lng}
               </Text>
@@ -202,7 +225,10 @@ const UserDetailsScreen = () => {
         <Text style={styles.sectionTitle}>Account Information</Text>
         
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>📅 Created</Text>
+          <View style={styles.infoLabelContainer}>
+            <Calendar size={16} color={COLORS.textLight} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Created</Text>
+          </View>
           <Text style={styles.infoValue}>
             {new Date(user.createdAt).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -213,7 +239,10 @@ const UserDetailsScreen = () => {
         </View>
         
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>🔄 Last Updated</Text>
+          <View style={styles.infoLabelContainer}>
+            <RefreshCw size={16} color={COLORS.textLight} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Last Updated</Text>
+          </View>
           <Text style={styles.infoValue}>
             {new Date(user.updatedAt).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -224,7 +253,10 @@ const UserDetailsScreen = () => {
         </View>
         
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>🆔 User ID</Text>
+          <View style={styles.infoLabelContainer}>
+            <Hash size={16} color={COLORS.textLight} style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>User ID</Text>
+          </View>
           <Text style={[styles.infoValue, styles.userId]}>{user._id}</Text>
         </View>
       </View>
@@ -245,7 +277,7 @@ const UserDetailsScreen = () => {
         />
 
         <Button
-          title="🗑️ Delete User"
+          title="Delete User"
           onPress={handleDeleteUser}
           style={[styles.actionButton, styles.deleteButton]}
         />
@@ -366,10 +398,17 @@ const styles = StyleSheet.create({
   infoRow: {
     marginBottom: SPACING.medium,
   },
+  infoLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  infoIcon: {
+    marginRight: 6,
+  },
   infoLabel: {
     fontSize: 13,
     color: COLORS.textLight,
-    marginBottom: 4,
   },
   infoValue: {
     fontSize: 15,

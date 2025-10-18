@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, TextInput, Alert, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Users, Search } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { UserCard, FilterChip, CreateUserBottomSheet } from '../../components/Admin';
 import { adminApi } from '../../api';
@@ -167,7 +168,7 @@ const UsersScreen = () => {
     if (loading) return null;
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>👥</Text>
+        <Users size={64} color={COLORS.textLight} style={styles.emptyIconComponent} />
         <Text style={styles.emptyTitle}>No Users Found</Text>
         <Text style={styles.emptyText}>
           {searchQuery ? 'Try adjusting your search or filters' : 'No users match the selected filters'}
@@ -204,7 +205,7 @@ const UsersScreen = () => {
             onPress={toggleFilters}
             activeOpacity={0.7}
           >
-            <Text style={styles.filterIcon}>🔍</Text>
+            <Search size={16} color={COLORS.text} style={styles.filterIconComponent} />
             <Text style={styles.filterToggleText}>
               {filtersExpanded ? 'Hide Filters' : 'Show Filters'}
             </Text>
@@ -397,6 +398,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: SPACING.small / 2,
   },
+  filterIconComponent: {
+    marginRight: SPACING.small / 2,
+  },
   filterToggleText: {
     fontSize: 14,
     fontWeight: '600',
@@ -515,6 +519,9 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 64,
+    marginBottom: SPACING.medium,
+  },
+  emptyIconComponent: {
     marginBottom: SPACING.medium,
   },
   emptyTitle: {

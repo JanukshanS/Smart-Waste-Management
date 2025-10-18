@@ -28,6 +28,7 @@ export const COLORS = {
   purple: '#9C27B0',
   
   // Alert backgrounds
+  warningLight: '#FFF3E0',
   warningBg: '#FFF3E0',
   dangerBg: '#FFEBEE',
   infoBg: '#E3F2FD',

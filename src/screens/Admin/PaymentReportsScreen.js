@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from 'react-native-paper';
+import { DollarSign, BarChart3, AlertTriangle } from 'lucide-react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 import { adminApi } from '../../api';
 
@@ -52,7 +53,10 @@ const PaymentReportsScreen = () => {
             {/* Summary */}
             <Card style={styles.card}>
               <Card.Content>
-                <Text style={styles.cardTitle}>💰 Revenue Summary</Text>
+                <View style={styles.cardTitleContainer}>
+                  <DollarSign size={20} color={COLORS.primary} />
+                  <Text style={styles.cardTitle}>Revenue Summary</Text>
+                </View>
                 <Text style={styles.bigNumber}>LKR {report.summary?.totalRevenue?.toFixed(2) || '0.00'}</Text>
                 <Text style={styles.bigNumberLabel}>Total Revenue</Text>
                 <View style={styles.summaryGrid}>
@@ -76,7 +80,10 @@ const PaymentReportsScreen = () => {
             {report.revenueByWasteType && (
               <Card style={styles.card}>
                 <Card.Content>
-                  <Text style={styles.cardTitle}>📊 Revenue by Waste Type</Text>
+                  <View style={styles.cardTitleContainer}>
+                    <BarChart3 size={20} color={COLORS.primary} />
+                    <Text style={styles.cardTitle}>Revenue by Waste Type</Text>
+                  </View>
                   {Object.entries(report.revenueByWasteType).map(([type, revenue]) => (
                     <View key={type} style={styles.revenueRow}>
                       <Text style={styles.revenueLabel}>{type}</Text>
@@ -91,7 +98,10 @@ const PaymentReportsScreen = () => {
             {report.outstandingPayments && report.outstandingPayments.count > 0 && (
               <Card style={styles.card}>
                 <Card.Content>
-                  <Text style={styles.cardTitle}>⚠️ Outstanding Payments</Text>
+                  <View style={styles.cardTitleContainer}>
+                    <AlertTriangle size={20} color={COLORS.warning} />
+                    <Text style={styles.cardTitle}>Outstanding Payments</Text>
+                  </View>
                   <Text style={styles.outstandingAmount}>
                     LKR {report.outstandingPayments.totalAmount?.toFixed(2) || '0.00'}
                   </Text>
@@ -161,11 +171,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     elevation: 2,
   },
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.medium,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.text,
-    marginBottom: SPACING.medium,
+    marginLeft: SPACING.small,
   },
   bigNumber: {
     fontSize: 36,

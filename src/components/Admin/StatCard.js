@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING } from '../../constants/theme';
 
 const StatCard = ({ icon, title, value, subtitle, color = COLORS.primary, onPress }) => {
+  const isIconComponent = typeof icon !== 'string';
+  
   return (
     <TouchableOpacity 
       style={[styles.card, { borderLeftColor: color }]} 
@@ -10,7 +12,7 @@ const StatCard = ({ icon, title, value, subtitle, color = COLORS.primary, onPres
       activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>
-        <Text style={styles.icon}>{icon}</Text>
+        {isIconComponent ? icon : <Text style={styles.icon}>{icon}</Text>}
       </View>
       
       <View style={styles.content}>
