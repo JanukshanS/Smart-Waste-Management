@@ -1,4 +1,5 @@
 import { API_CONFIG } from '../constants/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * API Client for making HTTP requests
@@ -10,17 +11,36 @@ class ApiClient {
   }
 
   /**
+   * Get authentication headers
+   */
+  async getAuthHeaders() {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (token) {
+        return {
+          'Authorization': `Bearer ${token}`,
+        };
+      }
+    } catch (error) {
+      console.error('Error getting auth token:', error);
+    }
+    return {};
+  }
+
+  /**
    * Make a request to the API
    * @param {string} endpoint - API endpoint
    * @param {object} options - Fetch options
    */
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+    const authHeaders = await this.getAuthHeaders();
     const config = {
       ...options,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ...authHeaders,
         ...options.headers,
       },
     };
