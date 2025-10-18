@@ -49,27 +49,35 @@ const RouteCard = ({ route, onPress }) => {
           )}
 
           <View style={styles.details}>
-            {route.totalDistance && (
+            {route.totalDistance && !isNaN(route.totalDistance) && (
               <Text
                 style={[styles.detailText, { marginRight: SPACING.medium }]}
               >
-                🚗 {route.totalDistance.toFixed(1)} km
+                🚗 {Number(route.totalDistance).toFixed(1)} km
               </Text>
             )}
-            {route.estimatedDuration && (
+            {route.estimatedDuration && !isNaN(route.estimatedDuration) && (
               <Text style={styles.detailText}>
-                ⏱️ {Math.round(route.estimatedDuration)} min
+                ⏱️ {Math.round(Number(route.estimatedDuration))} min
               </Text>
             )}
           </View>
 
           {route.crewId && (
-            <Text style={styles.assignmentText}>Crew ID: {route.crewId}</Text>
+            <Text style={styles.assignmentText}>
+              Crew:{" "}
+              {typeof route.crewId === "object"
+                ? route.crewId.name
+                : route.crewId}
+            </Text>
           )}
 
           {route.vehicleId && (
             <Text style={styles.assignmentText}>
-              Vehicle ID: {route.vehicleId}
+              Vehicle ID:{" "}
+              {typeof route.vehicleId === "object"
+                ? route.vehicleId._id
+                : route.vehicleId}
             </Text>
           )}
 

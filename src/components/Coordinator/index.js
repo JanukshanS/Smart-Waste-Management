@@ -4,6 +4,7 @@ export { default as BinMapView } from "./BinMapView";
 export { default as BinStatsOverview } from "./BinStatsOverview";
 export { default as RequestCard } from './RequestCard';
 export { default as RouteCard } from './RouteCard';
+export { default as VehicleCard } from "./VehicleCard";
 
 // Map Components
 export { default as BinMarker } from './BinMarker';

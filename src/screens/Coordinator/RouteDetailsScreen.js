@@ -41,9 +41,13 @@ const RouteDetailsScreen = () => {
   const [crews, setCrews] = useState([]);
   const [selectedCrew, setSelectedCrew] = useState(null);
   const [crewId, setCrewId] = useState("");
-  const [vehicleId, setVehicleId] = useState("");
+  const [vehicles, setVehicles] = useState([]);
+  const [filteredVehicles, setFilteredVehicles] = useState([]);
+  const [vehicleSearchQuery, setVehicleSearchQuery] = useState("");
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [assignLoading, setAssignLoading] = useState(false);
   const [crewsLoading, setCrewsLoading] = useState(false);
+  const [vehiclesLoading, setVehiclesLoading] = useState(false);
 
   // Status update form
   const [newStatus, setNewStatus] = useState("");
@@ -90,14 +94,16 @@ const RouteDetailsScreen = () => {
     try {
       setCrewsLoading(true);
       const response = await coordinatorApi.getCrews({ status: "active" });
-      if (response.success) {
+      if (response.success && response.data) {
         // Filter to show only available or assigned crews
-        const availableCrews = response.data.filter(
-          (crew) =>
-            crew.availability === "available" ||
-            crew.profile?.availability === "available"
-        );
+        const availableCrews = response.data.filter((crew) => {
+          const availability = crew.availability || crew.profile?.availability;
+          return availability === "available" || availability === "assigned";
+        });
         setCrews(availableCrews);
+      } else {
+        console.error("Invalid response structure:", response);
+        Alert.alert("Error", "Invalid response from server");
       }
     } catch (err) {
       console.error("Error fetching crews:", err);
@@ -107,14 +113,55 @@ const RouteDetailsScreen = () => {
     }
   };
 
+  const fetchAvailableVehicles = async () => {
+    try {
+      setVehiclesLoading(true);
+      const response = await coordinatorApi.getAvailableVehicles();
+      if (response.success && response.data) {
+        setVehicles(response.data);
+        setFilteredVehicles(response.data);
+        setVehicleSearchQuery("");
+      } else {
+        console.error("Invalid response structure:", response);
+        Alert.alert("Error", "Invalid response from server");
+      }
+    } catch (err) {
+      console.error("Error fetching vehicles:", err);
+      Alert.alert("Error", err.message || "Failed to fetch vehicles");
+    } finally {
+      setVehiclesLoading(false);
+    }
+  };
+
+  // Filter vehicles based on search query
+  const handleVehicleSearch = (query) => {
+    setVehicleSearchQuery(query);
+    if (!query.trim()) {
+      setFilteredVehicles(vehicles);
+      return;
+    }
+
+    const searchLower = query.toLowerCase();
+    const filtered = vehicles.filter(
+      (vehicle) =>
+        vehicle.vehicleId?.toLowerCase().includes(searchLower) ||
+        vehicle.licensePlate?.toLowerCase().includes(searchLower) ||
+        vehicle.vehicleType?.toLowerCase().includes(searchLower) ||
+        vehicle.manufacturer?.toLowerCase().includes(searchLower) ||
+        vehicle.model?.toLowerCase().includes(searchLower)
+    );
+    setFilteredVehicles(filtered);
+  };
+
   const handleOpenAssignDialog = () => {
     setAssignDialogVisible(true);
     fetchAvailableCrews();
+    fetchAvailableVehicles();
   };
 
   const handleAssignRoute = async () => {
-    if (!selectedCrew || !vehicleId.trim()) {
-      Alert.alert("Error", "Please select a crew member and enter Vehicle ID");
+    if (!selectedCrew || !selectedVehicle) {
+      Alert.alert("Error", "Please select both a crew member and a vehicle");
       return;
     }
 
@@ -122,14 +169,14 @@ const RouteDetailsScreen = () => {
       setAssignLoading(true);
       const response = await coordinatorApi.assignRoute(id, {
         crewId: selectedCrew._id,
-        vehicleId: vehicleId.trim(),
+        vehicleId: selectedVehicle._id || selectedVehicle.vehicleId,
       });
 
       if (response.success) {
         Alert.alert("Success", "Route assigned successfully");
         setAssignDialogVisible(false);
         setSelectedCrew(null);
-        setVehicleId("");
+        setSelectedVehicle(null);
         fetchRouteDetails();
       }
     } catch (err) {
@@ -349,14 +396,18 @@ const RouteDetailsScreen = () => {
             {/* Assignment Info */}
             {route.crewId && (
               <Text style={styles.infoText}>
-                <Text style={styles.infoLabel}>Crew ID: </Text>
-                {route.crewId}
+                <Text style={styles.infoLabel}>Crew: </Text>
+                {typeof route.crewId === "object"
+                  ? route.crewId.name
+                  : route.crewId}
               </Text>
             )}
             {route.vehicleId && (
               <Text style={styles.infoText}>
                 <Text style={styles.infoLabel}>Vehicle ID: </Text>
-                {route.vehicleId}
+                {typeof route.vehicleId === "object"
+                  ? route.vehicleId._id
+                  : route.vehicleId}
               </Text>
             )}
             {route.scheduledDate && (
@@ -553,15 +604,120 @@ const RouteDetailsScreen = () => {
                 </ScrollView>
               </>
             )}
-            <TextInput
-              mode="outlined"
-              label="Vehicle ID *"
-              placeholder="Enter vehicle identifier"
-              value={vehicleId}
-              onChangeText={setVehicleId}
-              style={styles.input}
-              disabled={assignLoading || crewsLoading}
-            />
+
+            {/* Vehicle Selection */}
+            <Text style={styles.sectionLabel}>Select Vehicle *</Text>
+            {vehiclesLoading ? (
+              <ActivityIndicator
+                size="small"
+                color={COLORS.primary}
+                style={{ marginVertical: SPACING.medium }}
+              />
+            ) : vehicles.length > 0 ? (
+              <>
+                {/* Vehicle Search Input */}
+                <TextInput
+                  mode="outlined"
+                  label="Search vehicles"
+                  placeholder="Search by ID, plate, type, or manufacturer..."
+                  value={vehicleSearchQuery}
+                  onChangeText={handleVehicleSearch}
+                  style={styles.searchInput}
+                  left={<TextInput.Icon icon="magnify" />}
+                  right={
+                    vehicleSearchQuery ? (
+                      <TextInput.Icon
+                        icon="close"
+                        onPress={() => handleVehicleSearch("")}
+                      />
+                    ) : null
+                  }
+                />
+
+                {filteredVehicles.length === 0 ? (
+                  <Text style={styles.noResultsText}>
+                    No vehicles found matching "{vehicleSearchQuery}"
+                  </Text>
+                ) : (
+                  <>
+                    <Text style={styles.vehicleCountText}>
+                      {filteredVehicles.length} vehicle
+                      {filteredVehicles.length !== 1 ? "s" : ""} available
+                    </Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.vehicleScrollView}
+                      contentContainerStyle={styles.vehicleScrollContent}
+                      nestedScrollEnabled
+                    >
+                      {filteredVehicles.map((vehicle) => (
+                        <TouchableOpacity
+                          key={vehicle._id}
+                          style={[
+                            styles.vehicleItem,
+                            selectedVehicle?._id === vehicle._id &&
+                              styles.vehicleItemSelected,
+                            vehicle.status !== "available" &&
+                              styles.vehicleItemDisabled,
+                          ]}
+                          onPress={() => setSelectedVehicle(vehicle)}
+                          disabled={assignLoading || vehiclesLoading}
+                        >
+                          <View style={styles.vehicleItemContent}>
+                            <Text style={styles.vehicleId}>
+                              {vehicle.vehicleId}
+                            </Text>
+                            <Text style={styles.vehiclePlate}>
+                              {vehicle.licensePlate}
+                            </Text>
+                            <Text style={styles.vehicleType}>
+                              {vehicle.vehicleType} • {vehicle.capacity}m³
+                            </Text>
+                            <Text
+                              style={[
+                                styles.vehicleStatus,
+                                {
+                                  color:
+                                    vehicle.status === "available"
+                                      ? "#4CAF50"
+                                      : "#FFA500",
+                                },
+                              ]}
+                            >
+                              {vehicle.status === "available"
+                                ? "✓ Available"
+                                : "◉ In Use"}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    {selectedVehicle && (
+                      <View style={styles.selectedVehicleInfo}>
+                        <Text style={styles.selectedLabel}>Selected:</Text>
+                        <Text style={styles.selectedValue}>
+                          {selectedVehicle.vehicleId} (
+                          {selectedVehicle.licensePlate})
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <View style={styles.noVehiclesContainer}>
+                <Text style={styles.noVehiclesText}>No vehicles available</Text>
+                <Button
+                  title="Manage Vehicles"
+                  onPress={() => {
+                    setAssignDialogVisible(false);
+                    router.push("/coordinator/vehicles");
+                  }}
+                  style={{ marginTop: SPACING.small }}
+                />
+              </View>
+            )}
           </Dialog.Content>
           <Dialog.Actions>
             <Button
@@ -941,6 +1097,105 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: "center",
     marginVertical: SPACING.medium,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: SPACING.small,
+    marginTop: SPACING.medium,
+  },
+  vehicleScrollView: {
+    flexGrow: 0,
+    marginBottom: SPACING.small,
+  },
+  vehicleScrollContent: {
+    paddingVertical: SPACING.small,
+    paddingRight: SPACING.small,
+  },
+  vehicleItem: {
+    width: 180,
+    height: 120,
+    padding: SPACING.medium,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 8,
+    marginRight: SPACING.small,
+    borderWidth: 2,
+    borderColor: "transparent",
+    justifyContent: "space-between",
+  },
+  vehicleItemSelected: {
+    backgroundColor: COLORS.primary + "15",
+    borderColor: COLORS.primary,
+  },
+  vehicleItemDisabled: {
+    opacity: 0.5,
+  },
+  vehicleItemContent: {
+    flex: 0,
+  },
+  vehicleId: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  vehiclePlate: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    fontFamily: "monospace",
+    marginBottom: 8,
+  },
+  vehicleType: {
+    fontSize: 12,
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  vehicleStatus: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  selectedVehicleInfo: {
+    padding: SPACING.small,
+    backgroundColor: "#E8F5E9",
+    borderRadius: 4,
+    marginBottom: SPACING.medium,
+  },
+  selectedLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginBottom: 2,
+  },
+  selectedValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  noVehiclesContainer: {
+    padding: SPACING.large,
+    alignItems: "center",
+  },
+  noVehiclesText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginBottom: SPACING.small,
+  },
+  searchInput: {
+    marginBottom: SPACING.small,
+    backgroundColor: COLORS.white,
+  },
+  vehicleCountText: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginBottom: SPACING.small,
+    fontStyle: "italic",
+  },
+  noResultsText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: "center",
+    marginVertical: SPACING.medium,
+    fontStyle: "italic",
   },
 });
 

@@ -1,6 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'https://api.csse.icy-r.dev/api',
+  BASE_URL: "https://api.csse.icy-r.dev/api",
+  // BASE_URL: "http://localhost:5000/api",
   TIMEOUT: 10000,
 };
 

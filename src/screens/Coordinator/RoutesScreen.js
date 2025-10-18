@@ -47,10 +47,17 @@ const RoutesScreen = () => {
 
     // Apply search
     if (search) {
-      filtered = filtered.filter(r => 
-        r.routeName?.toLowerCase().includes(search.toLowerCase()) ||
-        r.crewId?.toLowerCase().includes(search.toLowerCase()) ||
-        r.vehicleId?.toLowerCase().includes(search.toLowerCase())
+      filtered = filtered.filter(
+        (r) =>
+          r.routeName?.toLowerCase().includes(search.toLowerCase()) ||
+          (typeof r.crewId === "object"
+            ? r.crewId?.name?.toLowerCase()
+            : r.crewId?.toString().toLowerCase()
+          ).includes(search.toLowerCase()) ||
+          (typeof r.vehicleId === "object"
+            ? r.vehicleId?._id?.toString().toLowerCase()
+            : r.vehicleId?.toString().toLowerCase()
+          ).includes(search.toLowerCase())
       );
     }
 

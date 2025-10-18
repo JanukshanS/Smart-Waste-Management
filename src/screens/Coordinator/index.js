@@ -14,4 +14,5 @@ export { default as ScheduleScreen } from "./ScheduleScreen";
 export { default as CrewsScreen } from "./CrewsScreen";
 export { default as CreateCrewScreen } from "./CreateCrewScreen";
 export { default as CrewDetailsScreen } from "./CrewDetailsScreen";
+export { default as VehiclesScreen } from "./VehiclesScreen";
 

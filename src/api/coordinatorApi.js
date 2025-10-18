@@ -316,3 +316,119 @@ export const updateCrewAvailability = async (crewId, availability) => {
     throw error;
   }
 };
+
+// ==================== Vehicle Management ====================
+
+/**
+ * Get all vehicles with filtering and pagination
+ * @param {Object} params - Query parameters (status, vehicleType, page, limit, sort)
+ */
+export const getVehicles = async (params = {}) => {
+  try {
+    const response = await client.get('/coordinator/vehicles', { params });
+    return response;
+  } catch (error) {
+    console.error('Error fetching vehicles:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get available vehicles for route assignment
+ */
+export const getAvailableVehicles = async () => {
+  try {
+    const response = await client.get('/coordinator/vehicles/available');
+    return response;
+  } catch (error) {
+    console.error('Error fetching available vehicles:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get vehicle details by ID
+ * @param {string} vehicleId - Vehicle ID
+ */
+export const getVehicleDetails = async (vehicleId) => {
+  try {
+    const response = await client.get(`/coordinator/vehicles/${vehicleId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching vehicle details:', error);
+    throw error;
+  }
+};
+
+/**
+ * Create new vehicle
+ * @param {Object} vehicleData - Vehicle data
+ */
+export const createVehicle = async (vehicleData) => {
+  try {
+    const response = await client.post('/coordinator/vehicles', vehicleData);
+    return response;
+  } catch (error) {
+    console.error('Error creating vehicle:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update vehicle
+ * @param {string} vehicleId - Vehicle ID
+ * @param {Object} vehicleData - Updated vehicle data
+ */
+export const updateVehicle = async (vehicleId, vehicleData) => {
+  try {
+    const response = await client.put(`/coordinator/vehicles/${vehicleId}`, vehicleData);
+    return response;
+  } catch (error) {
+    console.error('Error updating vehicle:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete vehicle
+ * @param {string} vehicleId - Vehicle ID
+ */
+export const deleteVehicle = async (vehicleId) => {
+  try {
+    const response = await client.delete(`/coordinator/vehicles/${vehicleId}`);
+    return response;
+  } catch (error) {
+    console.error('Error deleting vehicle:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update vehicle status
+ * @param {string} vehicleId - Vehicle ID
+ * @param {string} status - New status (available, in-use, maintenance, decommissioned)
+ */
+export const updateVehicleStatus = async (vehicleId, status) => {
+  try {
+    const response = await client.put(`/coordinator/vehicles/${vehicleId}/status`, { status });
+    return response;
+  } catch (error) {
+    console.error('Error updating vehicle status:', error);
+    throw error;
+  }
+};
+
+/**
+ * Add maintenance record to vehicle
+ * @param {string} vehicleId - Vehicle ID
+ * @param {Object} maintenanceData - Maintenance record data
+ */
+export const addVehicleMaintenanceRecord = async (vehicleId, maintenanceData) => {
+  try {
+    const response = await client.post(`/coordinator/vehicles/${vehicleId}/maintenance`, maintenanceData);
+    return response;
+  } catch (error) {
+    console.error('Error adding maintenance record:', error);
+    throw error;
+  }
+};

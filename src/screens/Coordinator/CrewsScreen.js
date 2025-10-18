@@ -43,9 +43,12 @@ const CrewsScreen = () => {
   const fetchCrews = async () => {
     try {
       const response = await coordinatorApi.getCrews();
-      if (response.success) {
+      if (response.success && response.data) {
         setCrews(response.data);
         setError(null);
+      } else {
+        console.error("Invalid response structure:", response);
+        setError("Invalid response from server");
       }
     } catch (err) {
       console.error('Error fetching crews:', err);

@@ -146,8 +146,11 @@ const ScheduleScreen = () => {
               {formatDate(item.scheduledDate)} {formatTime(item.scheduledDate)}
             </Text>
           </View>
-          <Chip 
-            style={[styles.statusChip, { backgroundColor: getStatusColor(item.status) }]}
+          <Chip
+            style={[
+              styles.statusChip,
+              { backgroundColor: getStatusColor(item.status) },
+            ]}
             textStyle={styles.statusText}
           >
             {item.status?.toUpperCase()}
@@ -157,20 +160,39 @@ const ScheduleScreen = () => {
         <View style={styles.routeDetails}>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Crew:</Text>
-            <Text style={styles.detailValue}>{item.crewId || 'Not assigned'}</Text>
+            <Text style={styles.detailValue}>
+              {item.crewId
+                ? typeof item.crewId === "object"
+                  ? item.crewId.name
+                  : item.crewId
+                : "Not assigned"}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Vehicle:</Text>
-            <Text style={styles.detailValue}>{item.vehicleId || 'Not assigned'}</Text>
+            <Text style={styles.detailValue}>
+              {item.vehicleId
+                ? typeof item.vehicleId === "object"
+                  ? item.vehicleId._id
+                  : item.vehicleId
+                : "Not assigned"}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Stops:</Text>
-            <Text style={styles.detailValue}>{item.stops?.length || 0} stops</Text>
+            <Text style={styles.detailValue}>
+              {item.stops?.length || 0} stops
+            </Text>
           </View>
-          {item.status === 'in-progress' && (
+          {item.status === "in-progress" && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Progress:</Text>
-              <Text style={[styles.detailValue, { color: COLORS.primary, fontWeight: 'bold' }]}>
+              <Text
+                style={[
+                  styles.detailValue,
+                  { color: COLORS.primary, fontWeight: "bold" },
+                ]}
+              >
                 {item.completionPercentage || 0}%
               </Text>
             </View>

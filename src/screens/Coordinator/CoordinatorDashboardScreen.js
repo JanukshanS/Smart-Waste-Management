@@ -168,7 +168,10 @@ const CoordinatorDashboardScreen = () => {
             >
               <Text style={styles.refreshIcon}>🔄</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
               <Text style={styles.logoutButtonText}>Logout</Text>
             </TouchableOpacity>
           </View>
@@ -364,6 +367,22 @@ const CoordinatorDashboardScreen = () => {
                 icon="➕"
                 color={COLORS.primary}
                 onPress={() => router.push("/coordinator/create-route")}
+              />
+
+              <ActionCard
+                title="Manage Crews"
+                description="View and manage collection crews"
+                icon="👥"
+                color="#2196F3"
+                onPress={() => router.push("/coordinator/crews")}
+              />
+
+              <ActionCard
+                title="Manage Vehicles"
+                description="View and manage collection vehicles"
+                icon="🚛"
+                color="#FF5722"
+                onPress={() => router.push("/coordinator/vehicles")}
               />
             </View>
 

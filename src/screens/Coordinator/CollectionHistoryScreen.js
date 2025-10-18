@@ -61,8 +61,14 @@ const CollectionHistoryScreen = () => {
       filtered = filtered.filter(
         (r) =>
           r.routeName?.toLowerCase().includes(search.toLowerCase()) ||
-          r.crewId?.toLowerCase().includes(search.toLowerCase()) ||
-          r.vehicleId?.toLowerCase().includes(search.toLowerCase())
+          (typeof r.crewId === "object"
+            ? r.crewId?.name?.toLowerCase()
+            : r.crewId?.toString().toLowerCase()
+          ).includes(search.toLowerCase()) ||
+          (typeof r.vehicleId === "object"
+            ? r.vehicleId?._id?.toString().toLowerCase()
+            : r.vehicleId?.toString().toLowerCase()
+          ).includes(search.toLowerCase())
       );
     }
 
@@ -130,14 +136,22 @@ const CollectionHistoryScreen = () => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Crew:</Text>
             <Text style={styles.infoValue}>
-              {item.crewId || "Not assigned"}
+              {item.crewId
+                ? typeof item.crewId === "object"
+                  ? item.crewId.name
+                  : item.crewId
+                : "Not assigned"}
             </Text>
           </View>
 
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Vehicle:</Text>
             <Text style={styles.infoValue}>
-              {item.vehicleId || "Not assigned"}
+              {item.vehicleId
+                ? typeof item.vehicleId === "object"
+                  ? item.vehicleId._id
+                  : item.vehicleId
+                : "Not assigned"}
             </Text>
           </View>
 
