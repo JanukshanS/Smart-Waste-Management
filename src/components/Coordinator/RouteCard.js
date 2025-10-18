@@ -37,7 +37,7 @@ const RouteCard = ({ route, onPress }) => {
               style={[styles.statusBadge, { backgroundColor: statusColor }]}
             >
               <Text style={styles.statusText}>
-                {route.status?.toUpperCase()}
+                {route.status?.toUpperCase() || 'UNKNOWN'}
               </Text>
             </View>
           </View>
@@ -65,7 +65,7 @@ const RouteCard = ({ route, onPress }) => {
 
           {route.crewId && (
             <Text style={styles.assignmentText}>
-              Crew: {typeof route.crewId === 'object' ? route.crewId.name || route.crewId._id : route.crewId}
+              Crew: {typeof route.crewId === 'object' ? (route.crewId.name || route.crewId._id || 'Unknown') : (route.crewId || 'Unknown')}
             </Text>
           )}
 
